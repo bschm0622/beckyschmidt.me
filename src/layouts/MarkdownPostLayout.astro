@@ -1,0 +1,45 @@
+---
+import "@/styles/global.css";
+import BaseHead from "@/components/BaseHead.astro";
+const { title, description, image, canonicalURL, frontmatter } = Astro.props;
+---
+
+<!doctype html>
+<html lang="en" class="light">
+    <head>
+        <BaseHead
+            title={title}
+            description={description}
+            image={image}
+            canonicalURL={canonicalURL}
+        />
+    </head>
+    <body class="bg-background text-foreground transition-colors typography">
+        <main
+            class="container mx-auto px-4 py-8 flex-1 max-w-screen-2xl pb-20 md:pb-8"
+        >
+            <h1>{frontmatter.title}</h1>
+            <p>Written by {frontmatter.author}</p>
+            <slot />
+        </main>
+    </body>
+</html>
+
+<style>
+    html,
+    body {
+        margin: 0;
+        width: 100%;
+        height: 100%;
+    }
+
+    /* Prevent flash of unstyled content */
+    html:not(.light):not(.dark) {
+        visibility: hidden;
+    }
+
+    html.light,
+    html.dark {
+        visibility: visible;
+    }
+</style>

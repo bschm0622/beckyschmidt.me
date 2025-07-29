@@ -1,0 +1,137 @@
+@import 'tailwindcss';
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+    --color-primary: #2563eb;
+    /* Medium blue, calm and neutral */
+    --color-muted: #e5e5e5;
+    /* Light gray for subtle UI elements */
+    --color-tertiary: #6b7280;
+    /* Neutral gray, nice balance */
+    --color-surface: #ffffff;
+    /* Pure white for surfaces */
+    --color-accent: #9ca3af;
+    /* Soft gray-blue accent */
+    --color-secondary: #f3f4f6;
+    /* Very light gray for backgrounds or highlights */
+    --color-foreground: #1e293b;
+    /* Dark slate blue-gray, good readable text */
+    --color-background: #f9fafb;
+    /* Very light gray background */
+}
+
+.dark {
+    --color-primary: #3b82f6;
+    /* Brighter blue for dark mode */
+    --color-muted: #475569;
+    /* Muted dark slate */
+    --color-tertiary: #94a3b8;
+    /* Light gray-blue accent */
+    --color-surface: #1e293b;
+    /* Dark slate surface */
+    --color-accent: #cbd5e1;
+    /* Light gray accent */
+    --color-secondary: #334155;
+    /* Darker slate background */
+    --color-foreground: #f1f5f9;
+    /* Off-white text */
+    --color-background: #0f172a;
+    /* Very dark slate background */
+}
+
+.typography {
+    @apply text-lg leading-8 text-foreground;
+
+    /* Headings */
+    h1 {
+        @apply text-5xl font-bold leading-tight mb-6 mt-12;
+    }
+
+    h2 {
+        @apply text-4xl font-semibold leading-snug mb-6 mt-10;
+    }
+
+    h3 {
+        @apply text-3xl font-semibold leading-snug mb-5 mt-8;
+    }
+
+    h4 {
+        @apply text-2xl font-medium mb-4 mt-6;
+    }
+
+    h5 {
+        @apply text-xl font-medium mb-3 mt-6;
+    }
+
+    h6 {
+        @apply text-lg font-medium mb-2 mt-4;
+    }
+
+    /* Body text */
+    p {
+        @apply text-xl leading-8 mb-6;
+    }
+
+    ul {
+        @apply list-disc pl-6 mb-6 text-xl leading-8;
+    }
+
+    ol {
+        @apply list-decimal pl-6 mb-6 text-xl leading-8;
+    }
+
+    li {
+        @apply mb-2;
+    }
+
+    a {
+        @apply text-primary underline hover:opacity-80 transition;
+    }
+
+    blockquote {
+        @apply border-l-4 border-accent pl-6 italic text-tertiary text-xl leading-8 my-8;
+    }
+
+    code {
+        @apply bg-secondary text-base px-1.5 py-1 rounded;
+    }
+
+    pre {
+        @apply bg-secondary text-base p-6 rounded overflow-x-auto mb-6;
+    }
+
+    hr {
+        @apply border-muted my-10;
+    }
+
+    img {
+        @apply max-w-full rounded my-6;
+    }
+
+    table {
+        @apply w-full text-left border-collapse my-8;
+    }
+
+    th,
+    td {
+        @apply border border-muted px-5 py-3 text-xl;
+    }
+
+    strong {
+        @apply font-semibold text-foreground;
+    }
+
+    em {
+        @apply italic;
+    }
+
+    small {
+        @apply text-base text-tertiary;
+    }
+
+    /* Reset last child spacing */
+    *:last-child {
+        @apply mb-0;
+    }
+}

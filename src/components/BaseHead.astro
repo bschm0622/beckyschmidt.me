@@ -1,0 +1,116 @@
+---
+import { SITE } from "@/siteConfig";
+import { ClientRouter } from "astro:transitions";
+import Favicons from "@/components/Favicons.astro";
+import { Font } from "astro:assets";
+
+interface Props {
+    title?: string;
+    name?: string;
+    description?: string;
+    image?: URL | string;
+    canonicalURL?: URL | string;
+}
+
+const {
+    title = SITE.title,
+    name = SITE.name,
+    description = SITE.description,
+    image,
+    canonicalURL,
+} = Astro.props;
+
+const siteOrigin = Astro.site ?? SITE.href;
+
+const fullTitle = title ? `${SITE.name} | ${title}` : SITE.name;
+
+const imageUrl =
+    typeof image === "string"
+        ? image
+        : (image?.toString() ?? new URL("/og.png", siteOrigin).toString());
+
+const canonicalStr =
+    typeof canonicalURL === "string"
+        ? canonicalURL
+        : (canonicalURL?.toString() ??
+          new URL(Astro.url.pathname, siteOrigin).toString());
+
+const shouldLoadAnalytics =
+    import.meta.env.PROD && !Astro.url.pathname.startsWith("/admin");
+---
+
+<!-- Theme mode initialization with debug logs -->
+<script is:inline>
+    (function() {
+        let theme = localStorage.getItem("theme");
+        console.log('[BaseHead] Initial localStorage theme:', theme);
+        if (!theme) {
+            if (
+                window.matchMedia &&
+                window.matchMedia("(prefers-color-scheme: dark)").matches
+            ) {
+                theme = "dark";
+            } else {
+                theme = "light";
+            }
+            localStorage.setItem("theme", theme);
+            console.log('[BaseHead] Set theme in localStorage to:', theme);
+        }
+        document.documentElement.classList.remove("light", "dark");
+        document.documentElement.classList.add(theme);
+        console.log('[BaseHead] Applied theme class to <html>:', theme);
+        console.log('[BaseHead] localStorage theme after script:', localStorage.getItem("theme"));
+    })();
+</script>
+
+<!-- Meta Basics -->
+<meta charset="UTF-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0, user-scalable=yes"
+/>
+<meta name="format-detection" content="telephone=no" />
+<meta name="HandheldFriendly" content="True" />
+<meta name="referrer" content="no-referrer-when-downgrade" />
+<meta name="generator" content={Astro.generator} />
+
+<!-- Primary Meta Tags -->
+<title>{fullTitle}</title>
+<meta name="title" content={fullTitle} />
+<meta name="name" content={name} />
+<meta name="description" content={description} />
+<meta name="robots" content="index, follow" />
+<meta name="author" content={SITE.author} />
+<meta name="theme-color" content="#ffffff" />
+
+<!-- Open Graph / Facebook -->
+<meta property="og:type" content="website" />
+<meta property="og:title" content={title} />
+<meta property="og:description" content={description} />
+<meta property="og:image" content={imageUrl} />
+<meta property="og:url" content={canonicalStr} />
+<meta property="og:locale" content={SITE.locale} />
+
+<!-- Twitter -->
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content={title} />
+<meta name="twitter:description" content={description} />
+<meta name="twitter:image" content={imageUrl} />
+
+<!-- Canonical -->
+<link rel="canonical" href={canonicalStr} />
+
+<!-- Manifest + Sitemap -->
+<link rel="manifest" href="/site.webmanifest" />
+<link rel="sitemap" href="/sitemap-index.xml" />
+
+<Font cssVariable="--font-roboto" preload />
+<Favicons />
+<ClientRouter />
+
+{
+    shouldLoadAnalytics && (
+        <script>// Replace with analytics script if needed</script>
+    )
+}

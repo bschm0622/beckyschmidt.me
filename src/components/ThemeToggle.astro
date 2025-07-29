@@ -1,0 +1,88 @@
+---
+const uniqueId = `themeToggle-${crypto.randomUUID().slice(0, 8)}`;
+---
+
+<button
+    id={uniqueId}
+    type="button"
+    aria-label="Toggle theme"
+    class="theme-toggle-btn flex h-9 w-9 items-center justify-center rounded-lg transition-all"
+>
+    <!-- Light (Sun) Icon -->
+    <svg
+        xmlns="http://www.w3.org/2000/svg"
+        class="h-[1.3rem] w-[1.3rem] stroke-gray-900 dark:hidden"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke="currentColor"
+    >
+        <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"
+        ></path>
+    </svg>
+
+    <!-- Dark (Moon) Icon -->
+    <svg
+        xmlns="http://www.w3.org/2000/svg"
+        class="hidden h-[1.25rem] w-[1.25rem] stroke-gray-100 dark:block"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke="currentColor"
+    >
+        <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"
+        ></path>
+    </svg>
+
+    <span class="sr-only">Toggle theme</span>
+</button>
+
+<script define:vars={{ buttonId: uniqueId }}>
+    const applyThemeFromLocalStorage = () => {
+        const theme = localStorage.getItem("theme");
+        console.log('[ThemeToggle] applyThemeFromLocalStorage, theme:', theme);
+        if (theme === "dark") {
+            document.documentElement.classList.remove("light");
+            document.documentElement.classList.add("dark");
+        } else if (theme === "light") {
+            document.documentElement.classList.remove("dark");
+            document.documentElement.classList.add("light");
+        }
+        console.log('[ThemeToggle] <html> class after apply:', document.documentElement.className);
+    };
+
+    const handleToggleClick = () => {
+        document.documentElement.classList.toggle("dark");
+        const isDark = document.documentElement.classList.contains("dark");
+        document.documentElement.classList.toggle("light", !isDark);
+        localStorage.setItem("theme", isDark ? "dark" : "light");
+        console.log('[ThemeToggle] handleToggleClick, set theme to:', isDark ? 'dark' : 'light');
+        console.log('[ThemeToggle] <html> class after toggle:', document.documentElement.className);
+    };
+
+    const setupThemeToggleButton = () => {
+        const toggleButton = document.getElementById(buttonId);
+        if (toggleButton) {
+            toggleButton.removeEventListener("click", handleToggleClick); // Prevent duplicate listeners
+            toggleButton.addEventListener("click", handleToggleClick);
+            console.log('[ThemeToggle] setupThemeToggleButton attached to:', buttonId);
+        }
+    };
+
+    // For View Transitions: Apply theme *immediately* after new DOM is swapped.
+    document.addEventListener("astro:after-swap", applyThemeFromLocalStorage);
+
+    // For initial load and re-attaching button listener after page transitions:
+    if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", setupThemeToggleButton);
+    } else {
+        setupThemeToggleButton();
+    }
+    document.addEventListener("astro:page-load", setupThemeToggleButton);
+</script>

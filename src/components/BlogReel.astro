@@ -1,0 +1,19 @@
+---
+import { getCollection } from "astro:content";
+const allPosts = await getCollection("blog");
+---
+
+<div class="px-20">
+<p>
+    This is where I will post about my journey learning Astro.
+</p>
+<ul>
+    {
+        allPosts.map((post: any) => (
+            <li>
+                <a href={`/blog/${post.id}/`}>{post.data.title}</a>
+            </li>
+        ))
+    }
+</ul>
+</div>
