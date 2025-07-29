@@ -1,6 +1,8 @@
 ---
 import ThemeToggle from "@/components/ThemeToggle.astro";
 import { SITE } from "@/siteConfig";
+import { Picture } from "astro:assets";
+import BeckyHeadshot from "@/assets/becky-headshot.jpeg";
 
 const navLinks = SITE.nav;
 ---
@@ -88,24 +90,36 @@ const navLinks = SITE.nav;
 
 <nav class="px-6 py-6 flex items-center justify-between w-full text-xl">
     <div class="hidden md:flex items-center justify-between w-full">
-        <a href="/" class="text-4xl font-bold text-tertiary">
-            {SITE.name || SITE.title}
-        </a>
-            <ul class="flex items-center space-x-2">
-                {
-                    navLinks.map((link, index) => (
-                        <>
-                            <li>
-                                <a href={link.href} class="nav-squiggle">
-                                    {link.label}
-                                </a>
-                            </li>
-                            {index < navLinks.length - 1 && <li>/</li>}
-                        </>
-                    ))
-                }
-                <ThemeToggle />
-            </ul>
+        <div class="flex items-center space-x-3">
+            <div class="w-10 h-10 rounded-md overflow-hidden">
+                <Picture
+                    src={BeckyHeadshot}
+                    alt="Becky Schmidt's headshot"
+                    loading="eager"
+                    width={500}
+                    height={500}
+                    class="w-full h-full object-cover"
+                />
+            </div>
+            <a href="/" class="text-4xl font-bold text-tertiary">
+                {SITE.name || SITE.title}
+            </a>
+        </div>
+        <ul class="flex items-center space-x-2">
+            {
+                navLinks.map((link, index) => (
+                    <>
+                        <li>
+                            <a href={link.href} class="nav-squiggle">
+                                {link.label}
+                            </a>
+                        </li>
+                        {index < navLinks.length - 1 && <li>/</li>}
+                    </>
+                ))
+            }
+            <ThemeToggle />
+        </ul>
     </div>
 
     <!-- Mobile Nav -->

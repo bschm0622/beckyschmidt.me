@@ -3,6 +3,13 @@ import Layout from "@/layouts/Layout.astro";
 import SocialIcon from "@/components/SocialIcon.astro";
 import { Mail, Github, Linkedin } from "@lucide/astro";
 import { SITE } from "@/siteConfig";
+const slashPageLink =
+	SITE.nav.find((item) => item.label === "Slash Pages")?.href ??
+	"/slashpages";
+const blogLink =
+	SITE.nav.find((item) => item.label === "Blog")?.href ?? "/blog";
+const projectsLink =
+	SITE.nav.find((item) => item.label === "Projects")?.href ?? "/projects";
 ---
 
 <Layout title="Home" description="Home page">
@@ -22,13 +29,13 @@ import { SITE } from "@/siteConfig";
 				I'm endlessly curious about the world and the people in it,
 				because I know we were placed in this moment in time for a
 				reason. Recently, that's looked like pursuing my own <a
-					href="/projects">side projects</a
+					href={projectsLink}>side projects</a
 				>, creating websites and apps with AI.
 			</p>
 			<p>
-				I also post on my <a href="/blog">blog</a> here and there, and you
-				can find all sorts of experimental things at my random collection
-				of <a href="slash-pages">slash pages</a>, inspired by <a
+				I also post on my <a href={blogLink}>blog</a> here and there, and
+				you can find all sorts of experimental things at my random collection
+				of <a href={slashPageLink}>slash pages</a>, inspired by <a
 					href="https://slashpages.net/">slashpages.net</a
 				>.
 			</p>
