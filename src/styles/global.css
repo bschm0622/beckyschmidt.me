@@ -3,41 +3,42 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 @theme {
-    --color-primary: #2563eb;
-    /* Medium blue, calm and neutral */
-    --color-muted: #e5e5e5;
-    /* Light gray for subtle UI elements */
+    --font-sans: var(--font-carlito);
+    --color-primary: #4f46e5;
+    /* Softer, slightly warmer blue-purple */
+    --color-muted: #ebe8f9;
+    /* Very soft lavender-gray for subtle backgrounds */
     --color-tertiary: #6b7280;
-    /* Neutral gray, nice balance */
+    /* Keep slate gray for neutrality */
     --color-surface: #ffffff;
-    /* Pure white for surfaces */
-    --color-accent: #9ca3af;
-    /* Soft gray-blue accent */
+    /* White surfaces */
+    --color-accent: #a5b4fc;
+    /* Light periwinkle for subtle accents */
     --color-secondary: #f3f4f6;
-    /* Very light gray for backgrounds or highlights */
-    --color-foreground: #1e293b;
-    /* Dark slate blue-gray, good readable text */
+    /* Soft light gray */
+    --color-foreground: #374151;
+    /* Darker slate, softer than pure black */
     --color-background: #f9fafb;
     /* Very light gray background */
 }
 
 .dark {
-    --color-primary: #3b82f6;
-    /* Brighter blue for dark mode */
-    --color-muted: #475569;
-    /* Muted dark slate */
+    --color-primary: #818cf8;
+    /* Light blue-purple for dark mode */
+    --color-muted: #4b5563;
+    /* Muted slate */
     --color-tertiary: #94a3b8;
-    /* Light gray-blue accent */
+    /* Light gray-blue */
     --color-surface: #1e293b;
     /* Dark slate surface */
-    --color-accent: #cbd5e1;
-    /* Light gray accent */
+    --color-accent: #c7d2fe;
+    /* Pale periwinkle accent */
     --color-secondary: #334155;
-    /* Darker slate background */
-    --color-foreground: #f1f5f9;
+    /* Dark slate background */
+    --color-foreground: #f3f4f6;
     /* Off-white text */
     --color-background: #0f172a;
-    /* Very dark slate background */
+    /* Dark slate background */
 }
 
 .typography {
@@ -133,5 +134,90 @@
     /* Reset last child spacing */
     *:last-child {
         @apply mb-0;
+    }
+}
+
+.type-standard {
+    @apply text-lg leading-8 text-foreground;
+
+    h1 {
+        @apply text-5xl font-bold leading-tight;
+    }
+
+    h2 {
+        @apply text-4xl font-semibold leading-snug;
+    }
+
+    h3 {
+        @apply text-3xl font-semibold leading-snug;
+    }
+
+    h4 {
+        @apply text-2xl font-medium;
+    }
+
+    h5 {
+        @apply text-xl font-medium;
+    }
+
+    h6 {
+        @apply text-lg font-medium;
+    }
+
+    ul {
+        @apply list-disc pl-6;
+    }
+
+    ol {
+        @apply list-decimal pl-6;
+    }
+
+    li {
+        @apply list-item;
+    }
+
+    a {
+        @apply text-primary underline hover:opacity-80 transition;
+    }
+
+    blockquote {
+        @apply border-l-4 border-accent pl-6 italic text-tertiary;
+    }
+
+    code {
+        @apply bg-secondary text-base px-1.5 py-1 rounded;
+    }
+
+    pre {
+        @apply bg-secondary text-base p-6 rounded overflow-x-auto;
+    }
+
+    hr {
+        @apply border-muted;
+    }
+
+    img {
+        @apply max-w-full rounded;
+    }
+
+    table {
+        @apply w-full text-left border-collapse;
+    }
+
+    th,
+    td {
+        @apply border border-muted px-5 py-3 text-xl;
+    }
+
+    strong {
+        @apply font-semibold text-foreground;
+    }
+
+    em {
+        @apply italic;
+    }
+
+    small {
+        @apply text-base text-tertiary;
     }
 }

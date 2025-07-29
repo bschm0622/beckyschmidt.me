@@ -14,8 +14,8 @@ export default defineConfig({
   experimental: {
   fonts: [{
     provider: fontProviders.fontsource(),
-      name: "Roboto",
-      cssVariable: "--font-roboto"
+      name: "Carlito",
+    cssVariable: "--font-carlito"
     }]
   }
 });

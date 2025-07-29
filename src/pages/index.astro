@@ -1,11 +1,52 @@
 ---
-import Welcome from '@/components/Welcome.astro';
-import Layout from '@/layouts/Layout.astro';
-
-// Welcome to Astro! Wondering what to do next? Check out the Astro documentation at https://docs.astro.build
-// Don't want to use any of this? Delete everything in this file, the `assets`, `components`, and `layouts` directories, and start fresh.
+import Layout from "@/layouts/Layout.astro";
+import SocialIcon from "@/components/SocialIcon.astro";
+import { Mail, Github, Linkedin } from "@lucide/astro";
+import { SITE } from "@/siteConfig";
 ---
 
 <Layout title="Home" description="Home page">
-	<Welcome />
+	<div class="mx-auto w-full max-w-4xl mt-5 md:mt-10 space-y-10">
+		<div class="space-y-6">
+			<h1>Hi, there</h1>
+			<p>
+				Thanks for visiting my personal website! I'm Becky. For the past
+				4 years, I've worked as a product manager at
+				<a href="https://octane11.com">Octane11</a>, a B2B SaaS startup.
+				Outside of work, you can find me on walks with my family,
+				listening to my favorite podcasts, meeting friends at a coffee
+				shop (for the vibes, not the coffee), gathering eggs from my
+				backyard chickens, or playing a board game.
+			</p>
+			<p>
+				I'm endlessly curious about the world and the people in it,
+				because I know we were placed in this moment in time for a
+				reason. Recently, that's looked like pursuing my own <a
+					href="/projects">side projects</a
+				>, creating websites and apps with AI.
+			</p>
+			<p>
+				I also post on my <a href="/blog">blog</a> here and there, and you
+				can find all sorts of experimental things at my random collection
+				of <a href="slash-pages">slash pages</a>, inspired by <a
+					href="https://slashpages.net/">slashpages.net</a
+				>.
+			</p>
+		</div>
+		<div class="flex items-center gap-3">
+			<p class="mr-2">Connect with me:</p>
+
+			<SocialIcon href={`mailto:${SITE.socials?.email}`} label="Email">
+				<Mail />
+			</SocialIcon>
+
+			<SocialIcon href={SITE.socials?.linkedin} label="LinkedIn">
+				<Linkedin />
+			</SocialIcon>
+
+			<SocialIcon href={SITE.socials?.github} label="GitHub">
+				<Github />
+			</SocialIcon>
+		</div>
+	</div>
 </Layout>

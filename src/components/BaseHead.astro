@@ -41,9 +41,9 @@ const shouldLoadAnalytics =
 
 <!-- Theme mode initialization with debug logs -->
 <script is:inline>
-    (function() {
+    (function () {
         let theme = localStorage.getItem("theme");
-        console.log('[BaseHead] Initial localStorage theme:', theme);
+        console.log("[BaseHead] Initial localStorage theme:", theme);
         if (!theme) {
             if (
                 window.matchMedia &&
@@ -54,12 +54,15 @@ const shouldLoadAnalytics =
                 theme = "light";
             }
             localStorage.setItem("theme", theme);
-            console.log('[BaseHead] Set theme in localStorage to:', theme);
+            console.log("[BaseHead] Set theme in localStorage to:", theme);
         }
         document.documentElement.classList.remove("light", "dark");
         document.documentElement.classList.add(theme);
-        console.log('[BaseHead] Applied theme class to <html>:', theme);
-        console.log('[BaseHead] localStorage theme after script:', localStorage.getItem("theme"));
+        console.log("[BaseHead] Applied theme class to <html>:", theme);
+        console.log(
+            "[BaseHead] localStorage theme after script:",
+            localStorage.getItem("theme"),
+        );
     })();
 </script>
 
@@ -105,7 +108,7 @@ const shouldLoadAnalytics =
 <link rel="manifest" href="/site.webmanifest" />
 <link rel="sitemap" href="/sitemap-index.xml" />
 
-<Font cssVariable="--font-roboto" preload />
+<Font cssVariable="--font-carlito" preload />
 <Favicons />
 <ClientRouter />
 
