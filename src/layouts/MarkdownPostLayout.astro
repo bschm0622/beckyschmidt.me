@@ -1,6 +1,7 @@
 ---
 import "@/styles/global.css";
 import BaseHead from "@/components/BaseHead.astro";
+import Navbar from "@/components/Navbar.astro";
 const { title, description, image, canonicalURL, frontmatter } = Astro.props;
 ---
 
@@ -14,10 +15,9 @@ const { title, description, image, canonicalURL, frontmatter } = Astro.props;
             canonicalURL={canonicalURL}
         />
     </head>
-    <body class="bg-background text-foreground transition-colors typography">
-        <main
-            class="container mx-auto px-4 flex-1 max-w-screen-2xl pb-20 md:pb-8"
-        >
+    <Navbar />
+    <body class="bg-background text-foreground transition-colors">
+        <main class="mx-auto w-full max-w-4xl mt-5 md:mt-10 typography">
             <h1>{frontmatter.title}</h1>
             <p>Written by {frontmatter.author}</p>
             <slot />

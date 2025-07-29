@@ -3,6 +3,15 @@ import Layout from "@/layouts/Layout.astro";
 import BlogReel from "@/components/BlogReel.astro";
 ---
 
-<Layout>
-    <BlogReel />
+<Layout title="Blog" description="Becky's blog">
+    <div class="mx-auto w-full max-w-4xl mt-5 md:mt-10 space-y-10">
+        <div class="space-y-6">
+            <h1>My blog</h1>
+            <p>
+                I blog here about all sorts of random topics. Feel free to peruse.
+            </p>
+                <BlogReel />
+            </p>
+        </div>
+    </div>
 </Layout>
