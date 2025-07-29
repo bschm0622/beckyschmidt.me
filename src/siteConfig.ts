@@ -16,9 +16,6 @@ export interface SiteConfiguration {
     ogImage?: string;
     twitterHandle?: string;
 
-    themeColor?: string;
-    backgroundColor?: string;
-
     email?: string;
     phone?: string;
     address?: string;
@@ -55,8 +52,9 @@ export const SITE: SiteConfiguration = {
         { label: "Home", href: "/" },
         { label: "About", href: "/about" },
         { label: "Blog", href: "/blog" },
-        { label: "Podroll", href: "/podroll" },
-        { label: "EDC", href: "/edc" },
+        { label: "Projects", href: "/projects" },
+        { label: "Resume", href: "/resume" },
+        { label: "Slash Pages", href: "/slashpages" },
     ],
 
     copyright: `© ${new Date().getFullYear()} Becky Schmidt. All rights reserved.`,

@@ -59,70 +59,65 @@ const navLinks = SITE.nav;
         border-top: none;
     }
     input:checked ~ .mobile-menu {
-        max-height: 300px;
+        max-height: 100vh;
     }
 </style>
 
-<nav class="px-4 py-6 flex items-center justify-between text-xl">
-    <!-- Logo -->
-    <a href="/" class="font-semibold">
-        {SITE.name || SITE.title}
-    </a>
-
-    <!-- Right side (nav + theme toggle) -->
-    <div class="hidden md:flex items-center space-x-10">
-        <ul class="flex space-x-10">
+<nav class="px-6 py-6 flex items-center justify-between w-full text-xl">
+    <div class="hidden md:flex items-center justify-between w-full">
+        <ul class="flex items-center space-x-2">
             {
-                navLinks.map((link) => (
-                    <li>
-                        <a
-                            href={link.href}
-                            class="hover:underline"
-                        >
-                            {link.label}
-                        </a>
-                    </li>
+                navLinks.map((link, index) => (
+                    <>
+                        <li>
+                            <a href={link.href} class="hover:underline">
+                                {link.label}
+                            </a>
+                        </li>
+                        {index < navLinks.length - 1 && <li>/</li>}
+                    </>
                 ))
             }
         </ul>
         <ThemeToggle />
     </div>
 
-<!-- Mobile Nav -->
-<div class="flex items-center md:hidden space-x-4 relative">
-    <!-- Theme Toggle always visible -->
-    <ThemeToggle id="theme-toggle-mobile" />
+    <!-- Mobile Nav -->
+    <div class="flex items-center md:hidden space-x-4 relative ml-auto">
+        <!-- Theme Toggle always visible -->
+        <ThemeToggle id="theme-toggle-mobile" />
 
-    <!-- Toggle Button -->
-    <input type="checkbox" id="menu-toggle" class="peer" />
-    <label
-        for="menu-toggle"
-        class="cursor-pointer hamburger"
-        aria-label="Toggle menu"
-    >
-        <span class="hamburger-line line1"></span>
-        <span class="hamburger-line line2"></span>
-        <span class="hamburger-line line3"></span>
-    </label>
+        <!-- Toggle Button -->
+        <input type="checkbox" id="menu-toggle" class="peer" />
+        <label
+            for="menu-toggle"
+            class="cursor-pointer hamburger"
+            aria-label="Toggle menu"
+        >
+            <span class="hamburger-line line1"></span>
+            <span class="hamburger-line line2"></span>
+            <span class="hamburger-line line3"></span>
+        </label>
 
-    <!-- Dropdown Menu -->
-    <div
-        class="mobile-menu fixed left-0 right-0 top-[50px] bg-background shadow-lg"
-        id="mobile-menu"
-    >
-        <ul class="px-4 py-6 space-y-4">
-            {
-                navLinks.map((link) => (
-                    <li>
-                        <a
-                            href={link.href}
-                            class="block py-3 text-lg font-medium"
-                        >
-                            {link.label}
-                        </a>
-                    </li>
-                ))
-            }
-        </ul>
+        <!-- Dropdown Menu -->
+        <div
+            class="mobile-menu fixed left-0 right-0 top-[50px] bg-background shadow-lg"
+            id="mobile-menu"
+        >
+            <ul class="px-4 py-6 space-y-4">
+                {
+                    navLinks.map((link) => (
+                        <li>
+                            <a
+                                href={link.href}
+                                class="block py-3 text-lg font-medium"
+                            >
+                                {link.label}
+                            </a>
+                        </li>
+                    ))
+                }
+            </ul>
+        </div>
     </div>
-</div>
+</nav>
