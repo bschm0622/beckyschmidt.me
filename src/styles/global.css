@@ -94,14 +94,6 @@
         @apply border-l-4 border-accent pl-6 italic text-tertiary text-xl leading-8 my-8;
     }
 
-    code {
-        @apply bg-secondary text-base px-1.5 py-1 rounded;
-    }
-
-    pre {
-        @apply bg-secondary text-base p-6 rounded overflow-x-auto mb-6;
-    }
-
     hr {
         @apply border-muted my-10;
     }
@@ -120,7 +112,7 @@
     }
 
     strong {
-        @apply font-semibold text-foreground;
+        @apply font-semibold;
     }
 
     em {
@@ -128,12 +120,10 @@
     }
 
     small {
-        @apply text-base text-tertiary;
+        @apply text-base;
     }
-
-    /* Reset last child spacing */
-    *:last-child {
-        @apply mb-0;
+    pre {
+        @apply mb-8 px-2 py-2;
     }
 }
 
@@ -184,14 +174,6 @@
         @apply border-l-4 border-accent pl-6 italic text-tertiary;
     }
 
-    code {
-        @apply bg-secondary text-base px-1.5 py-1 rounded;
-    }
-
-    pre {
-        @apply bg-secondary text-base p-6 rounded overflow-x-auto;
-    }
-
     hr {
         @apply border-muted;
     }
@@ -220,4 +202,53 @@
     small {
         @apply text-base text-tertiary;
     }
+}
+
+@media (prefers-color-scheme: dark) {
+    body {
+        background-color: darkgray;
+    }
+
+    .astro-code,
+    .astro-code span {
+        color: var(--shiki-dark) !important;
+        background-color: var(--shiki-dark-bg) !important;
+        font-style: var(--shiki-dark-font-style) !important;
+        font-weight: var(--shiki-dark-font-weight) !important;
+        text-decoration: var(--shiki-dark-text-decoration) !important;
+    }
+}
+
+/* Also support explicit .dark class on html (Tailwind style) */
+html.dark .astro-code,
+html.dark .astro-code span {
+    color: var(--shiki-dark) !important;
+    background-color: var(--shiki-dark-bg) !important;
+    font-style: var(--shiki-dark-font-style) !important;
+    font-weight: var(--shiki-dark-font-weight) !important;
+    text-decoration: var(--shiki-dark-text-decoration) !important;
+}
+/* Inline <code> styling */
+code {
+    @apply text-primary text-lg;
+}
+
+/* Code blocks smaller font */
+.astro-code {
+    @apply text-base leading-relaxed;
+}
+
+.astro-code code {
+    @apply text-base;
+}
+
+/* Dark mode inline code */
+@media (prefers-color-scheme: dark) {
+    code {
+        @apply text-accent bg-secondary;
+    }
+}
+
+html.dark code {
+    @apply text-accent bg-secondary;
 }

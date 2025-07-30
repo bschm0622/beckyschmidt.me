@@ -1,0 +1,58 @@
+---
+import { getCollection } from "astro:content";
+import { slugifyAll, slugifyStr } from "@/utils/Slugify";
+import Layout from "@/layouts/Layout.astro";
+import BlogReel from "@/components/BlogReel.astro";
+
+export async function getStaticPaths() {
+    const allPosts = await getCollection("blog");
+    const allTags = Array.from(
+        new Set(allPosts.flatMap((post) => post.data.tags || [])),
+    );
+    const slugifiedTags = allTags.map((tag) => slugifyStr(tag));
+    const uniqueSlugifiedTags = Array.from(new Set(slugifiedTags));
+
+    return uniqueSlugifiedTags.map((tag) => ({
+        params: { tag },
+    }));
+}
+
+const { tag } = Astro.params;
+const allPosts = await getCollection("blog");
+
+const filteredPosts = allPosts.filter((post) =>
+    slugifyAll(post.data.tags || []).includes(tag),
+);
+---
+
+<Layout
+    title={`Posts tagged with "${tag}"`}
+    description={`Blog posts tagged with ${tag}`}
+>
+    <div class="mx-auto w-full max-w-4xl mt-5 md:mt-10 space-y-10">
+        <div class="flex items-center space-x-4">
+            <h1>Tagged with "{tag}"</h1>
+            <span
+                class="inline-block bg-muted text-tertiary text-3xl px-3 py-1 rounded-full select-none"
+                aria-label={`${filteredPosts.length} ${filteredPosts.length === 1 ? "post" : "posts"}`}
+            >
+                {filteredPosts.length}
+                {filteredPosts.length === 1 ? "post" : "posts"}
+            </span>
+        </div>
+        {
+            filteredPosts.length === 0 ? (
+                <p>No posts found with this tag.</p>
+            ) : (
+                <BlogReel posts={filteredPosts} />
+            )
+        }
+        <a
+            href="/blog"
+            class="inline-block mt-2 text-primary font-semibold hover:underline"
+            aria-label="Back to blog"
+        >
+            ← Back to Blog
+        </a>
+    </div>
+</Layout>

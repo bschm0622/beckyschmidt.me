@@ -3,8 +3,11 @@ import "@/styles/global.css";
 import BaseHead from "@/components/BaseHead.astro";
 import Navbar from "@/components/Navbar.astro";
 import Footer from "@/components/Footer.astro";
+import FormattedDate from "@/components/ui/FormattedDate.astro";
 
 const { title, description, image, canonicalURL, frontmatter } = Astro.props;
+const { tags } = frontmatter as { tags?: string[] };
+
 ---
 
 <!doctype html>
@@ -17,15 +20,33 @@ const { title, description, image, canonicalURL, frontmatter } = Astro.props;
             canonicalURL={canonicalURL}
         />
     </head>
-    <Navbar />
-    <body class="bg-background text-foreground transition-colors min-h-screen">
-        <main class="flex-1 mx-auto w-full max-w-4xl mt-5 md:mt-10 typography">
-            <h1>{frontmatter.title}</h1>
-            <p>Written by {frontmatter.author}</p>
-            <slot />
+    <body
+        class="bg-background text-foreground transition-colors min-h-screen flex flex-col"
+    >
+        <Navbar />
+        <main class="px-4 flex-1 mx-auto w-full max-w-4xl typography">
+                <!-- Main Content -->
+                <h1 class="mb-2">{frontmatter.title}</h1>
+                <div
+                    class="flex flex-wrap items-center gap-2 text-md text-foreground mb-6"
+                >
+                    <FormattedDate date={frontmatter.pubDate} />
+                    {
+                        tags &&
+                            tags.map((tag: string) => (
+                                <span class="px-2 py-0.5 bg-muted rounded text-sm font-medium">
+                                    {tag}
+                                </span>
+                            ))
+                    }
+                </div>
+
+                <slot />
+            </div>
         </main>
+
+        <Footer />
     </body>
-    <Footer />
 </html>
 
 <style>
@@ -46,3 +67,56 @@ const { title, description, image, canonicalURL, frontmatter } = Astro.props;
         visibility: visible;
     }
 </style>
+
+<script>
+      /** Attaches copy buttons to code blocks in the document,
+   * allowing users to copy code easily. */
+  function attachCopyButtons() {
+    const copyButtonLabel = "Copy";
+    const codeBlocks = Array.from(document.querySelectorAll("pre"));
+
+    for (const codeBlock of codeBlocks) {
+      const wrapper = document.createElement("div");
+      wrapper.style.position = "relative";
+
+      // Check if --file-name-offset custom property exists
+      const computedStyle = getComputedStyle(codeBlock);
+      const hasFileNameOffset =
+        computedStyle.getPropertyValue("--file-name-offset").trim() !== "";
+
+      // Determine the top positioning class
+      const topClass = hasFileNameOffset
+        ? "top-(--file-name-offset)"
+        : "-top-3";
+
+      const copyButton = document.createElement("button");
+      copyButton.className = `copy-code absolute end-3 ${topClass} rounded bg-muted border border-muted px-2 py-1 text-xs leading-4 text-foreground font-medium`;
+      copyButton.innerHTML = copyButtonLabel;
+      codeBlock.setAttribute("tabindex", "0");
+      codeBlock.appendChild(copyButton);
+
+      // wrap codebock with relative parent element
+      codeBlock?.parentNode?.insertBefore(wrapper, codeBlock);
+      wrapper.appendChild(codeBlock);
+
+      copyButton.addEventListener("click", async () => {
+        await copyCode(codeBlock, copyButton);
+      });
+    }
+
+    async function copyCode(block: any, button: any) {
+      const code = block.querySelector("code");
+      const text = code?.innerText;
+
+      await navigator.clipboard.writeText(text ?? "");
+
+      // visual feedback that task is completed
+      button.innerText = "Copied";
+
+      setTimeout(() => {
+        button.innerText = copyButtonLabel;
+      }, 700);
+    }
+  }
+  attachCopyButtons();
+  </script>

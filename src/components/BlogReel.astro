@@ -1,16 +1,79 @@
 ---
-import { getCollection } from "astro:content";
-const allPosts = await getCollection("blog");
+import FormattedDate from "./ui/FormattedDate.astro";
+import BlogTag from "./ui/BlogTag.astro";
+import { slugifyStr } from "@/utils/Slugify";
+
+const { posts = null, preview = false } = Astro.props;
+
+let postsToShow;
+
+if (posts) {
+  // Use passed-in posts, sorted by pubDate descending
+  postsToShow = posts.sort(
+    (a: any, b: any) => b.data.pubDate.getTime() - a.data.pubDate.getTime(),
+  );
+  if (preview) {
+    postsToShow = postsToShow.slice(0, 3);
+  }
+} else {
+  // If no posts passed, fetch all and show sorted or preview slice
+  const allPosts = await import("astro:content").then(mod => mod.getCollection("blog"));
+  const sortedPosts = allPosts.sort(
+    (a, b) => b.data.pubDate.getTime() - a.data.pubDate.getTime(),
+  );
+  postsToShow = preview ? sortedPosts.slice(0, 3) : sortedPosts;
+}
 ---
 
-<div>
-<ul>
-    {
-        allPosts.map((post: any) => (
-            <li>
-                <a href={`/blog/${post.id}/`}>{post.data.title}</a>
-            </li>
-        ))
-    }
-</ul>
+<div class="space-y-6">
+  {postsToShow.map((post: any) => (
+    <article class="pb-4">
+      <a
+        href={`/blog/${post.id}/`}
+        class="text-2xl font-semibold text-primary hover:underline"
+      >
+        {post.data.title}
+      </a>
+
+      {post.data.description && <p class="mt-1">{post.data.description}</p>}
+
+      <div class="mt-2 flex flex-wrap items-center text-sm text-tertiary space-x-2">
+        <FormattedDate date={post.data.pubDate} />
+        {post.data.tags && post.data.tags.length > 0 && (
+          <div class="flex flex-wrap space-x-2">
+            {post.data.tags.map((tag: any) => (
+              <BlogTag
+                href={`/blog/tag/${slugifyStr(tag)}/`}
+              >
+                {tag}
+              </BlogTag>
+            ))}
+          </div>
+        )}
+      </div>
+    </article>
+  ))}
+
+  {preview && (
+    <div class="pt-4">
+      <a
+        href="/blog"
+        class="inline-flex items-center text-primary font-semibold hover:underline"
+      >
+        See all posts
+        <svg
+          class="ml-1 h-5 w-5"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          viewBox="0 0 24 24"
+          aria-hidden="true"
+        >
+          <path d="M5 12h14M13 6l6 6-6 6" />
+        </svg>
+      </a>
+    </div>
+  )}
 </div>

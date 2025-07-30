@@ -1,17 +1,50 @@
 ---
 import Layout from "@/layouts/Layout.astro";
 import BlogReel from "@/components/BlogReel.astro";
+import { getCollection } from "astro:content";
+import BlogTag from "@/components/ui/BlogTag.astro";
+import { slugifyStr } from "@/utils/Slugify";
+
+const allPosts = await getCollection("blog");
+
+// Extract all unique tags from all posts
+const allTags = Array.from(
+    new Set(allPosts.flatMap((post) => post.data.tags || [])),
+);
 ---
 
 <Layout title="Blog" description="Becky's blog">
     <div class="mx-auto w-full max-w-4xl mt-5 md:mt-10 space-y-10">
         <div class="space-y-6">
-            <h1>My blog</h1>
+            <div class="flex items-center space-x-4">
+                <h1>My blog</h1>
+                <span
+                    class="inline-block bg-muted text-tertiary text-3xl px-3 py-1 rounded-full select-none"
+                    aria-label={`${allPosts.length} posts`}
+                >
+                    {allPosts.length} posts
+                </span>
+            </div>
             <p>
                 I blog here about all sorts of random topics. Feel free to
                 peruse.
             </p>
-            <BlogReel />
+
+            <div class="mb-8 flex flex-wrap items-center gap-2">
+                <span class="whitespace-nowrap">Explore by tag:</span>
+                {
+                    allTags.map((tag) => (
+                        <BlogTag
+                            href={`/blog/tag/${slugifyStr(tag)}/`}
+                            key={tag}
+                        >
+                            {tag}
+                        </BlogTag>
+                    ))
+                }
+            </div>
         </div>
+
+        <BlogReel posts={allPosts} />
     </div>
 </Layout>

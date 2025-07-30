@@ -1,6 +1,7 @@
 ---
 import Layout from "@/layouts/Layout.astro";
 import SocialIcon from "@/components/SocialIcon.astro";
+import BlogReel from "@/components/BlogReel.astro";
 import { Mail, Github, Linkedin } from "@lucide/astro";
 import { SITE } from "@/siteConfig";
 const slashPageLink =
@@ -17,20 +18,24 @@ const projectsLink =
 		<div class="space-y-6">
 			<h1>Hi, there 👋</h1>
 			<p>
-				Thanks for visiting my personal website! I'm Becky. For the past
-				4 years, I've worked as a product manager at
-				<a href="https://octane11.com">Octane11</a>, a B2B SaaS startup.
-				Outside of work, you can find me on walks with my family,
-				listening to my favorite podcasts, meeting friends at a coffee
-				shop (for the vibes, not the coffee), gathering eggs from my
-				backyard chickens, or playing a board game.
+				Thanks for visiting my personal website! For the past 4 years,
+				I've worked as a product manager at
+				<a
+					href="https://octane11.com"
+					target="_blank"
+					rel="noopener noreferrer">Octane11</a
+				>, a B2B SaaS startup. Outside of work, you can find me on walks
+				with my family, listening to my favorite podcasts, meeting
+				friends at a coffee shop (for the vibes, not the coffee),
+				gathering eggs from my backyard chickens, or playing a board
+				game.
 			</p>
 			<p>
 				I'm endlessly curious about the world and the people in it,
 				because I know we were placed in this moment in time for a
 				reason. Recently, that's looked like pursuing my own <a
 					href={projectsLink}>side projects</a
-				>, creating websites and apps with AI.
+				> - creating websites and apps with AI.
 			</p>
 			<p>
 				I also post on my <a href={blogLink}>blog</a> here and there, and
@@ -57,5 +62,9 @@ const projectsLink =
 				<Github />
 			</SocialIcon>
 		</div>
+		<div class="space-y-6">
+		<h2>Latest blog posts</h2>
+		<BlogReel preview={true} />
+	</div>
 	</div>
 </Layout>

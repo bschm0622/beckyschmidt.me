@@ -1,0 +1,11 @@
+---
+// Tag.astro
+const { href, children } = Astro.props;
+---
+
+<a
+    href={href}
+    class="px-2 py-0.5 bg-muted rounded text-sm font-medium !text-foreground !no-underline"
+>
+    <slot />
+</a>
