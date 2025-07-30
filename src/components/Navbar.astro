@@ -123,22 +123,38 @@ const navLinks = SITE.nav;
     </div>
 
     <!-- Mobile Nav -->
-    <div class="flex items-center md:hidden space-x-4 relative ml-auto">
-        <!-- Theme Toggle always visible -->
-        <ThemeToggle id="theme-toggle-mobile" />
+    <div class="flex items-center md:hidden space-x-4 justify-between w-full">
+        <div class="flex items-center space-x-3">
+            <div class="w-10 h-10 rounded-md overflow-hidden">
+                <Picture
+                    src={BeckyHeadshot}
+                    alt="Becky Schmidt's headshot"
+                    loading="eager"
+                    width={500}
+                    height={500}
+                    class="w-full h-full object-cover"
+                />
+            </div>
+            <a href="/" class="text-2xl font-bold text-tertiary">
+                {SITE.name || SITE.title}
+            </a>
+        </div>
+        <div class="flex items-center relative ml-auto space-x-3">
+            <!-- Theme Toggle always visible -->
+            <ThemeToggle id="theme-toggle-mobile" />
 
-        <!-- Toggle Button -->
-        <input type="checkbox" id="menu-toggle" class="peer" />
-        <label
-            for="menu-toggle"
-            class="cursor-pointer hamburger"
-            aria-label="Toggle menu"
-        >
-            <span class="hamburger-line line1"></span>
-            <span class="hamburger-line line2"></span>
-            <span class="hamburger-line line3"></span>
-        </label>
-
+            <!-- Toggle Button -->
+            <input type="checkbox" id="menu-toggle" class="peer" />
+            <label
+                for="menu-toggle"
+                class="cursor-pointer hamburger"
+                aria-label="Toggle menu"
+            >
+                <span class="hamburger-line line1"></span>
+                <span class="hamburger-line line2"></span>
+                <span class="hamburger-line line3"></span>
+            </label>
+        </div>
         <!-- Dropdown Menu -->
         <div
             class="mobile-menu fixed left-0 right-0 top-[50px] bg-background shadow-lg"

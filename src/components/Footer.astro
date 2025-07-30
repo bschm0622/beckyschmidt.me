@@ -1,27 +1,27 @@
 ---
-import { SITE } from "@/siteConfig";
+import {SITE} from "@/siteConfig"
 ---
 
-<footer class="px-6 py-12 text-right text-gray-400 text-sm">
-    <p>
-        {SITE.copyright}
-        &nbsp;•&nbsp;
+<footer class="px-6 py-12 text-sm text-tertiary">
+    <div class="flex flex-wrap gap-x-2 gap-y-1 justify-center md:justify-end">
+        <p class="whitespace-nowrap">{SITE.copyright}</p>
+        <span aria-hidden="true">•</span>
         <a
             href="https://astro.build"
-            class="hover:underline"
+            class="hover:underline whitespace-nowrap"
             target="_blank"
             rel="noopener noreferrer"
         >
             Made with Astro
         </a>
-        &nbsp;•&nbsp;
+        <span aria-hidden="true">•</span>
         <a
             href="https://github.com/bschm0622/beckyschmidt.me"
-            class="hover:underline"
+            class="hover:underline whitespace-nowrap"
             target="_blank"
             rel="noopener noreferrer"
         >
             GitHub repository
         </a>
-    </p>
+    </div>
 </footer>
