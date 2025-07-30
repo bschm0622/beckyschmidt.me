@@ -1,0 +1,72 @@
+---
+const {
+    logo,
+    name,
+    link = "",
+    stack = [],
+    active = true, // new prop
+} = Astro.props;
+---
+
+<article
+    class="relative border border-tertiary border-2 p-6 backdrop-blur-sm"
+>
+    <!-- Status badge -->
+    <div
+        class={`absolute top-3 right-3 text-sm px-2 py-0.5 rounded-full
+      ${
+          active
+              ? "bg-primary/70 text-surface"
+              : "bg-secondary text-foreground/40"
+      }
+    `}
+    >
+        {active ? "Active" : "Inactive"}
+    </div>
+
+    <header class="flex items-center gap-4 mb-4">
+        {
+            logo && (
+                <div class="h-10 w-10 flex items-center justify-center bg-secondary rounded-xl text-xl">
+                    {typeof logo === "string" && logo.startsWith("/") ? (
+                        <img src={logo} alt={`${name} logo`} class="h-6 w-6" />
+                    ) : (
+                        <span>{logo}</span>
+                    )}
+                </div>
+            )
+        }
+        <h3 class="text-lg font-semibold text-foreground">{name}</h3>
+    </header>
+
+    <div
+        class="prose prose-sm max-w-none text-foreground dark:prose-invert mb-4"
+    >
+        <slot />
+    </div>
+
+    {
+        stack.length > 0 && (
+            <div class="flex flex-wrap gap-2 text-sm mb-4">
+                {stack.map((item: any) => (
+                    <span class="bg-secondary text-foreground px-2 py-0.5 rounded-full">
+                        {item}
+                    </span>
+                ))}
+            </div>
+        )
+    }
+
+    {
+        link && (
+            <a
+                href={link}
+                target="_blank"
+                rel="noopener noreferrer"
+                class="text-sm text-primary underline underline-offset-4"
+            >
+                Visit site →
+            </a>
+        )
+    }
+</article>

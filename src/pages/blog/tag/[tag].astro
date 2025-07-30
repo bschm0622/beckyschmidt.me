@@ -30,16 +30,19 @@ const filteredPosts = allPosts.filter((post) =>
     description={`Blog posts tagged with ${tag}`}
 >
     <div class="mx-auto w-full max-w-4xl mt-5 md:mt-10 space-y-10">
-        <div class="flex items-center space-x-4">
+        <div
+            class="flex flex-col sm:flex-row sm:items-center sm:space-x-4 space-y-2 sm:space-y-0"
+        >
             <h1>Tagged with "{tag}"</h1>
             <span
-                class="inline-block bg-muted text-tertiary text-3xl px-3 py-1 rounded-full select-none"
+                class="inline-block max-w-max bg-muted text-tertiary text-3xl px-3 py-1 rounded-full select-none"
                 aria-label={`${filteredPosts.length} ${filteredPosts.length === 1 ? "post" : "posts"}`}
             >
                 {filteredPosts.length}
                 {filteredPosts.length === 1 ? "post" : "posts"}
             </span>
         </div>
+
         {
             filteredPosts.length === 0 ? (
                 <p>No posts found with this tag.</p>

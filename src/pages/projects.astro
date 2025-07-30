@@ -1,0 +1,34 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import ProjectCard from "@/components/ui/ProjectCard.astro";
+---
+
+<Layout title="Projects" description="Projects page">
+    <div class="mx-auto w-full max-w-4xl mt-5 md:mt-10 space-y-10">
+        <div class="space-y-6">
+            <h1>Stuff I'm tinkering with</h1>
+            <ProjectCard
+                logo="/src/assets/logos/indy-creator-logo.png"
+                name="Indy Creator"
+                link="https://indycreator.com?ref=beckyschmidt.me"
+                stack={["Astro", "Supabase", "Stripe", "Tailwind"]}
+                active={true}
+            >
+                <p>
+                    Indy Creator is an Indianapolis-only local 2-sided marketplace for
+                    content creators and local businesses to connect and collaborate. 
+                </p>
+                <p>
+                    I started Indy Creator as a passion project. I've lived in Indiana
+                    almost my whole life, and I love local businesses and my community
+                    and want to see the city thrive. Marketing is one of the biggest
+                    challenges that small businesses face, and local creators are an
+                    authentic, affordable way to get exposure.
+                </p>
+                <p>
+                    The project is 
+                </p>
+            </ProjectCard>
+        </div>
+    </div>
+</Layout>
