@@ -1,11 +1,26 @@
 ---
 import Layout from "@/layouts/Layout.astro";
+import ResumeCard from "@/components/ui/ResumeCard.astro";
 ---
 
 <Layout title="Resume" description="My work history">
     <div class="mx-auto w-full max-w-4xl mt-5 md:mt-10 space-y-10">
         <div class="space-y-6">
             <h1>My resume</h1>
+            <ResumeCard
+                position="Product Manager"
+                company="IndyCreator"
+                companyUrl="https://indycreator.com"
+                location="Remote"
+                dates="Jan 2023 – Present"
+                description="Leading product and growth for a platform connecting small businesses with local creators."
+                bullets={[
+                    "Launched MVP in under 4 weeks using Astro, Supabase, and Stripe.",
+                    "Built and tested invite-only flow with email-based campaigns.",
+                    "Refined user onboarding with 20% increase in activation rate.",
+                ]}
+                showBorder={true}
+            />
         </div>
     </div>
 </Layout>

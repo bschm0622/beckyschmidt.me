@@ -1,0 +1,37 @@
+---
+// ResumeItem.astro
+const {
+    position,
+    company,
+    companyUrl,
+    location,
+    dates,
+    description,
+    bullets = [],
+    showBorder
+} = Astro.props;
+---
+
+<article
+    class={`space-y-2 pb-6 ${showBorder ? "border-b border-tertiary/20" : ""}`}>
+    <div class="flex flex-col sm:flex-row sm:justify-between">
+        <div>
+            <h2>{position}</h2>
+            <div class="flex flex-wrap items-center gap-1 text-tertiary">
+                <a href={companyUrl} target="_blank" rel="noopener noreferrer">
+                    {company}
+                </a>
+                <span>|</span>
+                <span>{location}</span>
+            </div>
+        </div>
+
+        <span class="text-md text-muted-foreground">{dates}</span>
+    </div>
+
+    <p>{description}</p>
+
+    <ul class="list-disc pl-5 space-y-1">
+        {bullets.map((bullet: any) => <li>{bullet}</li>)}
+    </ul>
+</article>
