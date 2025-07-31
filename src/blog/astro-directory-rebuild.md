@@ -1,5 +1,5 @@
 ---
-title: "Why I Rebuilt My Podcast Directory with Astro"
+title: "Why I rebuilt my podcast directory with Astro"
 pubDate: 2025-05-30
 description: "I recently rebuilt my podcast directory from Next.js to Astro to improve performance and simplify my stack. In this post, I walk through my setup with Supabase, share where I got stuck (and how I fixed it), and reflect on what I learned."
 author: Becky Schmidt

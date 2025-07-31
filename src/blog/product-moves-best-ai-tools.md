@@ -1,5 +1,5 @@
 ---
-title: "4 Product Moves the Best AI Tools Are Making Right Now"
+title: "4 product moves the best AI tools are making right now"
 pubDate: 2025-07-06
 description: "AI is moving fast, but some tools are already pulling away from the pack. Here’s what they’re doing right."
 author: Becky Schmidt

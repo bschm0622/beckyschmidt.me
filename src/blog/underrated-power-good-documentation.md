@@ -1,5 +1,5 @@
 ---  
-title: "The Underrated Power of Good Documentation"  
+title: "The underrated power of good documentation"  
 pubDate: 2025-05-05  
 description: "The best teammates know how to document everything, and it’s a skill that can make all the difference. Here’s how I use it to stay organized and keep projects on track."  
 author: Becky Schmidt
