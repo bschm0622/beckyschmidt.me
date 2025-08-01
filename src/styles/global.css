@@ -204,11 +204,6 @@
     }
 }
 
-@media (prefers-color-scheme: dark) {
-    body {
-        background-color: darkgray;
-    }
-
     .astro-code,
     .astro-code span {
         color: var(--shiki-dark) !important;
@@ -217,7 +212,6 @@
         font-weight: var(--shiki-dark-font-weight) !important;
         text-decoration: var(--shiki-dark-text-decoration) !important;
     }
-}
 
 /* Also support explicit .dark class on html (Tailwind style) */
 html.dark .astro-code,
