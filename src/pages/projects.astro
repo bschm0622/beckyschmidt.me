@@ -1,6 +1,11 @@
 ---
 import Layout from "@/layouts/Layout.astro";
 import ProjectCard from "@/components/ui/ProjectCard.astro";
+import IndyCreatorLogo from "@/assets/logos/indy-creator-logo.png";
+import WellspringLogo from "@/assets/logos/wellspring-archive-logo.png";
+import BibleplanLogo from "@/assets/logos/bibleplan-logo.png";
+
+import { Archive, Hammer, Repeat } from "@lucide/astro";
 ---
 
 <Layout title="Projects" description="Projects page">
@@ -14,46 +19,51 @@ import ProjectCard from "@/components/ui/ProjectCard.astro";
             </p>
             <div class="space-y-12">
                 <ProjectCard
-                    logo="/src/assets/logos/indy-creator-logo.png"
+                    logo={IndyCreatorLogo}
                     name="Indy Creator"
                     statusText="Actively being developed"
                     stack={["Astro", "Tailwind", "Supabase", "Stripe"]}
-                    link="https://wellspringarchive.com?ref=beckyschmidt.me"
+                    link="https://indycreator.com?ref=beckyschmidt.me"
                     description={"An Indianapolis-only two-sided marketplace for local content creators and businesses to connect and grow their brands. I developed the marketing landing page and app using Astro as my framework, with Supabase as the backend database."}
                     reason={"Born out of a love for my hometown, I wanted to try my hand at a micro-SaaS while also benefitting my local community."}
-                />
-
+                >
+                    <Hammer slot="statusIcon" />
+                </ProjectCard>
                 <ProjectCard
-                    logo="/src/assets/logos/wellspring-archive-logo.png"
+                    logo={WellspringLogo}
                     name="Wellspring Archive - Directory"
                     statusText="Actively maintained"
                     stack={["Astro", "Tailwind", "Supabase"]}
-                    link="https://indycreator.com?ref=beckyschmidt.me"
+                    link="wellspringarchive.com?ref=beckyschmidt.me"
                     description={"A podcast directory designed to help Christians find new, curated content. I developed the directory using Astro as the framework (migrated from NextJS) and I'm storing the directory listings in Supabase."}
                     reason={"Directories are all the rage again and I wanted to try creating one about something I'm passionate about."}
-                />
-
+                >
+                    <Repeat slot="statusIcon" />
+                </ProjectCard>
                 <ProjectCard
-                    logo="/src/assets/logos/wellspring-archive-logo.png"
+                    logo={WellspringLogo}
                     name="Wellspring Archive - Substack"
                     statusText="Not actively writing"
                     stack={["Substack"]}
                     link="https://wellspringarchive.substack.com"
                     description={"Writing about the intersections of faith and technology on Substack. I was using Substack as a launchpad for the Wellspring Archive website."}
                     reason={"I didn't get as much traction on Substack as I would've liked. I probably needed to market this harder with my personal network, rather than relying on Substack's algorithms."}
-                />
+                >
+                    <Archive slot="statusIcon" />
+                </ProjectCard>
 
                 <ProjectCard
-                    logo="/src/assets/logos/bibleplan-logo.png"
+                    logo={BibleplanLogo}
                     name="bibleplan.app"
                     statusText="Not actively maintained"
                     stack={["Next.js", "DaisyUI", "Supabase"]}
                     link="https://bibleplan.app/?ref=beckyschmidt.me"
                     description={"A Bible reading plan generator that allows for complete flexibility in what you read and when. This was my first foray into vibe coding at the start of 2025 – I started with ChatGPT and finished it in Cursor, using Next.js and Supabase."}
                     reason={"I implemented quite a few features here that I am proud of, including real-time plan tracking and a plan generation algorithm that is designed to evenly distribute readings across days based on your selection and plan duration."}
-                />
+                >
+                    <Archive slot="statusIcon" />
+                </ProjectCard>
             </div>
-        </div>
         </div>
     </div>
 </Layout>

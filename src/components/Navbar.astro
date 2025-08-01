@@ -87,6 +87,29 @@ const navLinks = SITE.nav;
         opacity: 1;
         pointer-events: auto;
     }
+
+    .nav-squiggle {
+        position: relative;
+        color: inherit;
+        text-decoration: none; /* remove native underline */
+    }
+
+    .nav-squiggle::after {
+        content: "";
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: -0.05rem; /* position roughly where underline would be */
+        height: 2px;
+        background-color: var(--color-primary);
+        pointer-events: none;
+        transition: height 0.1s ease;
+        z-index: 1; /* ensure it’s above the text */
+    }
+
+    .nav-squiggle:hover::after {
+        height: 4px;
+    }
 </style>
 
 <script>
@@ -127,18 +150,20 @@ const navLinks = SITE.nav;
                 {SITE.name || SITE.title}
             </a>
         </div>
-        <ul class="flex items-center space-x-2">
+        <ul class="flex items-center space-x-3">
             {
                 navLinks.map((link, index) => (
-                    <li>
-                        <a href={link.href} class="nav-squiggle">
-                            {link.label}
-                        </a>
-                        {index < navLinks.length - 1 && <span>/</span>}
-                    </li>
+                    <>
+                        <li>
+                            <a href={link.href} class="nav-squiggle">
+                                {link.label}
+                            </a>
+                        </li>
+                        {index < navLinks.length - 1 && <li>/</li>}
+                    </>
                 ))
             }
-            <li><ThemeToggle /></li>
+            <ThemeToggle />
         </ul>
     </div>
 
