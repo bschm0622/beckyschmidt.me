@@ -43,7 +43,6 @@ const shouldLoadAnalytics =
 <script is:inline>
     (function () {
         let theme = localStorage.getItem("theme");
-        console.log("[BaseHead] Initial localStorage theme:", theme);
         if (!theme) {
             if (
                 window.matchMedia &&
@@ -54,15 +53,9 @@ const shouldLoadAnalytics =
                 theme = "light";
             }
             localStorage.setItem("theme", theme);
-            console.log("[BaseHead] Set theme in localStorage to:", theme);
         }
         document.documentElement.classList.remove("light", "dark");
         document.documentElement.classList.add(theme);
-        console.log("[BaseHead] Applied theme class to <html>:", theme);
-        console.log(
-            "[BaseHead] localStorage theme after script:",
-            localStorage.getItem("theme"),
-        );
     })();
 </script>
 

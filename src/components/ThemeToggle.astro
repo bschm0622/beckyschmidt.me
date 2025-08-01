@@ -46,7 +46,6 @@ const uniqueId = `themeToggle-${crypto.randomUUID().slice(0, 8)}`;
 <script define:vars={{ buttonId: uniqueId }}>
     const applyThemeFromLocalStorage = () => {
         const theme = localStorage.getItem("theme");
-        console.log('[ThemeToggle] applyThemeFromLocalStorage, theme:', theme);
         if (theme === "dark") {
             document.documentElement.classList.remove("light");
             document.documentElement.classList.add("dark");
@@ -54,7 +53,6 @@ const uniqueId = `themeToggle-${crypto.randomUUID().slice(0, 8)}`;
             document.documentElement.classList.remove("dark");
             document.documentElement.classList.add("light");
         }
-        console.log('[ThemeToggle] <html> class after apply:', document.documentElement.className);
     };
 
     const handleToggleClick = () => {
@@ -62,8 +60,6 @@ const uniqueId = `themeToggle-${crypto.randomUUID().slice(0, 8)}`;
         const isDark = document.documentElement.classList.contains("dark");
         document.documentElement.classList.toggle("light", !isDark);
         localStorage.setItem("theme", isDark ? "dark" : "light");
-        console.log('[ThemeToggle] handleToggleClick, set theme to:', isDark ? 'dark' : 'light');
-        console.log('[ThemeToggle] <html> class after toggle:', document.documentElement.className);
     };
 
     const setupThemeToggleButton = () => {
@@ -71,7 +67,6 @@ const uniqueId = `themeToggle-${crypto.randomUUID().slice(0, 8)}`;
         if (toggleButton) {
             toggleButton.removeEventListener("click", handleToggleClick); // Prevent duplicate listeners
             toggleButton.addEventListener("click", handleToggleClick);
-            console.log('[ThemeToggle] setupThemeToggleButton attached to:', buttonId);
         }
     };
 
