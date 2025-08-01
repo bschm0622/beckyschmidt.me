@@ -1,12 +1,32 @@
 ---
-// FormattedDate.astro
 const { date } = Astro.props;
 
-const formattedDate = new Date(date).toLocaleDateString("en-US", {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-});
+let formattedDate;
+
+if (typeof date === "string") {
+    // Parse as local date by appending T00:00:00 (safe for string inputs)
+    formattedDate = new Date(`${date}T00:00:00`).toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+    });
+} else if (date instanceof Date) {
+    // Convert UTC date to local date (no timezone shift)
+    const year = date.getUTCFullYear();
+    const month = date.getUTCMonth();
+    const day = date.getUTCDate();
+    const localDate = new Date(year, month, day);
+
+    formattedDate = localDate.toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+    });
+} else {
+    formattedDate = "Invalid date";
+}
 ---
 
-<time datetime={date}>{formattedDate}</time>
+<time datetime={typeof date === "string" ? date : date.toISOString()}>
+    {formattedDate}
+</time>
