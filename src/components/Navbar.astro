@@ -8,10 +8,30 @@ const navLinks = SITE.nav;
 ---
 
 <style>
-    input[type="checkbox"] {
+    input#menu-toggle {
         position: absolute;
         opacity: 0;
+        width: 0;
+        height: 0;
         pointer-events: none;
+    }
+
+    /* Hamburger styling */
+    .hamburger {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        gap: 5px;
+        width: 24px;
+        height: 24px;
+        cursor: pointer;
+        color: var(--color-tertiary);
+        background: transparent;
+        border: none;
+        padding: 0;
+        position: relative;
+        z-index: 50; /* above mobile-menu */
     }
 
     .hamburger-line {
@@ -24,71 +44,72 @@ const navLinks = SITE.nav;
         transform-origin: center;
     }
 
-    /* Wrapper to help center alignment */
-    .hamburger {
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        gap: 5px;
-        width: 24px;
-        height: 24px;
-        position: relative;
-    }
-
-    /* Animate to X (perfect symmetry fix) */
-    input:checked + label .line1 {
+    /* Animate hamburger to X when menu open */
+    input#menu-toggle:checked + label.hamburger .line1 {
         transform: rotate(45deg) translateY(0);
         position: absolute;
         top: 11px;
     }
 
-    input:checked + label .line2 {
+    input#menu-toggle:checked + label.hamburger .line2 {
         opacity: 0;
     }
 
-    input:checked + label .line3 {
+    input#menu-toggle:checked + label.hamburger .line3 {
         transform: rotate(-45deg) translateY(0);
         position: absolute;
         top: 11px;
     }
 
-    /* Mobile menu animation */
+    /* Mobile menu hidden by default */
     .mobile-menu {
-        max-height: 0;
-        overflow: hidden;
-        transition: max-height 0.3s ease;
-        border-top: none;
-    }
-    input:checked ~ .mobile-menu {
-        max-height: 100vh;
-    }
-
-    .nav-squiggle {
-        position: relative;
-        color: inherit;
-        text-decoration: none; /* remove native underline */
-    }
-
-    .nav-squiggle::after {
-        content: "";
-        position: absolute;
+        position: fixed;
+        top: 88px; /* navbar height */
         left: 0;
         right: 0;
-        bottom: -0.05rem; /* position roughly where underline would be */
-        height: 2px;
-        background-color: var(--color-primary);
+        height: calc(100vh - 64px);
+        background: var(--color-background);
+        overflow-y: auto;
+        padding: 1rem 1.5rem;
+        z-index: 40;
+
+        transform: translateY(-100%);
+        opacity: 0;
         pointer-events: none;
-        transition: height 0.1s ease;
-        z-index: 1; /* ensure it’s above the text */
+        transition:
+            opacity 0.3s ease;
     }
 
-    .nav-squiggle:hover::after {
-        height: 4px;
+    /* Show mobile menu when checked */
+    input#menu-toggle:checked ~ .mobile-menu {
+        transform: translateY(0);
+        opacity: 1;
+        pointer-events: auto;
     }
 </style>
 
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        const toggleBtn = document.getElementById("menu-toggle-btn");
+        const mobileMenu = document.getElementById("mobile-menu");
+
+        if (!toggleBtn || !mobileMenu) return;
+
+        toggleBtn.addEventListener("click", () => {
+            mobileMenu.classList.toggle("open");
+        });
+
+        // Optional: close menu when clicking a link inside it
+        mobileMenu.querySelectorAll("a").forEach((link) => {
+            link.addEventListener("click", () => {
+                mobileMenu.classList.remove("open");
+            });
+        });
+    });
+</script>
+
 <nav class="px-6 py-6 flex items-center justify-between w-full text-xl">
+    <!-- Desktop Nav -->
     <div class="hidden md:flex items-center justify-between w-full">
         <div class="flex items-center space-x-3">
             <div class="w-10 h-10 rounded-md overflow-hidden">
@@ -108,72 +129,72 @@ const navLinks = SITE.nav;
         <ul class="flex items-center space-x-2">
             {
                 navLinks.map((link, index) => (
-                    <>
-                        <li>
-                            <a href={link.href} class="nav-squiggle">
-                                {link.label}
-                            </a>
-                        </li>
-                        {index < navLinks.length - 1 && <li>/</li>}
-                    </>
+                    <li>
+                        <a href={link.href} class="nav-squiggle">
+                            {link.label}
+                        </a>
+                        {index < navLinks.length - 1 && <span>/</span>}
+                    </li>
                 ))
             }
-            <ThemeToggle />
+            <li><ThemeToggle /></li>
         </ul>
     </div>
 
     <!-- Mobile Nav -->
-    <div class="flex items-center md:hidden space-x-4 justify-between w-full">
-        <div class="flex items-center space-x-3">
-            <div class="w-10 h-10 rounded-md overflow-hidden">
-                <Picture
-                    src={BeckyHeadshot}
-                    alt="Becky Schmidt's headshot"
-                    loading="eager"
-                    width={500}
-                    height={500}
-                    class="w-full h-full object-cover"
-                />
+    <div class="flex flex-col md:hidden w-full relative">
+        <div class="flex items-center justify-between w-full">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-md overflow-hidden">
+                    <Picture
+                        src={BeckyHeadshot}
+                        alt="Becky Schmidt's headshot"
+                        loading="eager"
+                        width={500}
+                        height={500}
+                        class="w-full h-full object-cover"
+                    />
+                </div>
+                <a href="/" class="text-2xl font-bold text-tertiary">
+                    {SITE.name || SITE.title}
+                </a>
             </div>
-            <a href="/" class="text-2xl font-bold text-tertiary">
-                {SITE.name || SITE.title}
-            </a>
-        </div>
-        <div class="flex items-center relative ml-auto space-x-3">
-            <!-- Theme Toggle always visible -->
-            <ThemeToggle id="theme-toggle-mobile" />
 
-            <!-- Toggle Button -->
-            <input type="checkbox" id="menu-toggle" class="peer" />
+            <div class="flex items-center space-x-4">
+                <ThemeToggle />
+
+            <!-- Move checkbox and label outside the flex div, as siblings of mobile-menu -->
+            <input type="checkbox" id="menu-toggle" />
+
             <label
                 for="menu-toggle"
-                class="cursor-pointer hamburger"
+                class="hamburger"
                 aria-label="Toggle menu"
+                role="button"
+                tabindex="0"
             >
                 <span class="hamburger-line line1"></span>
                 <span class="hamburger-line line2"></span>
                 <span class="hamburger-line line3"></span>
             </label>
+
+            <div id="mobile-menu" class="mobile-menu">
+                <ul class="space-y-2">
+                    {
+                        navLinks.map((link) => (
+                            <li>
+                                <a
+                                    href={link.href}
+                                    class="block py-2 text-md hover:text-primary transition"
+                                >
+                                    {link.label}
+                                </a>
+                            </li>
+                        ))
+                    }
+                </ul>
+            </div>
         </div>
-        <!-- Dropdown Menu -->
-        <div
-            class="mobile-menu fixed left-0 right-0 top-[50px] bg-background shadow-lg"
-            id="mobile-menu"
-        >
-            <ul class="px-4 py-6 space-y-4">
-                {
-                    navLinks.map((link) => (
-                        <li>
-                            <a
-                                href={link.href}
-                                class="block py-3 text-lg font-medium"
-                            >
-                                {link.label}
-                            </a>
-                        </li>
-                    ))
-                }
-            </ul>
-        </div>
+    </div>
     </div>
 </nav>
