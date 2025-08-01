@@ -5,7 +5,7 @@ content:
     filename: '{fields.slug}.md'
     type: collection
     view:
-      fields: [title, pubDate, description, tags]
+      fields: [title, pubDate, tags]
     fields:
       - name: title
         label: Title
@@ -23,7 +23,7 @@ content:
         type: date
         required: true
         options:
-          format: yyyy-mm-dd
+          format: yyyy-MM-dd
 
       - name: author
         label: Author
