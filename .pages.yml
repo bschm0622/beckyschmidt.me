@@ -1,0 +1,67 @@
+content:
+  - name: blog
+    label: Blog
+    path: src/blog
+    filename: '{fields.slug}.md'
+    type: collection
+    view:
+      fields: [title, slug, pubDate, description, tags]
+    fields:
+      - name: title
+        label: Title
+        type: string
+        required: true
+
+      - name: slug
+        label: Slug
+        type: string
+        required: true
+        pattern: '^[a-z0-9]+(?:-[a-z0-9]+)*$'
+
+      - name: pubDate
+        label: Publication Date
+        type: date
+        required: true
+        options:
+          format: MM/dd/yyyy
+
+      - name: author
+        label: Author
+        type: string
+        required: true
+        default: Becky Schmidt
+
+      - name: description
+        label: Description
+        type: text
+        required: true
+
+      - name: tags
+        label: Tags
+        type: list
+        required: true
+        field:
+          type: string
+
+      - name: body
+        label: Body
+        type: rich-text
+        required: true
+
+
+  - name: site-settings
+    label: Site Settings
+    path: src/config/site.json
+    type: file
+    fields:
+      - name: title
+        label: Website title
+        type: string
+      - name: description
+        label: Website description
+        type: string
+        description: Will be used for any page with no description.
+      - name: url
+        label: Website URL
+        type: string
+        pattern: ^(https?:\/\/)?(www\.)?[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}(\/[^\s]*)?$
