@@ -4,6 +4,7 @@ pubDate: 2025-05-05
 description: "The best teammates know how to document everything, and it’s a skill that can make all the difference. Here’s how I use it to stay organized and keep projects on track."  
 author: Becky Schmidt
 tags: ["product management"]
+slug: underrated-power-good-documentation
 ---
 If you want to become someone your team relies on, start by being the one who writes things down.
 

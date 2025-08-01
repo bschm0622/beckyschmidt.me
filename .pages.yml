@@ -5,7 +5,7 @@ content:
     filename: '{fields.slug}.md'
     type: collection
     view:
-      fields: [title, slug, pubDate, description, tags]
+      fields: [title, pubDate, description, tags]
     fields:
       - name: title
         label: Title
@@ -23,7 +23,7 @@ content:
         type: date
         required: true
         options:
-          format: MM/dd/yyyy
+          format: yyyy-mm-dd
 
       - name: author
         label: Author
@@ -49,19 +49,7 @@ content:
         required: true
 
 
-  - name: site-settings
-    label: Site Settings
-    path: src/config/site.json
-    type: file
-    fields:
-      - name: title
-        label: Website title
-        type: string
-      - name: description
-        label: Website description
-        type: string
-        description: Will be used for any page with no description.
-      - name: url
-        label: Website URL
-        type: string
-        pattern: ^(https?:\/\/)?(www\.)?[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}(\/[^\s]*)?$
+settings:
+  hide: true
+  content:
+    merge: true
