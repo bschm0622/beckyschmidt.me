@@ -35,8 +35,7 @@ const canonicalStr =
         : (canonicalURL?.toString() ??
           new URL(Astro.url.pathname, siteOrigin).toString());
 
-const shouldLoadAnalytics =
-    import.meta.env.PROD && !Astro.url.pathname.startsWith("/admin");
+const shouldLoadAnalytics = import.meta.env.PROD;
 ---
 
 <!-- Theme mode initialization with debug logs -->
@@ -105,8 +104,13 @@ const shouldLoadAnalytics =
 <Favicons />
 <ClientRouter />
 
+<!-- Umami Analytics (only loaded in production) -->
 {
     shouldLoadAnalytics && (
-        <script>// Replace with analytics script if needed</script>
+        <script
+            defer
+            src="https://cloud.umami.is/script.js"
+            data-website-id="2d238baf-947c-468a-aac9-1ac81b265110"
+        />
     )
 }
