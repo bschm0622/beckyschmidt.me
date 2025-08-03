@@ -105,12 +105,17 @@ const shouldLoadAnalytics = import.meta.env.PROD;
 <ClientRouter />
 
 <!-- Umami Analytics (only loaded in production) -->
-{
-    shouldLoadAnalytics && (
-        <script
-            defer
-            src="https://cloud.umami.is/script.js"
-            data-website-id="2d238baf-947c-468a-aac9-1ac81b265110"
-        />
-    )
-}
+{shouldLoadAnalytics && (
+  <script>
+    if (document.cookie.indexOf('umami.disabled=true') === -1) {
+      const s = document.createElement('script');
+      s.src = 'https://cloud.umami.is/script.js';
+      s.setAttribute('data-website-id', '2d238baf-947c-468a-aac9-1ac81b265110');
+      s.defer = true;
+      document.head.appendChild(s);
+    } else {
+      console.log("Umami tracking disabled for this device.");
+    }
+  </script>
+)}
+

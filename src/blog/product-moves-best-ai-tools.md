@@ -15,6 +15,8 @@ These winners succeed not just because of better models, but because they consis
 
 As a daily user, I’ve been watching closely to spot the product choices that give them an edge.
 
+## Table of contents
+
 ## 1. Make It a Joy to Use
 
 ChatGPT has an estimated 63% market share and around [400 million weekly users](https://backlinko.com/chatgpt-stats).
