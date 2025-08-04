@@ -71,10 +71,10 @@ The first month brought a lot of momentum. I launched the landing page, reached 
 
 Now, heading into month three, I’ve been thinking more about pace. I love working on Indy Creator, but with a full-time job and a family, I’m realizing that sprinting all the time just isn’t realistic. My new goal is steady progress: onboard 10 more creators, begin outreach to businesses, and find a marketing rhythm that doesn’t burn me out.
 
-I started this year wanting to prove I could be an indie hackers - someone who builds and ships real software, solo. But beneath that desire was also the fear that I had lost my identity to being “just” a mom. I wanted to prove to myself that I still have creative capacity and can put meaningful things out into the world.
+I started this year wanting to prove I could be an indie hacker - someone who builds and ships real software, solo. But beneath that desire was also the fear that I had lost my identity to being “just” a mom. I wanted to prove to myself that I still have creative capacity and can put meaningful things into the world.
 
-There is definitely value in doing things for yourself, but as I’ve reflected more, I’ve been reminded that my worth doesn’t come from my side projects or my job - it comes from God and His calling for me. That calling is to glorify Him through the roles He’s given me: first as a wife and mother, then at my day job, and then in side projects like these.
+There’s definitely value in doing things for yourself, but as I’ve reflected more, I’ve realized my worth doesn’t come from side projects or my day job - it comes from God and His calling for me. That calling asks me to glorify Him through the roles He’s given me: first as a wife and mother, then in my day job, and then through side projects like these.
 
-That perspective helps me stay grounded, especially when I feel tempted to walk away like I’ve done with past projects. I’ve never been great at the last 10%. I love the spark of a new idea, but following through has always been harder. This time, I want to stick with it. Even if I only get to 90%, because when it’s your own thing, the work is never really finished anyway.
+Keeping that perspective helps me stay grounded, especially when I feel tempted to give up like I have with past projects. I’ve never been great at the last 10%. I love the spark of a new idea, but following through has always been harder, especially as life gets busier and I want to quit. This time, I want to stick with it, even if I only get to 90%, because when it’s your own project, the work is never really finished anyway.
 
-So I’m going to keep showing up at a pace that fits my life right now, and see where it leads. Just steady progress, and a commitment to finishing what I started.
+So I’m going to keep showing up at a pace that fits my life right now and see where it leads, steady progress and a commitment to keep going.
