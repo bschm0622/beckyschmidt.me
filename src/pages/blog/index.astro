@@ -7,18 +7,27 @@ import { slugifyStr } from "@/utils/Slugify";
 
 const allPosts = await getCollection("blog");
 
-// Extract all unique tags from all posts
-const allTags = Array.from(
-    new Set(allPosts.flatMap((post) => post.data.tags || [])),
+// Step 1: Count how many posts per tag
+const tagCounts = allPosts.reduce(
+    (acc, post) => {
+        (post.data.tags || []).forEach((tag) => {
+            acc[tag] = (acc[tag] || 0) + 1;
+        });
+        return acc;
+    },
+    {} as Record<string, number>,
+);
+
+// Step 2: Get all tags sorted by count descending
+const allTags = Object.keys(tagCounts).sort(
+    (a, b) => tagCounts[b] - tagCounts[a],
 );
 ---
 
 <Layout title="Blog" description="Becky's blog">
     <div class="mx-auto w-full max-w-4xl mt-5 md:mt-10 space-y-10">
         <div class="space-y-6">
-            <div
-                class="flex flex-row gap-4"
-            >
+            <div class="flex flex-row gap-4">
                 <h1>My blog</h1>
                 <span class="flex items-center gap-2 text-3xl text-tertiary">
                     <svg
@@ -32,16 +41,16 @@ const allTags = Array.from(
                         stroke-linecap="round"
                         stroke-linejoin="round"
                         class="lucide lucide-notebook-text-icon lucide-notebook-text"
-                        ><path d="M2 6h4"></path><path d="M2 10h4"></path><path
-                            d="M2 14h4"></path><path d="M2 18h4"></path><rect
-                            width="16"
-                            height="20"
-                            x="4"
-                            y="2"
-                            rx="2"></rect><path d="M9.5 8h5"></path><path
-                            d="M9.5 12H16"></path><path d="M9.5 16H14"
-                        ></path></svg
                     >
+                        <path d="M2 6h4"></path>
+                        <path d="M2 10h4"></path>
+                        <path d="M2 14h4"></path>
+                        <path d="M2 18h4"></path>
+                        <rect width="16" height="20" x="4" y="2" rx="2"></rect>
+                        <path d="M9.5 8h5"></path>
+                        <path d="M9.5 12H16"></path>
+                        <path d="M9.5 16H14"></path>
+                    </svg>
                     {allPosts.length} posts
                 </span>
             </div>
@@ -58,7 +67,7 @@ const allTags = Array.from(
                             href={`/blog/tag/${slugifyStr(tag)}/`}
                             key={tag}
                         >
-                            {tag}
+                            {tag} ({tagCounts[tag]})
                         </BlogTag>
                     ))
                 }
