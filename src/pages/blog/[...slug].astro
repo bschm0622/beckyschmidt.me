@@ -1,6 +1,7 @@
 ---
 import { getCollection, render } from "astro:content";
 import MarkdownPostLayout from "@/layouts/MarkdownPostLayout.astro";
+import ReactionApp from "@/components/ReactionApp";
 
 export async function getStaticPaths() {
     const posts = await getCollection("blog");
@@ -12,8 +13,11 @@ export async function getStaticPaths() {
 
 const { post } = Astro.props;
 const { Content } = await render(post);
+const slug = post.data.slug;
 ---
 
 <MarkdownPostLayout frontmatter={post.data}>
     <Content />
+    <p class="italic">Thanks for reading! If you enjoyed this post, leave a reaction below 👇</p>
+    <ReactionApp client:load postId={slug} />
 </MarkdownPostLayout>
