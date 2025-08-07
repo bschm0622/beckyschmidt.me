@@ -9,11 +9,15 @@
     "astro": "astro"
   },
   "dependencies": {
+    "@astrojs/react": "^4.3.0",
     "@astrojs/sitemap": "^3.4.1",
     "@lucide/astro": "^0.534.0",
     "@tailwindcss/vite": "^4.1.10",
     "astro": "^5.9.3",
+    "convex": "^1.25.4",
     "lodash.kebabcase": "^4.1.1",
+    "react": "^19.1.1",
+    "react-dom": "^19.1.1",
     "remark-collapse": "^0.1.2",
     "remark-toc": "^9.0.0",
     "tailwindcss": "^4.1.10"
