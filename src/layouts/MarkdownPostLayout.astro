@@ -30,6 +30,11 @@ const { tags } = frontmatter as { tags?: string[] };
     <body
         class="bg-background text-foreground transition-colors min-h-screen flex flex-col"
     >
+        <div
+            id="scroll-progress"
+            class="fixed top-0 left-0 z-50 h-1 bg-primary"
+        >
+        </div>
         <Navbar />
         <main class="px-4 flex-1 mx-auto w-full max-w-4xl typography">
             <!-- Main Content -->
@@ -124,9 +129,7 @@ const { tags } = frontmatter as { tags?: string[] };
                 {
                     tags &&
                         tags.map((tag: string) => (
-                            <span
-                                class="px-2 py-0.5 bg-muted rounded text-sm font-medium"
-                            >
+                            <span class="px-2 py-0.5 bg-muted rounded text-sm font-medium">
                                 {tag}
                             </span>
                         ))
@@ -160,6 +163,19 @@ const { tags } = frontmatter as { tags?: string[] };
 </style>
 
 <script>
+    /** scroll progress bar */
+    window.addEventListener("scroll", function () {
+        const scrollableHeight =
+            document.documentElement.scrollHeight - window.innerHeight;
+        const scrolled = window.scrollY;
+        const progressBar = document.getElementById("scroll-progress");
+
+        if (progressBar) {
+            const progress = (scrolled / scrollableHeight) * 100;
+            progressBar.style.width = progress + "%";
+        }
+    });
+
     /** Attaches copy buttons to code blocks in the document,
      * allowing users to copy code easily. */
     function attachCopyButtons() {
