@@ -51,13 +51,14 @@ function ReactionButton({ postId }: ReactionButtonProps) {
                 localStorage.setItem(localKey, "true");
             }
         } catch (e: any) {
-            // Assuming the rate limit error is thrown from backend as Error with a message
-            if (e?.message?.includes("Rate limit")) {
+            console.error("Reaction error:", e);
+            if (e?.data?.code === "RATE_LIMIT") {
                 setError("You've reacted way too many times in a row. Take a break and just pick one reaction in a few!");
             } else {
                 setError("Something went wrong. Please try again.");
             }
         }
+
     };
 
     if (!postId) return null;

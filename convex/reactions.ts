@@ -1,6 +1,6 @@
 // convex/functions/reactions.ts
 import { query, mutation } from "./_generated/server";
-import { v } from "convex/values";
+import { ConvexError, v } from "convex/values";
 
 const RATE_LIMIT_WINDOW_MS = 60 * 1000; // 1 minute window
 const RATE_LIMIT_MAX_REQUESTS = 10;
@@ -16,9 +16,12 @@ async function checkRateLimit(ctx : any, clientId: string) {
 
     const recentCount = recentLogs.filter((log : any) => log.timestamp > windowStart).length;
 
-    if (recentCount >= RATE_LIMIT_MAX_REQUESTS) {
-        throw new Error("Rate limit exceeded. Please wait before reacting again.");
-    }
+        if (recentCount >= RATE_LIMIT_MAX_REQUESTS) {
+        throw new ConvexError({
+            code: "RATE_LIMIT",
+            message: "Rate limit exceeded. Please wait before reacting again."
+        });
+        }
 
     // Log this reaction action for rate limiting
     await ctx.db.insert("reactionLogs", { clientId, timestamp: now });
