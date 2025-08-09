@@ -12,12 +12,15 @@ export async function getStaticPaths() {
 }
 
 const { post } = Astro.props;
-const { Content } = await render(post);
+const { Content, remarkPluginFrontmatter } = await render(post);
+const minutesRead = remarkPluginFrontmatter?.minutesRead ?? "";
 const slug = post.data.slug;
 ---
 
-<MarkdownPostLayout frontmatter={post.data}>
+<MarkdownPostLayout minutesRead={minutesRead} frontmatter={post.data}>
     <Content />
-    <p class="italic">Thanks for reading! If you enjoyed this post, leave a reaction below 👇</p>
+    <p class="italic">
+        Thanks for reading! If you enjoyed this post, leave a reaction below 👇
+    </p>
     <ReactionApp client:load postId={slug} />
 </MarkdownPostLayout>

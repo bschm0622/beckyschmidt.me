@@ -3,7 +3,7 @@
   "type": "module",
   "version": "0.0.1",
   "scripts": {
-    "dev": "astro dev",
+    "dev": "npx convex dev & astro dev",
     "build": "astro build",
     "preview": "astro preview",
     "astro": "astro"
@@ -16,8 +16,10 @@
     "astro": "^5.9.3",
     "convex": "^1.25.4",
     "lodash.kebabcase": "^4.1.1",
+    "mdast-util-to-string": "^4.0.0",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
+    "reading-time": "^1.5.0",
     "remark-collapse": "^0.1.2",
     "remark-toc": "^9.0.0",
     "tailwindcss": "^4.1.10"

@@ -6,6 +6,8 @@ import react from '@astrojs/react';
 
 import remarkToc from "remark-toc";
 import remarkCollapse from "remark-collapse";
+import { remarkReadingTime } from './src/utils/remark-reading-time.mjs';
+
 
 import tailwindcss from '@tailwindcss/vite';
 
@@ -35,6 +37,7 @@ export default defineConfig({
     remarkPlugins: [
       [remarkToc, { tight: true }],
       [remarkCollapse, { test: 'Table of contents' }],
+      remarkReadingTime,
     ],
   },
   experimental: {
