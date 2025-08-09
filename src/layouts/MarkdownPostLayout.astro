@@ -160,6 +160,28 @@ const { tags } = frontmatter as { tags?: string[] };
     html.dark {
         visibility: visible;
     }
+    /* Hide the code element inside pre when collapsed */
+.collapsed code {
+  display: none !important;
+}
+
+    /* Make sure buttons don’t overlap */
+    .copy-code,
+    .collapse-toggle {
+        cursor: pointer;
+    }
+
+    /* Position collapse button a bit left from copy */
+    .collapse-toggle {
+        right: 4.5rem; /* adjust as needed based on your layout */
+    }
+
+    /* Optional: focus styles */
+    .copy-code:focus,
+    .collapse-toggle:focus {
+        outline: 2px solid #2563eb;
+        outline-offset: 2px;
+    }
 </style>
 
 <script>
@@ -180,50 +202,60 @@ const { tags } = frontmatter as { tags?: string[] };
      * allowing users to copy code easily. */
     function attachCopyButtons() {
         const copyButtonLabel = "Copy";
+        const collapseButtonLabels = {
+            collapsed: "Expand",
+            expanded: "Collapse",
+        };
+
         const codeBlocks = Array.from(document.querySelectorAll("pre"));
 
         for (const codeBlock of codeBlocks) {
             const wrapper = document.createElement("div");
             wrapper.style.position = "relative";
 
-            // Check if --file-name-offset custom property exists
-            const computedStyle = getComputedStyle(codeBlock);
-            const hasFileNameOffset =
-                computedStyle.getPropertyValue("--file-name-offset").trim() !==
-                "";
-
-            // Determine the top positioning class
-            const topClass = hasFileNameOffset
-                ? "top-(--file-name-offset)"
-                : "-top-3";
-
-            const copyButton = document.createElement("button");
-            copyButton.className = `copy-code absolute end-3 ${topClass} rounded bg-muted border border-muted px-2 py-1 text-xs leading-4 text-foreground font-medium`;
-            copyButton.innerHTML = copyButtonLabel;
-            codeBlock.setAttribute("tabindex", "0");
-            codeBlock.appendChild(copyButton);
-
-            // wrap codebock with relative parent element
-            codeBlock?.parentNode?.insertBefore(wrapper, codeBlock);
+            // Wrap <pre> with wrapper
+            codeBlock.parentNode?.insertBefore(wrapper, codeBlock);
             wrapper.appendChild(codeBlock);
 
+            // Create copy button
+            const copyButton = document.createElement("button");
+            copyButton.className = `copy-code absolute end-3 -top-3 rounded bg-muted border border-muted px-2 py-1 text-xs leading-4 text-foreground font-medium`;
+            copyButton.textContent = copyButtonLabel;
+
+            // Create collapse button
+            const collapseButton = document.createElement("button");
+            collapseButton.className = `collapse-toggle absolute end-16 -top-3 rounded bg-muted border border-muted px-2 py-1 text-xs leading-4 text-foreground font-medium`;
+            collapseButton.textContent = collapseButtonLabels.expanded;
+            collapseButton.setAttribute("aria-expanded", "true");
+
+            // Add buttons to codeBlock
+            wrapper.appendChild(copyButton);
+            wrapper.appendChild(collapseButton);
+
+
+            // Copy button handler
             copyButton.addEventListener("click", async () => {
-                await copyCode(codeBlock, copyButton);
+                const code = codeBlock.querySelector("code");
+                const text = code?.innerText ?? "";
+                await navigator.clipboard.writeText(text);
+
+                copyButton.textContent = "Copied";
+                setTimeout(() => {
+                    copyButton.textContent = copyButtonLabel;
+                }, 700);
             });
-        }
 
-        async function copyCode(block: any, button: any) {
-            const code = block.querySelector("code");
-            const text = code?.innerText;
-
-            await navigator.clipboard.writeText(text ?? "");
-
-            // visual feedback that task is completed
-            button.innerText = "Copied";
-
-            setTimeout(() => {
-                button.innerText = copyButtonLabel;
-            }, 700);
+            // Collapse button handler
+            collapseButton.addEventListener("click", () => {
+                const isCollapsed = wrapper.classList.toggle("collapsed");
+                collapseButton.textContent = isCollapsed
+                    ? collapseButtonLabels.collapsed
+                    : collapseButtonLabels.expanded;
+                collapseButton.setAttribute(
+                    "aria-expanded",
+                    (!isCollapsed).toString(),
+                );
+            });
         }
     }
     attachCopyButtons();
