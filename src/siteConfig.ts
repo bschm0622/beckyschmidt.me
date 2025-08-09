@@ -56,5 +56,5 @@ export const SITE: SiteConfiguration = {
         { label: "Slash Pages", href: "/slash-pages" },
     ],
 
-    copyright: `© ${new Date().getFullYear()} Becky Schmidt. All rights reserved.`,
+    copyright: `© ${new Date().getFullYear()} Becky Schmidt - all rights reserved`,
 };
