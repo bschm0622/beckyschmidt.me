@@ -6,12 +6,12 @@ const uniqueId = `themeToggle-${crypto.randomUUID().slice(0, 8)}`;
     id={uniqueId}
     type="button"
     aria-label="Toggle theme"
-    class="theme-toggle-btn flex h-9 w-9 items-center justify-center rounded-lg transition-all"
+    class="theme-toggle-btn flex h-9 w-9 items-center justify-center rounded-lg transition-all cursor-pointer"
 >
-    <!-- Light (Sun) Icon - shows in dark mode to indicate "switch to light" -->
+    <!-- Light (Sun) Icon -->
     <svg
         xmlns="http://www.w3.org/2000/svg"
-        class="h-[1.3rem] w-[1.3rem] stroke-gray-100 dark:block"
+        class="h-[1.3rem] w-[1.3rem] dark:hidden"
         fill="none"
         viewBox="0 0 24 24"
         stroke="currentColor"
@@ -24,10 +24,10 @@ const uniqueId = `themeToggle-${crypto.randomUUID().slice(0, 8)}`;
         ></path>
     </svg>
 
-    <!-- Dark (Moon) Icon - shows in light mode to indicate "switch to dark" -->
+    <!-- Dark (Moon) Icon -->
     <svg
         xmlns="http://www.w3.org/2000/svg"
-        class="h-[1.25rem] w-[1.25rem] stroke-gray-900 dark:hidden"
+        class="hidden h-[1.25rem] w-[1.25rem] dark:block"
         fill="none"
         viewBox="0 0 24 24"
         stroke="currentColor"
