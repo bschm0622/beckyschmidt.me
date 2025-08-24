@@ -1,10 +1,10 @@
 ---
-title: "The rise of personalized software"
+title: The rise of personalized software
+slug: rise-of-personalized-software
 pubDate: 2025-08-24
-description: "In just three days and $20, I created a personal productivity app that fits my workflow perfectly. This post explores how AI-powered development is making personalized software not only possible, but preferable."
 author: Becky Schmidt
+description: In just three days and $20, I created a personal productivity app that fits my workflow perfectly. This post explores how AI-powered development is making personalized software not only possible, but preferable.
 tags: ["AI"]
-slug: "rise-of-personalized-software"
 ---
 ## Table of contents
 
