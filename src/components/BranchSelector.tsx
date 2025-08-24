@@ -23,6 +23,15 @@ export default function BranchSelector({ selectedBranch, onBranchSelect }: Branc
     loadBranches();
   }, []);
 
+  // Debug logging
+  useEffect(() => {
+    console.log('BranchSelector Debug:', {
+      selectedBranch,
+      branches: branches.length,
+      branchNames: branches.map(b => b.name)
+    });
+  }, [selectedBranch, branches]);
+
   const loadBranches = async () => {
     setIsLoading(true);
     setError('');
@@ -35,11 +44,13 @@ export default function BranchSelector({ selectedBranch, onBranchSelect }: Branc
         throw new Error(data.error || 'Failed to load branches');
       }
 
+      console.log('Branches loaded:', data.branches);
       setBranches(data.branches);
       
       // Auto-select master branch if no branch is selected
       if (!selectedBranch && data.branches.length > 0) {
         const defaultBranch = data.branches.find((b: Branch) => b.name === 'master') || data.branches[0];
+        console.log('Auto-selecting branch:', defaultBranch.name);
         onBranchSelect(defaultBranch.name);
       }
     } catch (err: any) {
@@ -97,47 +108,42 @@ export default function BranchSelector({ selectedBranch, onBranchSelect }: Branc
   };
 
   return (
-    <div className="bg-surface border border-muted rounded-lg p-6">
-      <div className="flex justify-between items-center mb-4">
-        <h3 className="text-lg font-semibold text-foreground">Select Branch</h3>
+    <div className="bg-surface border border-muted rounded-lg p-4">
+      <div className="flex justify-between items-center mb-3">
+        <h3 className="text-base font-semibold text-foreground">Branch</h3>
         <button
           onClick={() => setShowCreateForm(!showCreateForm)}
-          className="text-sm text-primary hover:text-opacity-80 transition-colors"
+          className="text-xs text-primary hover:text-opacity-80 transition-colors px-2 py-1 rounded border border-primary/20 hover:bg-primary/5"
         >
-          {showCreateForm ? 'Cancel' : 'New Branch'}
+          {showCreateForm ? 'Cancel' : '+ New'}
         </button>
       </div>
 
       {error && (
-        <div className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-md p-3 mb-4">
+        <div className="text-xs text-red-600 bg-red-50 border border-red-200 rounded p-2 mb-3">
           {error}
         </div>
       )}
 
       {/* Create Branch Form */}
       {showCreateForm && (
-        <form onSubmit={handleCreateBranch} className="mb-4 p-4 bg-background border border-muted rounded-md">
-          <div className="space-y-3">
-            <div>
-              <label className="block text-sm font-medium text-foreground mb-1">
-                New Branch Name
-              </label>
-              <input
-                type="text"
-                value={newBranchName}
-                onChange={(e) => setNewBranchName(e.target.value)}
-                placeholder="feature/my-new-post"
-                className="w-full px-3 py-2 bg-background border border-muted rounded-md text-foreground focus:outline-none focus:ring-2 focus:ring-primary text-sm"
-                required
-              />
-            </div>
-            <div className="flex gap-2">
+        <form onSubmit={handleCreateBranch} className="mb-3 p-3 bg-background border border-muted rounded">
+          <div className="space-y-2">
+            <input
+              type="text"
+              value={newBranchName}
+              onChange={(e) => setNewBranchName(e.target.value)}
+              placeholder="feature/my-new-post"
+              className="w-full px-2 py-1 bg-background border border-muted rounded text-foreground focus:outline-none focus:ring-1 focus:ring-primary text-sm"
+              required
+            />
+            <div className="flex gap-1">
               <button
                 type="submit"
                 disabled={isCreatingBranch || !newBranchName.trim()}
-                className="bg-primary text-white px-3 py-1 rounded text-sm hover:opacity-80 disabled:opacity-50 transition-opacity"
+                className="bg-primary text-white px-2 py-1 rounded text-xs hover:opacity-80 disabled:opacity-50 transition-opacity"
               >
-                {isCreatingBranch ? 'Creating...' : 'Create Branch'}
+                {isCreatingBranch ? 'Creating...' : 'Create'}
               </button>
               <button
                 type="button"
@@ -145,7 +151,7 @@ export default function BranchSelector({ selectedBranch, onBranchSelect }: Branc
                   setShowCreateForm(false);
                   setNewBranchName('');
                 }}
-                className="px-3 py-1 text-tertiary hover:text-foreground transition-colors text-sm"
+                className="px-2 py-1 text-tertiary hover:text-foreground transition-colors text-xs"
               >
                 Cancel
               </button>
@@ -156,49 +162,36 @@ export default function BranchSelector({ selectedBranch, onBranchSelect }: Branc
 
       {/* Branch Selection */}
       {isLoading ? (
-        <div className="text-center py-4 text-tertiary">
+        <div className="text-center py-3 text-tertiary text-sm">
           Loading branches...
         </div>
       ) : (
-        <div className="space-y-2">
-          {branches.map((branch) => (
-            <button
-              key={branch.name}
-              onClick={() => onBranchSelect(branch.name)}
-              className={`w-full text-left p-3 rounded-md transition-colors ${
-                selectedBranch === branch.name
-                  ? 'bg-primary text-white'
-                  : 'bg-background border border-muted hover:bg-secondary text-foreground'
-              }`}
-            >
-              <div className="flex justify-between items-center">
-                <div>
-                  <div className="font-medium">{branch.name}</div>
-                  <div className="text-sm opacity-75">
-                    {branch.sha.substring(0, 7)}
-                    {isProtectedBranch(branch.name) && ' • Protected'}
-                  </div>
-                </div>
-                {isProtectedBranch(branch.name) && (
-                  <div className="text-xs text-orange-500">
-                    Protected
-                  </div>
-                )}
-              </div>
-            </button>
-          ))}
+        <div>
+          <select
+            value={selectedBranch || ''}
+            onChange={(e) => onBranchSelect(e.target.value)}
+            className="w-full px-3 py-2 bg-background border border-muted rounded-md text-foreground focus:outline-none focus:ring-2 focus:ring-primary text-sm"
+          >
+            <option value="" disabled>Select a branch...</option>
+            {branches.map((branch) => (
+              <option key={branch.name} value={branch.name}>
+                {branch.name}
+                {isProtectedBranch(branch.name) ? ' (Protected)' : ''}
+                {` • ${branch.sha.substring(0, 7)}`}
+              </option>
+            ))}
+          </select>
 
           {selectedBranch && isProtectedBranch(selectedBranch) && (
-            <div className="text-sm text-orange-600 bg-orange-50 border border-orange-200 rounded-md p-3 mt-3">
-              <strong>Note:</strong> This is a protected branch. You can view and load posts from it, 
-              but you'll need to select or create a feature branch to save changes.
+            <div className="text-xs text-orange-600 bg-orange-50 border border-orange-200 rounded p-2 mt-2">
+              <strong>Note:</strong> Protected branch - create a feature branch to save changes.
             </div>
           )}
         </div>
       )}
 
       {branches.length === 0 && !isLoading && (
-        <div className="text-center py-8 text-tertiary">
+        <div className="text-center py-4 text-tertiary text-sm">
           No branches found. Check your GitHub configuration.
         </div>
       )}

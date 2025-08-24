@@ -3,6 +3,7 @@ import CodeMirror from '@uiw/react-codemirror';
 import { markdown } from '@codemirror/lang-markdown';
 import { oneDark } from '@codemirror/theme-one-dark';
 import MarkdownIt from 'markdown-it';
+import BranchSelector from './BranchSelector';
 
 interface FrontMatter {
   title: string;
@@ -33,7 +34,6 @@ export default function BlogEditor() {
   const [activeTab, setActiveTab] = useState<'editor' | 'preview'>('editor');
   const [sourceBranch, setSourceBranch] = useState('master'); // Branch we loaded the file from
   const [targetBranch, setTargetBranch] = useState(''); // Branch we want to save to
-  const [branches, setBranches] = useState<string[]>([]);
   const [isSaving, setIsSaving] = useState(false);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [currentFile, setCurrentFile] = useState<string | null>(null);
@@ -69,8 +69,6 @@ export default function BlogEditor() {
       setSourceBranch(branchFromUrl);
     }
     
-    // Load available branches
-    loadBranches();
     
     if (filename && filename !== 'null' && filename !== 'undefined') {
       console.log('Loading file:', filename);
@@ -81,21 +79,16 @@ export default function BlogEditor() {
       // New post template
       // New post template
       const newContent = `---
-title: "New Blog Post"
-slug: new-blog-post
+title: ""
+slug: ""
 pubDate: ${new Date().toISOString().split('T')[0]}
-description: Description for your new blog post
+description: ""
 author: Becky Schmidt
-tags: new,draft
+tags: ""
 ---
 
-# New Blog Post
-
-Start writing your new blog post here...
-
-## Introduction
-
-Add your content here.`;
+<!-- Start writing your blog post content here -->
+`;
       
       parseMarkdownWithFrontMatter(newContent);
     }
@@ -279,18 +272,6 @@ tags: ${frontMatter.tags}
     setMarkdownContent(value);
     setHasUnsavedChanges(true);
   }, []);
-
-  const loadBranches = async () => {
-    try {
-      const response = await fetch('/api/github/branches');
-      const data = await response.json();
-      if (response.ok && data.branches) {
-        setBranches(data.branches.map((b: any) => b.name));
-      }
-    } catch (err) {
-      console.error('Failed to load branches:', err);
-    }
-  };
 
   const updatePreview = (content: string) => {
     if (!content.trim()) {
@@ -503,34 +484,11 @@ ${frontMatter.description || 'Blog post updates via CMS'}
         </div>
       )}
 
-      {/* Target Branch Selector */}
-      <div className="bg-surface border border-muted rounded-lg p-6">
-        <h3 className="text-lg font-semibold text-foreground mb-4">Save To Branch</h3>
-        <div className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-foreground mb-2">
-              Select branch to commit changes to:
-            </label>
-            <select
-              value={targetBranch}
-              onChange={(e) => setTargetBranch(e.target.value)}
-              className="w-full px-3 py-2 bg-background border border-muted rounded-md text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-            >
-              <option value="">Select a branch...</option>
-              {branches.map((branch) => (
-                <option key={branch} value={branch} disabled={isProtectedBranch(branch)}>
-                  {branch} {isProtectedBranch(branch) ? '(Protected)' : ''}
-                </option>
-              ))}
-            </select>
-          </div>
-          {targetBranch && isProtectedBranch(targetBranch) && (
-            <div className="text-sm text-orange-600 bg-orange-50 border border-orange-200 rounded-md p-3">
-              <strong>Warning:</strong> Cannot commit to protected branches. Please select a feature branch.
-            </div>
-          )}
-        </div>
-      </div>
+      {/* Branch Selector */}
+      <BranchSelector
+        selectedBranch={targetBranch}
+        onBranchSelect={setTargetBranch}
+      />
 
       {/* Front Matter Editor */}
       <div className="bg-surface border border-muted rounded-lg p-6">
@@ -575,7 +533,7 @@ ${frontMatter.description || 'Blog post updates via CMS'}
               value={frontMatter.tags}
               onChange={(e) => handleFrontMatterChange('tags', e.target.value)}
               className="w-full px-3 py-2 bg-background border border-muted rounded-md text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-              placeholder="tag1,tag2,tag3"
+              placeholder='["tag1","tag2","tag3"]'
             />
           </div>
           
@@ -589,8 +547,8 @@ ${frontMatter.description || 'Blog post updates via CMS'}
               placeholder="Brief description of the post"
             />
           </div>
-        </div>
-      </div>
+            </div>
+          </div>
 
       {/* Mobile Tab Switcher */}
       <div className="md:hidden">
@@ -615,24 +573,23 @@ ${frontMatter.description || 'Blog post updates via CMS'}
           >
             Preview
           </button>
-        </div>
-      </div>
+            </div>
+          </div>
 
-      {/* Editor and Preview */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Editor */}
-        <div className={`${activeTab !== 'editor' ? 'hidden md:block' : ''}`}>
+          {/* Editor and Preview */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Editor */}
+            <div className={`${activeTab !== 'editor' ? 'hidden md:block' : ''}`}>
           <div className="bg-surface border border-muted rounded-lg overflow-hidden">
             <div className="bg-secondary px-4 py-2 border-b border-muted">
               <h4 className="font-medium text-foreground">Markdown Editor</h4>
             </div>
-            <div className="h-96">
+            <div className="min-h-96 max-h-[32rem] overflow-auto">
               <CodeMirror
                 value={markdownContent}
                 onChange={handleMarkdownChange}
                 extensions={[markdown()]}
                 theme={oneDark}
-                placeholder="Write your markdown content here..."
                 basicSetup={{
                   lineNumbers: true,
                   foldGutter: true,
@@ -646,7 +603,7 @@ ${frontMatter.description || 'Blog post updates via CMS'}
                 }}
                 style={{
                   fontSize: '14px',
-                  height: '100%',
+                  minHeight: '384px',
                 }}
               />
             </div>
@@ -659,7 +616,7 @@ ${frontMatter.description || 'Blog post updates via CMS'}
             <div className="bg-secondary px-4 py-2 border-b border-muted">
               <h4 className="font-medium text-foreground">Preview</h4>
             </div>
-            <div className="h-96 p-4 overflow-y-auto bg-background typography"
+            <div className="min-h-96 max-h-[32rem] p-4 overflow-y-auto bg-background typography"
               dangerouslySetInnerHTML={{ __html: previewHtml }}
             />
           </div>

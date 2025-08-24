@@ -155,9 +155,6 @@ export default function AdminDashboard() {
           <h2 className="text-2xl font-semibold text-foreground">
             Manage Blog Posts
           </h2>
-          <p className="text-sm text-tertiary mt-1">
-            Viewing posts from branch: <span className="font-medium text-foreground">{selectedBranch}</span>
-          </p>
         </div>
         <button
           onClick={handleLogout}
@@ -246,16 +243,6 @@ export default function AdminDashboard() {
         )}
       </div>
 
-      {/* Refresh Button */}
-      <div className="text-center">
-        <button
-          onClick={loadBlogPosts}
-          disabled={loadingPosts}
-          className="bg-secondary text-foreground px-4 py-2 rounded-md hover:bg-muted disabled:opacity-50 transition-colors"
-        >
-          {loadingPosts ? 'Refreshing...' : 'Refresh Posts'}
-        </button>
-      </div>
     </div>
   );
 }
