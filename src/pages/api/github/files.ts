@@ -28,7 +28,6 @@ export const GET: APIRoute = async ({ url }) => {
 
     // Get specific file content
     if (path) {
-      console.log('Fetching specific file:', path);
       try {
         const { data } = await octokit.rest.repos.getContent({
           owner,
@@ -40,8 +39,6 @@ export const GET: APIRoute = async ({ url }) => {
 
         if ('content' in data && data.content) {
           const content = Buffer.from(data.content, 'base64').toString('utf8');
-          console.log('Decoded content length:', content.length);
-          console.log('Successfully returning file content');
           
           return new Response(JSON.stringify({ 
             content,
