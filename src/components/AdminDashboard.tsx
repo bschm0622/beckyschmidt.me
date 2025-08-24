@@ -151,17 +151,23 @@ export default function AdminDashboard() {
     <div className="space-y-8">
       {/* Header */}
       <div className="flex justify-between items-center">
-        <div>
-          <h2 className="text-2xl font-semibold text-foreground">
+          <h2>
             Manage Blog Posts
           </h2>
-        </div>
+      <div className="flex items-center">
         <button
           onClick={handleLogout}
           className="px-4 py-2 text-tertiary hover:text-foreground transition-colors"
         >
           Logout
         </button>
+        <button
+          onClick={handleCreateNew}
+          className="bg-primary text-white px-4 py-2 rounded-md hover:opacity-80 transition-opacity font-medium"
+        >
+          New Post
+        </button>
+        </div>
       </div>
 
       {/* Error Display */}
@@ -183,34 +189,18 @@ export default function AdminDashboard() {
         onBranchSelect={handleBranchSelect}
       />
 
-      {/* Create New Post */}
-      <div className="bg-surface border border-muted rounded-lg p-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h3 className="text-lg font-semibold text-foreground mb-2">Create New Post</h3>
-            <p className="text-tertiary">Start writing a new blog post</p>
-          </div>
-          <button
-            onClick={handleCreateNew}
-            className="bg-primary text-white px-6 py-3 rounded-md hover:opacity-80 transition-opacity font-medium"
-          >
-            New Post
-          </button>
-        </div>
-      </div>
-
       {/* Existing Posts */}
       <div className="bg-surface border border-muted rounded-lg overflow-hidden">
-        <div className="bg-secondary px-6 py-4 border-b border-muted">
-          <h3 className="text-lg font-semibold text-foreground">Existing Posts</h3>
+        <div className="bg-secondary px-3 py-2 border-b border-muted">
+          <h3>Existing Posts</h3>
         </div>
 
         {loadingPosts ? (
-          <div className="text-center py-12 text-tertiary">
+          <div className="text-center py-6 text-tertiary">
             Loading posts...
           </div>
         ) : blogPosts.length === 0 ? (
-          <div className="text-center py-12 text-tertiary">
+          <div className="text-center py-6 text-tertiary">
             No blog posts found. Create your first post!
           </div>
         ) : (
@@ -218,13 +208,13 @@ export default function AdminDashboard() {
             {blogPosts.map((post) => (
               <div 
                 key={post.filename}
-                className="p-6 hover:bg-background transition-colors"
+                className="p-3 hover:bg-background transition-colors"
               >
                 <div className="flex items-center justify-between">
                   <div className="flex-1">
-                    <h4 className="font-semibold text-foreground mb-1">
+                    <div className="text-md font-semibold text-foreground mb-1">
                       {post.title}
-                    </h4>
+                    </div>
                     <div className="text-sm text-tertiary space-x-4">
                       <span>File: {post.filename}</span>
                       <span>Slug: {post.slug}</span>

@@ -11,10 +11,13 @@ import { remarkReadingTime } from './src/utils/remark-reading-time.mjs';
 
 import tailwindcss from '@tailwindcss/vite';
 
+import netlify from "@astrojs/netlify";
+
 // https://astro.build/config
 export default defineConfig({
   site: "https://beckyschmidt.me",
   integrations: [sitemap(), react()],
+
   env: {
     schema: {
       CONVEX_URL: envField.string({
@@ -43,9 +46,11 @@ export default defineConfig({
       }),
     },
   },
+
   vite: {
     plugins: [tailwindcss()]
   },
+
   markdown: {
     shikiConfig: {
       themes: {
@@ -60,11 +65,14 @@ export default defineConfig({
       remarkReadingTime,
     ],
   },
+
   experimental: {
   fonts: [{
     provider: fontProviders.fontsource(),
       name: "Carlito",
     cssVariable: "--font-carlito"
     }]
-  }
+  },
+
+  adapter: process.env.NODE_ENV === 'production' ? netlify() : undefined
 });

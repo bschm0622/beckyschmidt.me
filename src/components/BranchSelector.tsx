@@ -25,11 +25,6 @@ export default function BranchSelector({ selectedBranch, onBranchSelect }: Branc
 
   // Debug logging
   useEffect(() => {
-    console.log('BranchSelector Debug:', {
-      selectedBranch,
-      branches: branches.length,
-      branchNames: branches.map(b => b.name)
-    });
   }, [selectedBranch, branches]);
 
   const loadBranches = async () => {
@@ -43,14 +38,11 @@ export default function BranchSelector({ selectedBranch, onBranchSelect }: Branc
       if (!response.ok) {
         throw new Error(data.error || 'Failed to load branches');
       }
-
-      console.log('Branches loaded:', data.branches);
       setBranches(data.branches);
       
       // Auto-select master branch if no branch is selected
       if (!selectedBranch && data.branches.length > 0) {
         const defaultBranch = data.branches.find((b: Branch) => b.name === 'master') || data.branches[0];
-        console.log('Auto-selecting branch:', defaultBranch.name);
         onBranchSelect(defaultBranch.name);
       }
     } catch (err: any) {
@@ -113,7 +105,7 @@ export default function BranchSelector({ selectedBranch, onBranchSelect }: Branc
         <h3 className="text-base font-semibold text-foreground">Branch</h3>
         <button
           onClick={() => setShowCreateForm(!showCreateForm)}
-          className="text-xs text-primary hover:text-opacity-80 transition-colors px-2 py-1 rounded border border-primary/20 hover:bg-primary/5"
+          className="text-md text-primary hover:text-opacity-80 transition-colors px-2 py-1 rounded border border-primary/20 hover:bg-primary/5"
         >
           {showCreateForm ? 'Cancel' : '+ New'}
         </button>
@@ -141,7 +133,7 @@ export default function BranchSelector({ selectedBranch, onBranchSelect }: Branc
               <button
                 type="submit"
                 disabled={isCreatingBranch || !newBranchName.trim()}
-                className="bg-primary text-white px-2 py-1 rounded text-xs hover:opacity-80 disabled:opacity-50 transition-opacity"
+                className="bg-primary text-white px-2 py-1 rounded text-md hover:opacity-80 disabled:opacity-50 transition-opacity"
               >
                 {isCreatingBranch ? 'Creating...' : 'Create'}
               </button>
@@ -151,7 +143,7 @@ export default function BranchSelector({ selectedBranch, onBranchSelect }: Branc
                   setShowCreateForm(false);
                   setNewBranchName('');
                 }}
-                className="px-2 py-1 text-tertiary hover:text-foreground transition-colors text-xs"
+                className="px-2 py-1 text-tertiary hover:text-foreground transition-colors text-sm"
               >
                 Cancel
               </button>

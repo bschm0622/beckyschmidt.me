@@ -53,13 +53,6 @@ export const GET: APIRoute = async ({ url }) => {
           ref: branch,
         });
 
-        console.log('GitHub file data:', { 
-          type: data.type || 'unknown',
-          hasContent: 'content' in data,
-          contentLength: data.content?.length || 0,
-          name: data.name,
-          path: data.path
-        });
 
         if ('content' in data && data.content) {
           const content = Buffer.from(data.content, 'base64').toString('utf8');

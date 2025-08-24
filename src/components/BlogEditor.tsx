@@ -56,13 +56,6 @@ export default function BlogEditor() {
     const filename = urlParams.get('file');
     const branchFromUrl = urlParams.get('branch');
     
-    console.log('URL Debug:', { 
-      fullURL: window.location.href,
-      search: window.location.search,
-      filename,
-      branchFromUrl,
-      allParams: Object.fromEntries(urlParams.entries())
-    });
     
     // Set source branch from URL if provided
     if (branchFromUrl) {
@@ -71,7 +64,6 @@ export default function BlogEditor() {
     
     
     if (filename && filename !== 'null' && filename !== 'undefined') {
-      console.log('Loading file:', filename);
       setCurrentFile(filename);
       loadFileContent(filename, branchFromUrl || 'master');
     } else {
@@ -112,13 +104,6 @@ tags: ""
       // Use the new individual file API endpoint with branch parameter
       const apiUrl = `/api/github/file/src/blog/${filename}?branch=${encodeURIComponent(branch)}`;
       
-      console.log('Loading file from API:', {
-        originalFilename: filename,
-        branch,
-        apiUrl,
-        pathSegments: ['src', 'blog', filename]
-      });
-      console.log('About to make fetch request to:', apiUrl);
       
       const response = await fetch(apiUrl, {
         method: 'GET',
@@ -128,26 +113,17 @@ tags: ""
         }
       });
       
-      console.log('Fetch response received:', {
-        ok: response.ok,
-        status: response.status,
-        url: response.url
-      });
-      
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
         throw new Error(errorData.error || `HTTP ${response.status}: Failed to load file`);
       }
 
       const data = await response.json();
-      
-      console.log('API Response:', data); // Debug logging
-      
+            
       if (!data || !data.content) {
         throw new Error('File content is empty or missing from API response');
       }
 
-      console.log('Loaded file content:', { filename, contentLength: data.content.length });
       setCurrentFileSha(data.sha);
       parseMarkdownWithFrontMatter(data.content);
       
@@ -444,7 +420,7 @@ ${frontMatter.description || 'Blog post updates via CMS'}
               ← Back to Dashboard
             </button>
           </div>
-          <h1 className="text-2xl font-semibold text-foreground">
+          <h1>
             {currentFile ? `Editing: ${currentFile}` : 'New Blog Post'}
           </h1>
           <div className="text-sm text-tertiary space-y-1">
@@ -492,7 +468,7 @@ ${frontMatter.description || 'Blog post updates via CMS'}
 
       {/* Front Matter Editor */}
       <div className="bg-surface border border-muted rounded-lg p-6">
-        <h3 className="text-lg font-semibold text-foreground mb-4">Post Metadata</h3>
+        <h3 className="mb-4">Post Metadata</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium text-foreground mb-2">Title</label>
