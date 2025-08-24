@@ -3,6 +3,7 @@
   "type": "module",
   "version": "0.0.1",
   "scripts": {
+    "astro-dev": "astro dev",
     "dev": "npx convex dev & astro dev",
     "build": "astro build",
     "preview": "astro preview",
@@ -14,6 +15,10 @@
     "@astrojs/sitemap": "^3.4.1",
     "@lucide/astro": "^0.534.0",
     "@tailwindcss/vite": "^4.1.10",
+    "@octokit/rest": "^20.0.2",
+    "@uiw/react-codemirror": "^4.21.24",
+    "@codemirror/lang-markdown": "^6.2.4",
+    "@codemirror/theme-one-dark": "^6.1.2",
     "astro": "^5.9.3",
     "convex": "^1.25.4",
     "lodash.kebabcase": "^4.1.1",

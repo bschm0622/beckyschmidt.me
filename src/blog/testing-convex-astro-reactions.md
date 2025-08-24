@@ -58,7 +58,7 @@ If you want to implement this feature in your Astro project, you’ll need to st
     
 *   [Convex](https://www.convex.dev/templates/astro)
     
-    Once those are installed, create a schema file at `convex/schema.ts` to define your tables.
+Once those are installed, create a schema file at `convex/schema.ts` to define your tables.
     
 
 ```ts

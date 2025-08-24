@@ -21,6 +21,26 @@ export default defineConfig({
         access: "public",
         context: "client",
       }),
+      ADMIN_PASSWORD: envField.string({
+        access: "public",
+        context: "client",
+        default: "admin123",
+      }),
+      GITHUB_TOKEN: envField.string({
+        access: "secret",
+        context: "server",
+        optional: true,
+      }),
+      GITHUB_OWNER: envField.string({
+        access: "public",
+        context: "client",
+        default: "bschm0622",
+      }),
+      GITHUB_REPO: envField.string({
+        access: "public", 
+        context: "client",
+        default: "beckyschmidt.me",
+      }),
     },
   },
   vite: {
