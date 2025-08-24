@@ -37,12 +37,10 @@ export default defineConfig({
       GITHUB_OWNER: envField.string({
         access: "public",
         context: "client",
-        default: "bschm0622",
       }),
       GITHUB_REPO: envField.string({
         access: "public", 
         context: "client",
-        default: "beckyschmidt.me",
       }),
     },
   },
@@ -74,10 +72,5 @@ export default defineConfig({
     }]
   },
 
-  adapter: netlify({
-    edgeMiddleware: false,
-    functionPerRoute: false
-  }),
-  
-  output: 'server'
+  adapter: netlify(),
 });

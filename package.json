@@ -4,7 +4,7 @@
   "version": "0.0.1",
   "scripts": {
     "astro-dev": "astro dev",
-    "dev": "npx convex dev & astro dev",
+    "dev": "npx convex dev & netlify dev",
     "build": "astro build",
     "preview": "astro preview",
     "astro": "astro"
