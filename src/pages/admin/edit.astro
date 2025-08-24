@@ -1,0 +1,17 @@
+---
+export const prerender = false
+import Layout from '../../layouts/Layout.astro';
+import BlogEditor from '../../components/BlogEditor.tsx';
+---
+
+<Layout title="Blog Editor - Becky Schmidt">
+  <main class="container mx-auto px-4 py-8 max-w-7xl">
+    <BlogEditor client:load />
+  </main>
+</Layout>
+
+<style>
+  main {
+    min-height: calc(100vh - 200px);
+  }
+</style>
