@@ -39,19 +39,20 @@ export default function AdminDashboard() {
     setError('');
 
     try {
-      const adminPassword = import.meta.env.PUBLIC_ADMIN_PASSWORD;
-      
-      if (!adminPassword) {
-        setError('Admin password not configured. Please set PUBLIC_ADMIN_PASSWORD environment variable.');
-        return;
-      }
-      
-      if (password === adminPassword) {
+      const response = await fetch('/api/auth', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.success) {
         setIsAuthenticated(true);
         localStorage.setItem('admin-authenticated', 'true');
         loadBlogPosts();
       } else {
-        setError('Invalid password');
+        setError(data.error || 'Invalid password');
       }
     } catch (err) {
       setError('Authentication failed');

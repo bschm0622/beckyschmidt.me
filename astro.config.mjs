@@ -25,9 +25,9 @@ export default defineConfig({
         context: "client",
       }),
       ADMIN_PASSWORD: envField.string({
-        access: "public",
-        context: "client",
-        default: "admin123",
+        access: "secret",
+        context: "server",
+        optional: true,
       }),
       GITHUB_TOKEN: envField.string({
         access: "secret",
