@@ -74,5 +74,10 @@ export default defineConfig({
     }]
   },
 
-  adapter: process.env.NODE_ENV === 'production' ? netlify() : undefined
+  adapter: netlify({
+    edgeMiddleware: false,
+    functionPerRoute: false
+  }),
+  
+  output: 'server'
 });

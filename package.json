@@ -23,6 +23,7 @@
     "astro": "^5.9.3",
     "convex": "^1.25.4",
     "lodash.kebabcase": "^4.1.1",
+    "markdown-it": "^14.1.0",
     "mdast-util-to-string": "^4.0.0",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
