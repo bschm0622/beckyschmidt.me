@@ -19,30 +19,48 @@ I wanted to start with a small, achievable feature, so I asked ChatGPT for ideas
 ## Designing the feature
 
 I created two tables for storing reactions:
+
 *   `reactions` stores the actual reaction data from users:
+    
     *   `clientId`: a randomly generated ID saved in the user’s localStorage
+        
     *   `postId`: the unique slug for the blog post
+        
     *   `reaction`: the emoji reaction
+        
     *   `timestamp`: when the reaction was made
+        
 *   `reactionLogs` tracks each time a user clicks a reaction button, for rate limiting:
+    
     *   `clientId`: the user’s randomly generated ID
+        
     *   `timestamp`: when the reaction click happened
         
-To keep things simple, I store reactions in the user’s browser localStorage, so users can only use each reaction once per post, all without requiring login.  
+
+To keep things simple, I store reactions in the user’s browser localStorage, so users can only use each reaction once per post, all without requiring login.
 
 Here’s how it works:
+
 *   When a user clicks a reaction button, we check localStorage to see if they’ve already reacted to that post with that emoji.
+    
 *   If not, we generate a unique clientId, send a request to Convex to add the reaction to the database, and save a record in localStorage to remember their choice. We also log the click in reactionLogs for rate limiting.
+    
 *   If they already reacted, clicking again removes the reaction record from reactions and clears the localStorage reaction. This removal is also logged in reactionLogs.
+    
 *   The reactionLogs table enables a simple rate limiting mechanism to prevent users from spamming reaction buttons, all without requiring login.
     
 
 ## Getting into the code
 
 If you want to implement this feature in your Astro project, you’ll need to start by installing a couple of packages:
+
 *   [React integration](https://docs.astro.build/en/guides/integrations-guide/react/) for Astro
+    
 *   [Convex](https://www.convex.dev/templates/astro)
-Once those are installed, create a schema file at `convex/schema.ts` to define your tables.
+    
+    Once those are installed, create a schema file at `convex/schema.ts` to define your tables.
+    
+
 ```ts
 import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
@@ -62,8 +80,8 @@ export default defineSchema({
             timestamp: v.number(),
         }).index("by\_clientId", \["clientId"\]),
 });
-
 ```
+
 Next, implement your backend functions at `convex/reactions.ts`. These include three main functions - getting, adding, and removing reactions - along with a rate limiting mechanism.
 
 ```ts
@@ -184,18 +202,23 @@ export const removeReaction = mutation({
         await ctx.db.delete(existing.\_id);
     },
 });
-
 ```
 
 After that, create a reaction button component. This component uses localStorage to track whether a user has reacted to a post, so it can show the button state accordingly:
 
 *   If the user hasn’t reacted to a post with an emoji, the button shows as unselected and clicking it will:
-    *   create a clientId if needed      
-    *   add the reaction in Convex      
-    *   save a record in localStorage     
-*   If the user has already reacted, the button shows as selected, and clicking it again removes the reaction both from Convex and localStorage 
+    
+    *   create a clientId if needed
+        
+    *   add the reaction in Convex
+        
+    *   save a record in localStorage
+        
+*   If the user has already reacted, the button shows as selected, and clicking it again removes the reaction both from Convex and localStorage
+    
 *   There’s an edge case where a user’s localStorage shows a reaction but the Convex count is zero; in that case, the button still appears selected with a count of zero. To keep things simple, I decided not to cross-check localStorage against Convex counts.
     
+
 The button also includes a rate limiting error message if a user clicks too many times too quickly, and tooltips explain what each emoji means on hover.
 
 ```tsx
@@ -317,7 +340,6 @@ function ReactionButton({ postId }: ReactionButtonProps) {
 }
 
 export default ReactionButton;
-
 ```
 
 Next, I created a Convex wrapper component for the reaction button. This wrapper provides the necessary Convex context and passes down the postId prop.
@@ -325,14 +347,18 @@ Next, I created a Convex wrapper component for the reaction button. This wrapper
 I initially thought I could make a generic wrapper that would work for any Astro component based on the [Convex / Astro starter](https://github.com/get-convex/templates/tree/main/template-astro). However, after some trial and error (mostly asking ChatGPT) I learned that Convex’s React hooks (`useQuery` and `useMutation`) need both:
 
 *   the backend connection, provided by the `ConvexProvider`
+    
 *   the specific data to query, identified here by the `postId`
     
 
 Astro’s architecture adds some rigidity because each React island on the page initializes separately with only the props explicitly passed from Astro. This means you can’t rely on a single, global provider to manage context and dynamic props across multiple embedded React components.
 
 As a result:
+
 *   If your component needs both Convex context and dynamic props like `postId`, you have to create a wrapper that explicitly sets up Convex and receives those props.
+    
 *   In this project, the ReactionButton is tightly coupled to blog posts, so I made a wrapper component, ReactionApp, that takes `postId` and sets up Convex accordingly.
+    
 *   If you want to use Convex elsewhere without `postId`, you’d need a different wrapper tailored to that use case.
     
 
@@ -362,12 +388,16 @@ export default ReactionApp;
 ## Deploying to Netlify
 
 Deploying to Netlify was a bit tricky, but here’s what worked for me:
+
 *   Add your [CONVEX\_URL and CONVEX\_DEPLOY\_KEY](https://docs.convex.dev/dashboard/deployments/deployment-settings) as environment variables in Netlify.
+    
 *   Use this build command to deploy Convex only in production:
+    
 
 ```ts
 if \[ "$CONTEXT" = "production" \]; then npx convex deploy --cmd 'npm run build'; else npm run build; fi
 ```
+
 Convex’s free tier does not support preview deployments. Following the official [Convex / Netlify deployment docs](https://docs.convex.dev/production/hosting/netlify) alone didn’t account for this, so my preview branches couldn’t build because Convex refuses to use production keys in non-production environments (like branch previews). To work around this, I excluded Convex deployment from non-production builds and only deploy it on production. I strongly recommend checking out the [Convex discord](https://discord.com/invite/nk6C2qTeCq) if you get stuck, that's how I found this solution for Netlify.
 
 This limitation is a bit frustrating because you can’t test Convex in Netlify preview deployments, you have to rely on local testing and then push to production. There may be ways around this, but for a small feature like this, I was fine with moving on once production deployment worked.
