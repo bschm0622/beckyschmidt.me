@@ -38,6 +38,15 @@ export default function BlogEditor() {
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [currentFile, setCurrentFile] = useState<string | null>(null);
   const [currentFileSha, setCurrentFileSha] = useState<string | null>(null);
+  const [prStatus, setPrStatus] = useState<{
+    hasPR: boolean;
+    pullRequest?: {
+      number: number;
+      url: string;
+      title: string;
+      state: string;
+    };
+  } | null>(null);
   
   const mdParser = new MarkdownIt();
 
@@ -239,6 +248,24 @@ tags: ${frontMatter.tags}
     return `${frontMatterStr}\n${markdownContent}`;
   };
 
+  const checkPRStatus = async (branch: string) => {
+    if (!branch || branch === 'master') {
+      setPrStatus(null);
+      return;
+    }
+
+    try {
+      const response = await fetch(`/api/github/pr-status?branch=${encodeURIComponent(branch)}`);
+      if (response.ok) {
+        const data = await response.json();
+        setPrStatus(data);
+      }
+    } catch (error) {
+      console.error('Failed to check PR status:', error);
+      setPrStatus(null);
+    }
+  };
+
   const handleFrontMatterChange = (field: keyof FrontMatter, value: string) => {
     setFrontMatter(prev => ({ ...prev, [field]: value }));
     setHasUnsavedChanges(true);
@@ -315,6 +342,9 @@ tags: ${frontMatter.tags}
       setCurrentFileSha(data.content?.sha || null);
       setHasUnsavedChanges(false);
       
+      // Check PR status after saving
+      await checkPRStatus(targetBranch);
+      
       // Show success message
       alert(`Saved ${filename} to ${targetBranch} successfully!`);
 
@@ -371,6 +401,12 @@ ${frontMatter.description || 'Blog post updates via CMS'}
         throw new Error(data.error || 'Failed to create PR');
       }
 
+      // Update PR status
+      setPrStatus({
+        hasPR: true,
+        pullRequest: data.pullRequest
+      });
+      
       // Show success and open PR
       alert(`PR #${data.pullRequest.number} created successfully!`);
       if (data.pullRequest.url) {
@@ -428,6 +464,9 @@ ${frontMatter.description || 'Blog post updates via CMS'}
             {hasUnsavedChanges && (
               <p className="text-orange-500">• Unsaved changes</p>
             )}
+            {prStatus?.hasPR && (
+              <p className="text-blue-600">• PR #{prStatus.pullRequest?.number} exists for {targetBranch}</p>
+            )}
           </div>
         </div>
         
@@ -441,13 +480,29 @@ ${frontMatter.description || 'Blog post updates via CMS'}
             {isSaving ? 'Saving...' : 'Save Changes'}
           </button>
           {!hasUnsavedChanges && targetBranch && targetBranch !== 'master' && (
-            <button
-              onClick={handleCreatePR}
-              disabled={isSaving}
-              className="bg-green-600 text-white px-6 py-2 rounded-md hover:opacity-80 disabled:opacity-50 transition-opacity font-medium"
-            >
-              {isSaving ? 'Creating PR...' : 'Create PR'}
-            </button>
+            <div className="flex items-center gap-2">
+              {prStatus?.hasPR ? (
+                <a
+                  href={prStatus.pullRequest?.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="bg-blue-600 text-white px-6 py-2 rounded-md hover:opacity-80 transition-opacity font-medium inline-flex items-center gap-2"
+                >
+                  View PR #{prStatus.pullRequest?.number}
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                  </svg>
+                </a>
+              ) : (
+                <button
+                  onClick={handleCreatePR}
+                  disabled={isSaving}
+                  className="bg-green-600 text-white px-6 py-2 rounded-md hover:opacity-80 disabled:opacity-50 transition-opacity font-medium"
+                >
+                  {isSaving ? 'Creating PR...' : 'Create PR'}
+                </button>
+              )}
+            </div>
           )}
         </div>
       </div>
@@ -463,7 +518,10 @@ ${frontMatter.description || 'Blog post updates via CMS'}
       {/* Branch Selector */}
       <BranchSelector
         selectedBranch={targetBranch}
-        onBranchSelect={setTargetBranch}
+        onBranchSelect={(branch) => {
+          setTargetBranch(branch);
+          checkPRStatus(branch);
+        }}
       />
 
       {/* Front Matter Editor */}
@@ -606,8 +664,11 @@ ${frontMatter.description || 'Blog post updates via CMS'}
           <li>Select or create a branch (avoid committing directly to master)</li>
           <li>Make your changes to the post content</li>
           <li>Click "Save Changes" to commit to your selected branch</li>
-          <li>Click "Create PR" to open a pull request for review</li>
+          <li>Click "Create PR" to open a pull request, or "View PR" if one already exists</li>
         </ol>
+        <div className="mt-3 text-xs">
+          <strong>Note:</strong> After saving, additional changes to the same branch will automatically update the existing PR (no need to create a new one).
+        </div>
       </div>
     </div>
   );

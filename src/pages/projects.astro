@@ -2,10 +2,11 @@
 import Layout from "@/layouts/Layout.astro";
 import ProjectCard from "@/components/ui/ProjectCard.astro";
 import IndyCreatorLogo from "@/assets/logos/indy-creator-logo.png";
+import KanbanLogo from "@/assets/logos/kanban-scheduler.png";
 import WellspringLogo from "@/assets/logos/wellspring-archive-logo.png";
 import BibleplanLogo from "@/assets/logos/bibleplan-logo.png";
 
-import { Archive, Hammer, Repeat } from "@lucide/astro";
+import { Archive, Hammer, Repeat, User } from "@lucide/astro";
 ---
 
 <Layout title="Projects" description="Projects page">
@@ -28,6 +29,17 @@ import { Archive, Hammer, Repeat } from "@lucide/astro";
                     reason={"Born out of a love for my hometown, I wanted to try my hand at a micro-SaaS while also benefitting my local community."}
                 >
                     <Hammer slot="statusIcon" />
+                </ProjectCard>
+                <ProjectCard
+                    logo={KanbanLogo}
+                    name="Personal Kanban Home Scheduler"
+                    statusText="Personal project - actively used"
+                    stack={["Astro", "Tailwind", "Convex", "Clerk"]}
+                    link="https://home.beckyschmidt.me?ref=beckyschmidt.me"
+                    description={"A personal app for organizing home tasks with a weekly kanban approach. I was able to get this into a progressive web application and now I use it daily on my phone."}
+                    reason={"This started as a test project for using Claude Code, and a replacement for my Apple Notes which were out of control, and avoid paying a subscription for a to-do app. This was my first personal-use app and I love having complete control to create any feature I want."}
+                >
+                    <User slot="statusIcon" />
                 </ProjectCard>
                 <ProjectCard
                     logo={WellspringLogo}
