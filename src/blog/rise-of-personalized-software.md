@@ -3,7 +3,7 @@ title: The era of personalized software
 slug: era-of-personalized-software
 pubDate: 2025-08-24
 author: Becky Schmidt
-description: I spent three days and $20 building a custom task management app using AI, after years of settling for 80% solutions from existing SaaS tools. The economics of software just flipped: why pay for compromises when you can build exactly what you need?
+description: I spent three days and $20 building a custom task management app using AI, after years of settling for 80% solutions from existing SaaS tools. The economics of software just flipped - instead of paying for compromises, you can build exactly what you need.
 tags: ["AI"]
 ---
 ## Table of contents
