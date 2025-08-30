@@ -61,6 +61,11 @@ I did this to avoid the pitfall I had with other task apps: decision fatigue. Wh
 
 Most productivity tools give you infinite flexibility because it feels more powerful. But sometimes the best UX decision is to remove options. For tasks that need to be done months out, I would rather put them on my calendar, rather than see them in my day-to-day task management app.
 
+<video autoplay loop muted playsinline style="max-width:100%; height:auto;">
+  <source src="/KanbanView.MP4" type="video/mp4">
+  Your browser does not support the video tag.
+</video>
+
 ## **UX Principle \#2: Keep systems clean**
 
 I built two features that prevent the app from becoming a dumping ground: automatic weekly resets and forced maintenance.
