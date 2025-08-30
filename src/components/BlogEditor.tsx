@@ -456,10 +456,10 @@ ${frontMatter.description || 'Blog post updates via CMS'}
               ← Back to Dashboard
             </button>
           </div>
-          <h1>
+          <h1 className="text-2xl">
             {currentFile ? `Editing: ${currentFile}` : 'New Blog Post'}
           </h1>
-          <div className="text-sm text-tertiary space-y-1">
+          <div className="text-md text-tertiary space-y-1">
             <div>Source: <span className="font-medium">{sourceBranch}</span></div>
             {hasUnsavedChanges && (
               <p className="text-orange-500">• Unsaved changes</p>
@@ -526,7 +526,7 @@ ${frontMatter.description || 'Blog post updates via CMS'}
 
       {/* Front Matter Editor */}
       <div className="bg-surface border border-muted rounded-lg p-6">
-        <h3 className="mb-4">Post Metadata</h3>
+        <h3 className="mb-4 text-lg">Post Metadata</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium text-foreground mb-2">Title</label>

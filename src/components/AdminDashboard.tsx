@@ -84,8 +84,11 @@ export default function AdminDashboard() {
         filename: file.name,
         title: file.name.replace('.md', '').replace(/-/g, ' '),
         slug: file.name.replace('.md', ''),
-        pubDate: new Date().toISOString().split('T')[0],
+        pubDate: file.pubDate || new Date().toISOString().split('T')[0],
       }));
+      
+      // Sort posts by creation date descending (most recent first)
+      posts.sort((a, b) => new Date(b.pubDate).getTime() - new Date(a.pubDate).getTime());
       
       setBlogPosts(posts);
     } catch (err: any) {
@@ -216,9 +219,8 @@ export default function AdminDashboard() {
                     <div className="text-md font-semibold text-foreground mb-1">
                       {post.title}
                     </div>
-                    <div className="text-sm text-tertiary space-x-4">
-                      <span>File: {post.filename}</span>
-                      <span>Slug: {post.slug}</span>
+                    <div className="text-sm text-tertiary">
+                      <span>Published: {post.pubDate}</span>
                     </div>
                   </div>
                   <button

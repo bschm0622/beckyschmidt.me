@@ -102,17 +102,17 @@ export default function BranchSelector({ selectedBranch, onBranchSelect }: Branc
   return (
     <div className="bg-surface border border-muted rounded-lg p-4">
       <div className="flex justify-between items-center mb-3">
-        <h3 className="text-base font-semibold text-foreground">Branch</h3>
+        <h3 className="text-base text-lg font-semibold text-foreground">Branch</h3>
         <button
           onClick={() => setShowCreateForm(!showCreateForm)}
-          className="text-md text-primary hover:text-opacity-80 transition-colors px-2 py-1 rounded border border-primary/20 hover:bg-primary/5"
+          className="text-lg text-primary hover:text-opacity-80 transition-colors px-2 py-1 rounded border border-primary/20 hover:bg-primary/5"
         >
           {showCreateForm ? 'Cancel' : '+ New'}
         </button>
       </div>
 
       {error && (
-        <div className="text-xs text-red-600 bg-red-50 border border-red-200 rounded p-2 mb-3">
+        <div className="text-sm text-red-600 bg-red-50 border border-red-200 rounded p-2 mb-3">
           {error}
         </div>
       )}
@@ -126,7 +126,7 @@ export default function BranchSelector({ selectedBranch, onBranchSelect }: Branc
               value={newBranchName}
               onChange={(e) => setNewBranchName(e.target.value)}
               placeholder="feature/my-new-post"
-              className="w-full px-2 py-1 bg-background border border-muted rounded text-foreground focus:outline-none focus:ring-1 focus:ring-primary text-sm"
+              className="w-full px-2 py-1 bg-background border border-muted rounded text-foreground focus:outline-none focus:ring-1 focus:ring-primary text-md"
               required
             />
             <div className="flex gap-1">
@@ -143,7 +143,7 @@ export default function BranchSelector({ selectedBranch, onBranchSelect }: Branc
                   setShowCreateForm(false);
                   setNewBranchName('');
                 }}
-                className="px-2 py-1 text-tertiary hover:text-foreground transition-colors text-sm"
+                className="px-2 py-1 text-tertiary hover:text-foreground transition-colors text-md"
               >
                 Cancel
               </button>
@@ -154,7 +154,7 @@ export default function BranchSelector({ selectedBranch, onBranchSelect }: Branc
 
       {/* Branch Selection */}
       {isLoading ? (
-        <div className="text-center py-3 text-tertiary text-sm">
+        <div className="text-center py-3 text-tertiary text-md">
           Loading branches...
         </div>
       ) : (
@@ -162,7 +162,7 @@ export default function BranchSelector({ selectedBranch, onBranchSelect }: Branc
           <select
             value={selectedBranch || ''}
             onChange={(e) => onBranchSelect(e.target.value)}
-            className="w-full px-3 py-2 bg-background border border-muted rounded-md text-foreground focus:outline-none focus:ring-2 focus:ring-primary text-sm"
+            className="w-full px-3 py-2 bg-background border border-muted rounded-md text-foreground focus:outline-none focus:ring-2 focus:ring-primary text-md"
           >
             <option value="" disabled>Select a branch...</option>
             {branches.map((branch) => (
@@ -175,7 +175,7 @@ export default function BranchSelector({ selectedBranch, onBranchSelect }: Branc
           </select>
 
           {selectedBranch && isProtectedBranch(selectedBranch) && (
-            <div className="text-xs text-orange-600 bg-orange-50 border border-orange-200 rounded p-2 mt-2">
+            <div className="text-sm text-orange-600 bg-orange-50 border border-orange-200 rounded p-2 mt-2">
               <strong>Note:</strong> Protected branch - create a feature branch to save changes.
             </div>
           )}

@@ -52,14 +52,14 @@ export const GET: APIRoute = async ({ url }) => {
         } else {
           console.error('File data issue - no content field:', { 
             dataKeys: Object.keys(data),
-            type: data.type,
+            type: Array.isArray(data) ? 'array' : ('type' in data ? data.type : 'unknown'),
             hasContent: 'content' in data 
           });
           return new Response(
             JSON.stringify({ 
               error: 'File has no content or is not a file',
               debug: {
-                type: data.type,
+                type: Array.isArray(data) ? 'array' : ('type' in data ? data.type : 'unknown'),
                 hasContent: 'content' in data,
                 dataKeys: Object.keys(data)
               }
@@ -104,13 +104,51 @@ export const GET: APIRoute = async ({ url }) => {
     });
 
     if (Array.isArray(files)) {
-      const blogFiles = files
+      const blogFilesPromises = files
         .filter(file => file.type === 'file' && file.name.endsWith('.md'))
-        .map(file => ({
-          name: file.name,
-          path: file.path,
-          sha: file.sha,
-        }));
+        .map(async (file) => {
+          try {
+            // Fetch the file content to extract frontmatter
+            const { data: fileContent } = await octokit.rest.repos.getContent({
+              owner,
+              repo,
+              path: file.path!,
+              ref: branch,
+            });
+
+            let pubDate = null;
+            if ('content' in fileContent && fileContent.content) {
+              const content = Buffer.from(fileContent.content, 'base64').toString('utf8');
+              
+              // Extract pubDate from frontmatter
+              const frontmatterMatch = content.match(/^---\n([\s\S]*?)\n---/);
+              if (frontmatterMatch) {
+                const frontmatter = frontmatterMatch[1];
+                const pubDateMatch = frontmatter.match(/pubDate:\s*(.+)/);
+                if (pubDateMatch) {
+                  pubDate = pubDateMatch[1].trim();
+                }
+              }
+            }
+
+            return {
+              name: file.name,
+              path: file.path,
+              sha: file.sha,
+              pubDate: pubDate,
+            };
+          } catch (error) {
+            console.error(`Error fetching content for ${file.name}:`, error);
+            return {
+              name: file.name,
+              path: file.path,
+              sha: file.sha,
+              pubDate: null,
+            };
+          }
+        });
+
+      const blogFiles = await Promise.all(blogFilesPromises);
 
       return new Response(JSON.stringify({ files: blogFiles }), {
         status: 200,

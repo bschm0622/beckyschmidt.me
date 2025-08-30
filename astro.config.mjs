@@ -16,7 +16,9 @@ import netlify from "@astrojs/netlify";
 // https://astro.build/config
 export default defineConfig({
   site: "https://beckyschmidt.me",
-  integrations: [sitemap(), react()],
+  integrations: [
+    sitemap({ filter: (page) => page !== 'https://beckyschmidt.me/admin' }), 
+    react()],
 
   env: {
     schema: {

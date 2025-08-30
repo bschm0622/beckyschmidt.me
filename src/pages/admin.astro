@@ -1,17 +1,17 @@
 ---
 export const prerender = false
-import Layout from '../layouts/Layout.astro';
+import AdminLayout from '../layouts/AdminLayout.astro';
 import AdminDashboard from '../components/AdminDashboard.tsx';
 ---
 
-<Layout title="Admin Dashboard - Becky Schmidt">
+<AdminLayout title="Admin Dashboard - Becky Schmidt">
   <main class="container mx-auto px-4 py-8 max-w-4xl">
     <h1 class="text-3xl font-bold mb-8 text-gray-900 dark:text-gray-100">
       Blog Admin Dashboard
     </h1>
     <AdminDashboard client:load />
   </main>
-</Layout>
+</AdminLayout>
 
 <style>
   main {
