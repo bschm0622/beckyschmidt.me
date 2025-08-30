@@ -61,6 +61,11 @@ I did this to avoid the pitfall I had with other task apps: decision fatigue. Wh
 
 Most productivity tools give you infinite flexibility because it feels more powerful. But sometimes the best UX decision is to remove options. For tasks that need to be done months out, I would rather put them on my calendar, rather than see them in my day-to-day task management app.
 
+<video autoplay loop playsinline controls width="250">
+  <source src="/WeekView.MP4" type="video/mp4">
+  Your browser does not support the video tag.
+</video>
+
 ## **UX Principle \#2: Keep systems clean**
 
 I built two features that prevent the app from becoming a dumping ground: automatic weekly resets and forced maintenance.
@@ -71,11 +76,21 @@ I built two features that prevent the app from becoming a dumping ground: automa
 
 **Systems that only accumulate eventually become unusable.** The combination of automatic cleanup and forced review keeps the app functional instead of overwhelming.
 
+<video autoplay loop playsinline controls width="250">
+  <source src="/BacklogReview.MP4" type="video/mp4">
+  Your browser does not support the video tag.
+</video>
+
 ## **UX Principle \#3: Automate tedium, preserve judgment**
 
 Most apps handle recurring tasks by just duplicating them automatically on schedule. I built recurring task templates that you bulk-create from each week.
 
 The difference is that I get to choose which recurring tasks to tackle each week instead of the app deciding for me. My capacity and priorities change week to week. Sometimes I have bandwidth for deep cleaning, sometimes I don't. The app gives me the templates but leaves the decision-making to me.
+
+<video autoplay loop playsinline controls width="250">
+  <source src="/RecurringTasks.MP4" type="video/mp4">
+  Your browser does not support the video tag.
+</video>
 
 ## **UX Principle \#4: Make important concepts visually obvious**
 
@@ -84,6 +99,8 @@ I made two design choices that provide immediate visual feedback:
 **Kanban layout:** I went with a kanban layout (Backlog → This Week → Next Week) instead of a simple list. Each column shows as a collapsible row with a count of how many tasks are inside. When I see "This Week (8)" I naturally question whether I should add more. A simple list doesn't give that immediate capacity feedback.
 
 **Opens to today:** The app opens directly to today's tasks with all other days collapsed. When I open a task management app, I'm thinking "what do I need to do now?" not "let me review my entire week." Progressive disclosure keeps the interface clean while still making everything accessible when I need it.
+
+![Kanban View](/KanbanView.png)
 
 ## **The transferable takeaways**
 
