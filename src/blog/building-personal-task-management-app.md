@@ -3,7 +3,7 @@ title: Building my personal task management app
 slug: building-personal-task-management-app
 pubDate: 2025-09-02
 author: Becky Schmidt
-description: Anyone can build software with AI now, but you still need good UX principles. Here's how I designed a task management app that actually matches how I work, plus 4 principles you can steal for your own projects.
+description: Anyone can build software with AI now, but you still need good UX principles. Here's how I designed a task management app that actually matches how I work, plus 4 principles you can steal for your own projects hee
 tags: ["product management","AI"]
 ---
 I built my own task management app in a weekend with Claude Code. I wrote about why I think [personalized software is the future of software development](https://beckyschmidt.me/blog/economics-of-personalized-software/), and my goal with this post is to share how I think about creating software with over 4 years of product management experience.
