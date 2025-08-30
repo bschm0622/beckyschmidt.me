@@ -100,7 +100,8 @@ I made two design choices that provide immediate visual feedback:
 
 **Opens to today:** The app opens directly to today's tasks with all other days collapsed. When I open a task management app, I'm thinking "what do I need to do now?" not "let me review my entire week." Progressive disclosure keeps the interface clean while still making everything accessible when I need it.
 
-![Kanban View](/KanbanView.png)
+<img src="/KanbanView.png" alt="Kanban View" width="250" style="height:auto;" />
+
 
 ## **The transferable takeaways**
 
