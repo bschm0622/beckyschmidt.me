@@ -1,6 +1,6 @@
 ---
-title: The era of personalized software
-slug: era-of-personalized-software
+title: The economics of personalized software
+slug: economics-of-personalized-software
 pubDate: 2025-08-24
 author: Becky Schmidt
 description: I spent three days and $20 building a custom task management app using AI, after years of settling for 80% solutions from existing SaaS tools. The economics of software just flipped - instead of paying for compromises, you can build exactly what you need.
@@ -8,23 +8,41 @@ tags: ["AI"]
 ---
 ## Table of contents
 
-## Why I'm betting on personalized software over SaaS
+## Anyone can build
 
-Three days and $20. That's what it cost me to build a task management app that works exactly how I think, after years of trying everything from Notion to Todoist without finding something that clicked with my workflow.
+It took me just three days and $20 to build my own task management app that works exactly how I think. After years of trying all the big players like Notion, Todoist, and Apple Notes, I was convinced that the perfect to-do app didn’t exist. And I was right \- I just needed to build it myself.
 
-I'm not a developer. I just clearly defined what I wanted, then let AI handle the rest - writing code, debugging, deploying. You can try the result at [home.beckyschmidt.me](https://home.beckyschmidt.me) (full write-up coming soon on how I did it), but the tool itself isn't the point.
+I’m not a developer, but with a Claude Code subscription and an idea, AI wrote and debugged the code and deployed it. Today, I’m using the app on my phone every single day and I can change anything I want just by asking. You can try out my app at [home.beckyschmidt.me](https://home.beckyschmidt.me) (full write-up coming soon on how I did it), but the tool itself isn't the point of this post.
 
-The point is what this represents: until now, we've accepted that every software subscription gives us roughly 80% of what we want because building custom software required teams of developers, months of work, and ongoing maintenance costs. Consumer apps are generic. Enterprise software promises customization but delivers complexity and bloat.
+The point is what this represents economically: the fundamental cost structure of software development has flipped.
 
-But the economics just flipped. While SaaS companies must build for broad market appeal to achieve scale, carrying high customer acquisition costs and feature compromises, custom software has zero acquisition costs with perfect product-market fit for an audience of one.
+## The SaaS economics we’ve accepted
 
-[Sam Altman predicts](https://www.youtube.com/watch?v=Q5vsEUgxt3E) we'll see a one-person billion-dollar company soon, but I think there's a more immediate and practical opportunity: regular people and companies replacing their SaaS subscriptions at a fraction of the cost with personalized alternatives they can build to their exact specs and own forever.
+The traditional economics have forced us to live with a simple trade-off in software. Custom solutions were prohibitively expensive, so we turned to the large SaaS players who could spread the development cost across thousands of users.
 
-This isn't speculation - just peruse LinkedIn and every day you'll see posts like [this one from Klarna's CEO](https://www.linkedin.com/posts/sebastian-siemiatkowski-768977_sorry-jira-bitbucket-and-atlassian-you-are-activity-7363555407107145730-eTJl?utm_source=share&utm_medium=member_desktop&rcm=ACoAABYyuN8BiBAN0-xUJvZwebVfsZH4peYEMsg) replacing Jira with an in-house solution. The pattern is accelerating as more people discover how accessible custom software has become.
+This model worked because of unit economics across different software categories. B2B SaaS companies typically spend $500 to acquire each customer, while consumer apps might spend $25 per user but face the challenge of fighting against a sea of competitors. These companies need to scale to make the math work. This inevitably means building for the lowest common denominator.
+
+So we accepted that every software subscription gives us \- at best \- 80% of what we want. Building custom software required teams of developers, months of work, and ongoing maintenance costs. So we turned to the experts to create generic consumer software, and enterprise software that promises more customization but delivers complexity and bloat.
+
+## The economic flip
+
+[Sam Altman predicts](https://www.youtube.com/watch?v=Q5vsEUgxt3E) we'll see a one-person billion-dollar company soon, but I’m seeing a more immediate and practical opportunity: regular people and companies replacing their SaaS subscriptions at a fraction of the cost with personalized alternatives they can build to their exact specs and own forever.
+
+With AI, the economics have fundamentally shifted. Custom software now offers:
+
+- **Minimal development costs** – what once required enterprise budgets you can build for $20 and own forever
+- **Zero customer acquisition costs** – you're building for yourself
+- **Perfect product-market fit** – an audience of one who knows exactly what they want
+- **No feature compromises** – every feature serves your specific use case
+- **Complete ownership** – no subscription fees, no vendor lock-in, no sudden price increases
+
+Of course, custom software comes with real costs. Individuals and teams now handle security updates, ensure compliance, and plan for maintainability \- responsibilities that SaaS vendors used to shoulder. But the economic threshold has shifted dramatically. These operational costs, which once made custom software prohibitively expensive, are now smaller than a subscription fee.
+
+This isn't speculation \-  [Klarna](https://www.linkedin.com/posts/sebastian-siemiatkowski-768977_sorry-jira-bitbucket-and-atlassian-you-are-activity-7363555407107145730-eTJl?utm_source=share&utm_medium=member_desktop&rcm=ACoAABYyuN8BiBAN0-xUJvZwebVfsZH4peYEMsg) replaced Jira with an in-house solution and [Zinus](https://blog.replit.com/zinus-customer-story) replaced a $40,000/yr contract with software built in Replit. The pattern is accelerating as more people discover how accessible custom software has become.
 
 ## What remains defensible
 
-Not all software categories face the same threat. I'm seeing three types of categories that remain defensible:
+Not all software categories face the same immediate threat. I'm seeing three big categories that maintain economic moats:
 
 **Network-dependent platforms** like messaging apps, social networks, and marketplaces survive because their value comes from other users being there. You can't replicate Instagram's network by building a better photo app.
 
@@ -32,10 +50,10 @@ Not all software categories face the same threat. I'm seeing three types of cate
 
 **Ecosystem orchestration platforms** that manage complex vendor relationships and enterprise partnerships. Building better project management features is easy; rebuilding Stripe's relationships with banks, payment processors, and regulatory bodies across 50 countries is not.
 
-## The transition is already underway
+## The new landscape
 
-Smart SaaS companies are already recognizing this shift. Some are pivoting toward providing the infrastructure and APIs that power custom software rather than competing with it. Others are doubling down on network effects and ecosystem plays.
+We're heading toward a world where companies and individuals maintain portfolios of custom software rather than collections of subscriptions. Smart SaaS companies are already adapting \- some are pivoting toward providing infrastructure and APIs. Others are doubling down on network effects and ecosystem plays.
 
-The companies that don't adapt will face a new type of churn: customers who don't switch to competitors but simply stop needing their category entirely. When your customer can build exactly what they need instead of settling for what you offer, retention becomes an entirely different challenge.
+The companies that don't adapt will face a new type of churn: customers who stop buying and start building.
 
-For everyone else, the opportunity is exciting. The software you actually want - the one that matches your workflow, integrates with your specific tools, and includes only the features you need - is now buildable. The question isn't whether this shift will happen, but how quickly you'll take advantage of it.
+The shift isn't just technological \- it's economic. When the fundamental cost structure of software development changes, everything else changes too. The era of software compromise is ending.
