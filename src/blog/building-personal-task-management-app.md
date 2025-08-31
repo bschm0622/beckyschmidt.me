@@ -10,6 +10,8 @@ I built my own task management app in a weekend with Claude Code. I wrote about 
 
 Today, anyone can build software with AI, but you still need a basic understanding of software best-practices to create truly useful applications. I'll share UX (user experience) principles that I used while building, and examples from my project.
 
+Here's a link to the app if you'd like to check it out and follow along: [home.beckyschmidt.me](https://home.beckyschmidt.me).
+
 ## Table of contents
 
 ## **Start with a plan**
