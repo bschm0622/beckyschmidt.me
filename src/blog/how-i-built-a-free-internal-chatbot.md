@@ -1,7 +1,7 @@
 ---
 title: How I built a free internal chatbot
 slug: how-i-built-a-free-internal-chatbot
-pubDate: 2025-09-30
+pubDate: 2025-08-30
 author: Becky Schmidt
 description: I built an internal chatbot based on a tweet. Here's how it works and why you should just start building when you see cool ideas that aren't fully explained.
 tags: ["AI","building in public"]
