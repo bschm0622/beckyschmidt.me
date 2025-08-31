@@ -8,7 +8,7 @@ tags: ["AI","building in public"]
 ---
 Yesterday I saw this tweet that caught my attention:
 
-<img src="/ChatbotTweet.png" alt="Tweet by tyler_agg" width="250" style="height:auto;" />
+<img src="/ChatbotTweet.png" alt="Tweet by tyler_agg" width="500" style="height:auto;" />
 
 [Link to X](https://x.com/tyler_agg/status/1961491485591048218?s=12) 
 
