@@ -28,6 +28,11 @@ The chatbot does exactly what that tweet promised: searches your Google Drive do
 
 You can search across everything or pick a specific document. New files get indexed automatically. And since it's built with Google Apps Script, there's no infrastructure to manage and it deploys in one click.
 
+<video autoplay loop playsinline controls width="600">
+  <source src="/ChatbotDemo.mp4" type="video/mp4">
+  Your browser does not support the video tag.
+</video>
+
 ## Technical overview
 
 From a technical standpoint, the AI engine powering the chatbot is simple but powerful:
