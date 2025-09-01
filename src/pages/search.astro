@@ -1,0 +1,142 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import PagefindSearch from "astro-pagefind/components/Search";
+---
+
+<Layout title="Search" description="Search my website">
+    <div class="mx-auto w-full max-w-4xl mt-5 md:mt-10 space-y-10">
+        <div class="space-y-6">
+            <h1>Search</h1>
+            <PagefindSearch
+                id="search"
+                className="pagefind-ui"
+                uiOptions={{ showImages: false }}
+            />
+        </div>
+    </div>
+
+    <script>
+        // Auto-focus the search input when the page loads
+        document.addEventListener("DOMContentLoaded", function () {
+            setTimeout(() => {
+                const searchInput = document.querySelector(
+                    '#search input[type="text"]',
+                ) as HTMLInputElement;
+                if (searchInput) {
+                    searchInput.focus();
+                }
+            }, 100);
+        });
+    </script>
+    <style is:global>
+        :root {
+            --pagefind-ui-scale: 1;
+            --pagefind-ui-primary: var(--color-surface);
+            --pagefind-ui-text: var(--color-foreground);
+            --pagefind-ui-background: var(--color-background);
+            --pagefind-ui-border: var(--color-muted);
+            --pagefind-ui-border-width: 1px;
+            --pagefind-ui-border-radius: 8px;
+            --pagefind-ui-font: var(--font-sans);
+        }
+
+        .dark {
+            --pagefind-ui-primary: var(--color-surface);
+            --pagefind-ui-text: var(--color-foreground);
+            --pagefind-ui-background: var(--color-background);
+            --pagefind-ui-border: var(--color-muted);
+        }
+
+        /* Search input styling */
+        #search .pagefind-ui__search-input {
+            background-color: var(--color-surface);
+            border: 1px solid var(--color-muted);
+            color: var(--color-foreground);
+            font-size: 1.125rem;
+            padding: 0.75rem 1rem 0.75rem 3rem;
+            border-radius: 8px;
+            font-family: var(--font-sans);
+        }
+
+        /* Search icon positioning */
+        #search .pagefind-ui__search-input::before {
+            left: 1rem;
+            z-index: 1;
+        }
+
+        #search .pagefind-ui__search-input:focus {
+            border-color: var(--color-primary);
+            outline: none;
+            box-shadow: 0 0 0 3px rgb(79 70 229 / 0.1);
+        }
+
+        /* Search clear button */
+        #search .pagefind-ui__search-clear {
+            background-color: transparent;
+            color: var(--color-tertiary);
+        }
+
+        /* Search results */
+        #search .pagefind-ui__result {
+            background-color: var(--color-surface);
+            border: 1px solid var(--color-muted);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        #search .pagefind-ui__result-title,
+        #search .pagefind-ui__result-link {
+            color: var(--color-primary);
+            font-size: 1.5rem;
+            font-weight: 600;
+            text-decoration: underline;
+            line-height: 1.4;
+        }
+
+        #search .pagefind-ui__result-link:hover {
+            opacity: 0.8;
+        }
+
+        #search .pagefind-ui__result-excerpt {
+            color: var(--color-foreground);
+            font-size: 1rem;
+            line-height: 1.6;
+            margin-top: 0.5rem;
+        }
+
+        #search .pagefind-ui__result-excerpt mark {
+            background-color: var(--color-accent);
+            color: var(--color-foreground);
+            padding: 0.125rem 0.25rem;
+            border-radius: 4px;
+        }
+
+        /* Messages */
+        #search .pagefind-ui__message {
+            color: var(--color-tertiary);
+            font-size: 1rem;
+            margin: 1rem 0;
+        }
+
+        /* Hide image thumbnails */
+        #search .pagefind-ui__result-thumb {
+            display: none;
+        }
+
+        /* Button styling */
+        #search .pagefind-ui__button {
+            background-color: var(--color-primary);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            padding: 0.5rem 1rem;
+            font-size: 0.875rem;
+            cursor: pointer;
+        }
+
+        #search .pagefind-ui__button:hover {
+            opacity: 0.9;
+        }
+    </style>
+</Layout>

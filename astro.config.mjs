@@ -2,6 +2,8 @@
 import { defineConfig, fontProviders, envField } from 'astro/config';
 import sitemap from "@astrojs/sitemap";
 import react from '@astrojs/react';
+import pagefind from "astro-pagefind";
+
 
 
 import remarkToc from "remark-toc";
@@ -18,7 +20,10 @@ export default defineConfig({
   site: "https://beckyschmidt.me",
   integrations: [
     sitemap({ filter: (page) => page !== 'https://beckyschmidt.me/admin' }), 
-    react()],
+    react(),
+    pagefind()
+  ],
+    
 
   env: {
     schema: {

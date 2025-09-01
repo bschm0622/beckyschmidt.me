@@ -3,6 +3,7 @@ import ThemeToggle from "@/components/ThemeToggle.astro";
 import { SITE } from "@/siteConfig";
 import { Picture } from "astro:assets";
 import BeckyHeadshot from "@/assets/becky-headshot.jpeg";
+import { Search } from "@lucide/astro";
 
 const navLinks = SITE.nav;
 ---
@@ -163,6 +164,11 @@ const navLinks = SITE.nav;
                     </>
                 ))
             }
+            <li class="ml-4">
+                <a href="/search" class="flex h-9 w-9 items-center justify-center rounded-lg transition-all cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800">
+                    <Search size={20} class="stroke-gray-900 dark:stroke-gray-100" />
+                </a>
+            </li>
             <ThemeToggle />
         </ul>
     </div>

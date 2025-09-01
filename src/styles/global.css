@@ -32,8 +32,8 @@
     /* Light gray-blue */
     --color-surface: #1e293b;
     /* Dark slate surface */
-    --color-accent: #c7d2fe;
-    /* Pale periwinkle accent */
+    --color-accent: #6366f1;
+    /* Deeper indigo accent for better contrast */
     --color-secondary: #334155;
     /* Dark slate background */
     --color-foreground: #f3f4f6;

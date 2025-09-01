@@ -21,6 +21,7 @@
     "@tailwindcss/vite": "^4.1.10",
     "@uiw/react-codemirror": "^4.21.24",
     "astro": "^5.9.3",
+    "astro-pagefind": "^1.8.4",
     "convex": "^1.25.4",
     "lodash.kebabcase": "^4.1.1",
     "markdown-it": "^14.1.0",

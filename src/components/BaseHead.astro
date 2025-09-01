@@ -104,6 +104,16 @@ const shouldLoadAnalytics = import.meta.env.PROD;
 <Favicons />
 <ClientRouter />
 
+<!-- Command+K Search Shortcut -->
+<script is:inline>
+  document.addEventListener('keydown', function(e) {
+    if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+      e.preventDefault();
+      window.location.href = '/search';
+    }
+  });
+</script>
+
 <!-- Umami Analytics (only loaded in production) -->
 {shouldLoadAnalytics && (
   <script>
