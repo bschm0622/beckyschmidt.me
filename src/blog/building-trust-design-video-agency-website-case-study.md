@@ -1,5 +1,5 @@
 ---
-title: Building trust through design: a video agency website case study
+title: "Building trust through design: a video agency website case study"
 slug: building-trust-design-video-agency-website-case-study
 pubDate: 2025-09-15
 author: Becky Schmidt
