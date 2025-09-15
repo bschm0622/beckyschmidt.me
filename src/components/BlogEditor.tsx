@@ -82,9 +82,9 @@ export default function BlogEditor() {
       const newContent = `---
 title: ""
 slug: ""
-pubDate: ${new Date().toISOString().split('T')[0]}
+pubDate: "${new Date().toISOString().split('T')[0]}"
 description: ""
-author: Becky Schmidt
+author: "Becky Schmidt"
 tags: ""
 ---
 
@@ -148,11 +148,11 @@ tags: ""
         
         const fallbackContent = `---
 title: "${titleFromFilename}"
-slug: ${slugFromFilename}
-pubDate: ${new Date().toISOString().split('T')[0]}
-description: Edit this description for ${titleFromFilename}
-author: Becky Schmidt
-tags: blog
+slug: "${slugFromFilename}"
+pubDate: "${new Date().toISOString().split('T')[0]}"
+description: "Edit this description for ${titleFromFilename}"
+author: "Becky Schmidt"
+tags: "blog"
 ---
 
 # ${titleFromFilename}
@@ -174,11 +174,11 @@ Start writing your content here...`;
         // Generic fallback content
         const fallbackContent = `---
 title: "New Blog Post"
-slug: new-blog-post
-pubDate: ${new Date().toISOString().split('T')[0]}
-description: There was an error loading the original file content
-author: Becky Schmidt
-tags: error
+slug: "new-blog-post"
+pubDate: "${new Date().toISOString().split('T')[0]}"
+description: "There was an error loading the original file content"
+author: "Becky Schmidt"
+tags: "error"
 ---
 
 # Error Loading File
@@ -237,11 +237,11 @@ You can still edit and save new content here.`;
 
   const generateFullMarkdown = () => {
     const frontMatterStr = `---
-title: ${frontMatter.title}
-slug: ${frontMatter.slug}
-pubDate: ${frontMatter.pubDate}
-author: ${frontMatter.author}
-description: ${frontMatter.description}
+title: "${frontMatter.title}"
+slug: "${frontMatter.slug}"
+pubDate: "${frontMatter.pubDate}"
+author: "${frontMatter.author}"
+description: "${frontMatter.description}"
 tags: ${frontMatter.tags}
 ---`;
 
