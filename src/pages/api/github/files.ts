@@ -121,10 +121,10 @@ export const GET: APIRoute = async ({ url }) => {
               const content = Buffer.from(fileContent.content, 'base64').toString('utf8');
               
               // Extract pubDate from frontmatter
-              const frontmatterMatch = content.match(/^---\n([\s\S]*?)\n---/);
+              const frontmatterMatch = content.match(/^---\s*\n([\s\S]*?)\n---/);
               if (frontmatterMatch) {
                 const frontmatter = frontmatterMatch[1];
-                const pubDateMatch = frontmatter.match(/pubDate:\s*(.+)/);
+                const pubDateMatch = frontmatter.match(/pubDate:\s*([^\n\r]+)/);
                 if (pubDateMatch) {
                   pubDate = pubDateMatch[1].trim();
                 }
