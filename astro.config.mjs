@@ -75,7 +75,8 @@ export default defineConfig({
   fonts: [{
     provider: fontProviders.fontsource(),
       name: "Carlito",
-    cssVariable: "--font-carlito"
+    cssVariable: "--font-carlito",
+    weights: ["400", "700"]
     }]
   },
 
