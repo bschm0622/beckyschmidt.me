@@ -1,8 +1,6 @@
 ---
 import Layout from "@/layouts/Layout.astro";
-import SocialIcon from "@/components/SocialIcon.astro";
 import BlogReel from "@/components/BlogReel.astro";
-import { Mail, Github, Linkedin } from "@lucide/astro";
 import { SITE } from "@/siteConfig";
 const blogLink =
 	SITE.nav.find((item) => item.label === "Blog")?.href ?? "/blog";
@@ -28,17 +26,33 @@ const experimentsLink =
 				apps and websites</a> to understand where product development is headed.
 				</p>
 		</div>
-		<div class="flex items-center gap-3">
-			<p>Connect with me:</p>
-
-			<SocialIcon href={`mailto:${SITE.socials?.email}`} label="Email">
-				<Mail />
-			</SocialIcon>
-
-			<SocialIcon href={SITE.socials?.linkedin} label="LinkedIn">
-				<Linkedin />
-			</SocialIcon>
-
+		<div class="flex items-center gap-4">
+			<a href={`mailto:${SITE.socials?.email}`} class="inline-flex items-center gap-1.5 hover:underline">
+				Email
+				<svg
+					class="text-muted-foreground size-4"
+					xmlns="http://www.w3.org/2000/svg"
+					width="24"
+					height="24"
+					viewBox="0 0 24 24"
+					><path
+						fill="currentColor"
+						d="M10 6v2H5v11h11v-5h2v6a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1zm11-3v8h-2V6.413l-7.793 7.794l-1.414-1.414L17.585 5H13V3z"
+					></path></svg>
+			</a>
+			<a href={SITE.socials?.linkedin} target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 hover:underline">
+				LinkedIn
+				<svg
+					class="text-muted-foreground size-4"
+					xmlns="http://www.w3.org/2000/svg"
+					width="24"
+					height="24"
+					viewBox="0 0 24 24"
+					><path
+						fill="currentColor"
+						d="M10 6v2H5v11h11v-5h2v6a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1zm11-3v8h-2V6.413l-7.793 7.794l-1.414-1.414L17.585 5H13V3z"
+					></path></svg>
+			</a>
 		</div>
 		<div class="space-y-6">
 		<h2>Latest blog posts</h2>
