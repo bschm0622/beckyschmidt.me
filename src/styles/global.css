@@ -2,248 +2,214 @@
 
 @custom-variant dark (&:where(.dark, .dark *));
 
-
 @theme {
-    --font-sans: var(--font-carlito);
-    --color-primary: #4f46e5;
-    /* Softer, slightly warmer blue-purple */
-    --color-muted: #ebe8f9;
-    /* Very soft lavender-gray for subtle backgrounds */
-    --color-tertiary: #6b7280;
-    /* Keep slate gray for neutrality */
-    --color-surface: #ffffff;
-    /* White surfaces */
-    --color-accent: #a5b4fc;
-    /* Light periwinkle for subtle accents */
-    --color-secondary: #f3f4f6;
-    /* Soft light gray */
-    --color-foreground: #374151;
-    /* Darker slate, softer than pure black */
-    --color-background: #f9fafb;
-    /* Very light gray background */
+  --font-sans: var(--font-noto-sans-thai);
+  --color-primary: #334155; /* Deep slate navy */
+  --color-muted: #e5e7eb; /* Neutral soft gray */
+  --color-tertiary: #6b7280; /* Mid gray */
+  --color-surface: #ffffff;
+  --color-accent: #64748b; /* Muted blue-gray accent */
+  --color-secondary: #f8fafc;
+  --color-foreground: #1e293b; /* Deep slate text */
+  --color-background: #f9fafb;
+  --color-link: #2563eb; /* Distinct accessible blue for links */
 }
 
 .dark {
-    --color-primary: #818cf8;
-    /* Light blue-purple for dark mode */
-    --color-muted: #4b5563;
-    /* Muted slate */
-    --color-tertiary: #94a3b8;
-    /* Light gray-blue */
-    --color-surface: #1e293b;
-    /* Dark slate surface */
-    --color-accent: #6366f1;
-    /* Deeper indigo accent for better contrast */
-    --color-secondary: #334155;
-    /* Dark slate background */
-    --color-foreground: #f3f4f6;
-    /* Off-white text */
-    --color-background: #0f172a;
-    /* Dark slate background */
+  --color-primary: #94a3b8; /* Muted silver-blue */
+  --color-muted: #475569;
+  --color-tertiary: #64748b;
+  --color-surface: #1e293b;
+  --color-accent: #7dd3fc; /* Subtle blue accent pop */
+  --color-secondary: #334155;
+  --color-foreground: #f3f4f6;
+  --color-background: #0f172a;
+  --color-link: #93c5fd; /* Softer, bright link color for dark mode */
 }
 
 .typography {
-    @apply text-lg leading-8 text-foreground;
+  @apply text-[1.05rem] leading-7 text-foreground;
 
-    /* Headings */
-    h1 {
-        @apply text-5xl font-bold leading-tight mb-6 mt-12;
-    }
+  /* Headings — slightly more relaxed leading */
+  h1 {
+    @apply text-4xl font-semibold leading-[1.2] mb-4 mt-12 tracking-tight;
+  }
+  h2 {
+    @apply text-3xl font-medium leading-[1.3] mb-4 mt-10 tracking-tight;
+  }
+  h3 {
+    @apply text-2xl font-medium leading-[1.35] mb-3 mt-8;
+  }
+  h4 {
+    @apply text-xl font-medium leading-[1.4] mb-2 mt-6;
+  }
+  h5 {
+    @apply text-lg font-medium leading-[1.45] mb-1 mt-5;
+  }
+  h6 {
+    @apply text-base font-medium leading-[1.5] mt-4;
+  }
 
-    h2 {
-        @apply text-4xl font-semibold leading-snug mb-6 mt-10;
-    }
+  /* Body & lists */
+  p {
+    @apply text-[1.05rem] leading-7 mb-5 text-foreground/90;
+  }
+  ul,
+  ol {
+    @apply pl-5 mb-5 text-[1.05rem] leading-7 text-foreground/90;
+  }
+  li {
+    @apply mb-1;
+  }
 
-    h3 {
-        @apply text-3xl font-semibold leading-snug mb-5 mt-8;
-    }
+  /* Links — more distinct color */
+  a {
+    color: var(--color-link);
+    @apply no-underline hover:underline hover:opacity-80 transition;
+  }
 
-    h4 {
-        @apply text-2xl font-medium mb-4 mt-6;
-    }
+  /* Blockquote */
+  blockquote {
+    @apply border-l-2 border-accent pl-4 italic text-tertiary text-[1.05rem] leading-7 my-6;
+  }
 
-    h5 {
-        @apply text-xl font-medium mb-3 mt-6;
-    }
-
-    h6 {
-        @apply text-lg font-medium mb-2 mt-4;
-    }
-
-    /* Body text */
-    p {
-        @apply text-xl leading-8 mb-6;
-    }
-
-    ul {
-        @apply list-disc pl-6 mb-6 text-xl leading-8;
-    }
-
-    ol {
-        @apply list-decimal pl-6 mb-6 text-xl leading-8;
-    }
-
-    li {
-        @apply mb-2;
-    }
-
-    a {
-        @apply text-primary underline hover:opacity-80 transition;
-    }
-
-    blockquote {
-        @apply border-l-4 border-accent pl-6 italic text-tertiary text-xl leading-8 my-8;
-    }
-
-    hr {
-        @apply border-muted my-10;
-    }
-
-    img {
-        @apply max-w-full rounded my-6;
-    }
-
-    table {
-        @apply w-full text-left border-collapse my-8;
-    }
-
-    th,
-    td {
-        @apply border border-muted px-5 py-3 text-xl;
-    }
-
-    strong {
-        @apply font-semibold;
-    }
-
-    em {
-        @apply italic;
-    }
-
-    small {
-        @apply text-base;
-    }
-    pre {
-        @apply mb-8 px-2 py-2;
-    }
+  /* Misc */
+  hr {
+    @apply border-muted my-8;
+  }
+  img {
+    @apply max-w-full rounded-xl my-5;
+  }
+  table {
+    @apply w-full text-left border-collapse my-6;
+  }
+  th,
+  td {
+    @apply border border-muted px-4 py-2 text-[1rem] leading-relaxed;
+  }
+  strong {
+    @apply font-medium text-foreground;
+  }
+  em {
+    @apply italic text-foreground/90;
+  }
+  small {
+    @apply text-sm text-tertiary;
+  }
+  pre {
+    @apply mb-6 px-2 py-2 text-[0.95rem] leading-relaxed;
+  }
 }
 
 .type-standard {
-    @apply text-lg leading-8 text-foreground;
+  @apply text-base leading-6 text-foreground;
 
-    h1 {
-        @apply text-5xl font-bold leading-tight;
-    }
+  /* Headings — subtle loosened leading */
+  h1 {
+    @apply text-3xl font-semibold leading-[1.25] tracking-tight;
+  }
+  h2 {
+    @apply text-2xl font-medium leading-[1.3] tracking-tight;
+  }
+  h3 {
+    @apply text-xl font-medium leading-[1.35];
+  }
+  h4 {
+    @apply text-lg font-medium leading-[1.4];
+  }
+  h5 {
+    @apply text-base font-medium leading-[1.45];
+  }
+  h6 {
+    @apply text-sm font-medium uppercase tracking-wide text-tertiary leading-[1.5];
+  }
 
-    h2 {
-        @apply text-4xl font-semibold leading-snug;
-    }
+  /* Lists */
+  ul {
+    @apply list-disc pl-5;
+  }
+  ol {
+    @apply list-decimal pl-5;
+  }
 
-    h3 {
-        @apply text-3xl font-semibold leading-snug;
-    }
+  li {
+    @apply mb-1;
+  }
 
-    h4 {
-        @apply text-2xl font-medium;
-    }
+  /* Links — consistent blue tone */
+  a {
+    color: var(--color-link);
+    @apply no-underline hover:underline hover:opacity-80 transition;
+  }
 
-    h5 {
-        @apply text-xl font-medium;
-    }
-
-    h6 {
-        @apply text-lg font-medium;
-    }
-
-    ul {
-        @apply list-disc pl-6;
-    }
-
-    ol {
-        @apply list-decimal pl-6;
-    }
-
-    li {
-        @apply list-item;
-    }
-
-    a {
-        @apply text-primary underline hover:opacity-80 transition;
-    }
-
-    blockquote {
-        @apply border-l-4 border-accent pl-6 italic text-tertiary;
-    }
-
-    hr {
-        @apply border-muted;
-    }
-
-    img {
-        @apply max-w-full rounded;
-    }
-
-    table {
-        @apply w-full text-left border-collapse;
-    }
-
-    th,
-    td {
-        @apply border border-muted px-5 py-3 text-xl;
-    }
-
-    strong {
-        @apply font-semibold text-foreground;
-    }
-
-    em {
-        @apply italic;
-    }
-
-    small {
-        @apply text-base text-tertiary;
-    }
+  /* Quotes, separators, tables, etc. */
+  blockquote {
+    @apply border-l-2 border-accent pl-4 italic text-tertiary;
+  }
+  hr {
+    @apply border-muted my-6;
+  }
+  img {
+    @apply max-w-full rounded-lg;
+  }
+  table {
+    @apply w-full text-left border-collapse;
+  }
+  th,
+  td {
+    @apply border border-muted px-4 py-2 text-base;
+  }
+  strong {
+    @apply font-medium text-foreground;
+  }
+  em {
+    @apply italic text-foreground/90;
+  }
+  small {
+    @apply text-sm text-tertiary;
+  }
 }
 
-    .astro-code,
-    .astro-code span {
-        color: var(--shiki-dark) !important;
-        background-color: var(--shiki-dark-bg) !important;
-        font-style: var(--shiki-dark-font-style) !important;
-        font-weight: var(--shiki-dark-font-weight) !important;
-        text-decoration: var(--shiki-dark-text-decoration) !important;
-    }
+.astro-code,
+.astro-code span {
+  color: var(--shiki-dark) !important;
+  background-color: var(--shiki-dark-bg) !important;
+  font-style: var(--shiki-dark-font-style) !important;
+  font-weight: var(--shiki-dark-font-weight) !important;
+  text-decoration: var(--shiki-dark-text-decoration) !important;
+}
 
 /* Also support explicit .dark class on html (Tailwind style) */
 html.dark .astro-code,
 html.dark .astro-code span {
-    color: var(--shiki-dark) !important;
-    background-color: var(--shiki-dark-bg) !important;
-    font-style: var(--shiki-dark-font-style) !important;
-    font-weight: var(--shiki-dark-font-weight) !important;
-    text-decoration: var(--shiki-dark-text-decoration) !important;
+  color: var(--shiki-dark) !important;
+  background-color: var(--shiki-dark-bg) !important;
+  font-style: var(--shiki-dark-font-style) !important;
+  font-weight: var(--shiki-dark-font-weight) !important;
+  text-decoration: var(--shiki-dark-text-decoration) !important;
 }
+
 /* Inline <code> styling */
 code {
-    @apply text-primary text-lg;
+  @apply text-primary text-lg;
 }
 
 /* Code blocks smaller font */
 .astro-code {
-    @apply text-base leading-relaxed;
+  @apply text-base leading-relaxed;
 }
 
 .astro-code code {
-    @apply text-base;
+  @apply text-base;
 }
 
 /* Dark mode inline code */
 @media (prefers-color-scheme: dark) {
-    code {
-        @apply text-accent bg-secondary;
-    }
+  code {
+    @apply text-accent bg-secondary;
+  }
 }
 
 html.dark code {
-    @apply text-accent bg-secondary;
+  @apply text-accent bg-secondary;
 }

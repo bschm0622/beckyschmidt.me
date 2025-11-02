@@ -133,7 +133,7 @@ const navLinks = SITE.nav;
     });
 </script>
 
-<nav class="px-6 py-6 flex items-center justify-between w-full text-xl">
+<nav class="px-6 py-6 flex items-center justify-between w-full text-md">
     <!-- Desktop Nav -->
     <div class="hidden md:flex items-center justify-between w-full">
         <div class="flex items-center space-x-3">
@@ -147,7 +147,7 @@ const navLinks = SITE.nav;
                     class="w-full h-full object-cover"
                 />
             </div>
-            <a href="/" class="text-3xl font-bold text-tertiary">
+            <a href="/" class="text-2xl font-semibold text-tertiary">
                 {SITE.name || SITE.title}
             </a>
         </div>
@@ -164,7 +164,7 @@ const navLinks = SITE.nav;
                     </>
                 ))
             }
-            <li class="ml-4">
+            <li class="ml-2">
                 <a href="/search" class="flex h-9 w-9 items-center justify-center rounded-lg transition-all cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800">
                     <Search size={20} class="stroke-gray-900 dark:stroke-gray-100" />
                 </a>
@@ -187,7 +187,7 @@ const navLinks = SITE.nav;
                         class="w-full h-full object-cover"
                     />
                 </div>
-                <a href="/" class="text-2xl font-bold text-tertiary">
+                <a href="/" class="text-2xl font-semibold text-tertiary">
                     {SITE.name || SITE.title}
                 </a>
             </div>

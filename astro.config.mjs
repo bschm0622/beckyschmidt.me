@@ -74,9 +74,9 @@ export default defineConfig({
   experimental: {
   fonts: [{
     provider: fontProviders.fontsource(),
-      name: "Carlito",
-    cssVariable: "--font-carlito",
-    weights: ["400", "700"]
+      name: "Noto Sans Thai",
+    cssVariable: "--font-noto-sans-thai",
+    weights: ["400", "500", "600", "700"]
     }]
   },
 

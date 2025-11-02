@@ -37,13 +37,12 @@ export interface SiteConfiguration {
 export const SITE: SiteConfiguration = {
     title: "",
     name: "Becky Schmidt",
-    description: "Built with Astro, Tailwind CSS, and Markdown.",
-    href: "https://astro-boilerplate.beckyschmidt.me",
+    description: "Becky Schmidt's personal website.",
+    href: "https://beckyschmidt.me",
     author: "Becky Schmidt",
     locale: "en-US",
 
     socials: {
-        github: "https://github.com/bschm0622",
         linkedin: "https://www.linkedin.com/in/becky--schmidt/",
         email: "beckyschmidt0622@gmail.com",
     },
@@ -53,7 +52,6 @@ export const SITE: SiteConfiguration = {
         { label: "Blog", href: "/blog" },
         { label: "Projects", href: "/projects" },
         { label: "Resume", href: "/resume" },
-        { label: "Slash Pages", href: "/slash-pages" },
     ],
 
     copyright: `© ${new Date().getFullYear()} Becky Schmidt - all rights reserved`,

@@ -4,51 +4,32 @@ import SocialIcon from "@/components/SocialIcon.astro";
 import BlogReel from "@/components/BlogReel.astro";
 import { Mail, Github, Linkedin } from "@lucide/astro";
 import { SITE } from "@/siteConfig";
-const slashPageLink =
-	SITE.nav.find((item) => item.label === "Slash Pages")?.href ??
-	"/slash-pages";
 const blogLink =
 	SITE.nav.find((item) => item.label === "Blog")?.href ?? "/blog";
 const projectsLink =
 	SITE.nav.find((item) => item.label === "Projects")?.href ?? "/projects";
+const experimentsLink =
+	SITE.nav.find((item) => item.label === "Experiments")?.href ?? "/experiments";
+
 ---
 
 <Layout title="Home" description="Home page">
-	<div class="mx-auto w-full max-w-4xl mt-5 md:mt-10 space-y-10">
+	<div class="mx-auto w-full mt-5 md:mt-10 space-y-10">
 		<div class="space-y-6">
-			<h1>Hi, there 👋</h1>
 			<p>
-				Thanks for visiting my personal website! For the past 4 years,
-				I've worked as a product manager at
+				I'm a senior product manager building the core product at
 				<a
 					href="https://octane11.com"
 					target="_blank"
-					rel="noopener noreferrer">Octane11</a
-				>, a B2B SaaS startup. Outside of work, you can find me on walks
-				with my family, listening to my favorite podcasts, meeting
-				friends at a coffee shop (for the vibes, not the coffee),
-				gathering eggs from my backyard chickens, or playing a board
-				game.
+					rel="noopener noreferrer">Octane11</a>.
 			</p>
 			<p>
-				I'm endlessly curious about the world and the people in it,
-				because I know we were placed in this moment in time for a
-				reason. Recently, that's looked like pursuing my own <a
-					href={projectsLink}>side projects</a
-				> - creating websites and apps with AI.
-			</p>
-			<p>
-				I also post on my <a href={blogLink}>blog</a> here and there, and
-				you can find all sorts of experimental things at my random collection
-				of <a href={slashPageLink}>slash pages</a>, inspired by <a
-					href="https://slashpages.net/"
-					target="_blank"
-					rel="noopener noreferrer">slashpages.net</a
-				>.
-			</p>
+				Outside of work, I experiment with AI - building <a href={projectsLink}>
+				apps and websites</a> to understand where product development is headed.
+				</p>
 		</div>
 		<div class="flex items-center gap-3">
-			<p class="mr-2">Connect with me:</p>
+			<p>Connect with me:</p>
 
 			<SocialIcon href={`mailto:${SITE.socials?.email}`} label="Email">
 				<Mail />
@@ -58,9 +39,6 @@ const projectsLink =
 				<Linkedin />
 			</SocialIcon>
 
-			<SocialIcon href={SITE.socials?.github} label="GitHub">
-				<Github />
-			</SocialIcon>
 		</div>
 		<div class="space-y-6">
 		<h2>Latest blog posts</h2>

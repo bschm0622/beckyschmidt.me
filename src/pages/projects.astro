@@ -1,91 +1,41 @@
 ---
 import Layout from "@/layouts/Layout.astro";
 import ProjectCard from "@/components/ui/ProjectCard.astro";
-import IndyCreatorLogo from "@/assets/logos/indy-creator-logo.png";
-import KanbanLogo from "@/assets/logos/kanban-scheduler.png";
-import WellspringLogo from "@/assets/logos/wellspring-archive-logo.png";
-import BibleplanLogo from "@/assets/logos/bibleplan-logo.png";
-import GolfSimLogo from "@/assets/logos/golf-sim-logo-transparent.png"
-
-import { Archive, Hammer, Repeat, User, Pause } from "@lucide/astro";
 ---
 
 <Layout title="Projects" description="Projects page">
-    <div class="mx-auto w-full max-w-4xl mt-5 md:mt-10 space-y-10">
+    <div class="mx-auto w-full mt-5 md:mt-10 space-y-10">
         <div class="space-y-6">
-            <h1>Stuff I'm tinkering with</h1>
+            <h1>Projects</h1>
             <p>
-                Here are a list of all of the projects I've been working on.
-                Projects are loosely defined as apps, websites, writing
-                ventures, and whatever else may pique my interest.
+                Apps, websites, and experiments I’ve built to learn, iterate, and try new ideas.
             </p>
-            <div class="space-y-12">
+            <div class="space-y-6">
                 <ProjectCard
-                    logo={GolfSimLogo}
                     name="GolfSimFind"
-                    statusText="Actively tinkering"
-                    stack={["Astro", "Tailwind"]}
+                    tagline="A golf simulators near me directory to help people find and compare golf simulators in their area."
                     link="https://golfsimfind.com?ref=beckyschmidt.me"
-                    description={"A golf simulators near me directory to help people find and compare golf simulators in their area."}
-                    reason={"I wanted to try my hand at SEO and passive income through directories. So after a few weeks of research I found 'golf simulator near me' as a decent keyword, did some research around it, and decided to go for it!"}
-                >
-                    <Hammer slot="statusIcon" />
-                </ProjectCard>
+                />
                 <ProjectCard
-                    logo={KanbanLogo}
-                    name="Personal Kanban Home Scheduler"
-                    statusText="Personal project - actively used"
-                    stack={["Astro", "Tailwind", "Convex", "Clerk"]}
-                    link="https://home.beckyschmidt.me?ref=beckyschmidt.me"
-                    description={"A personal app for organizing home tasks with a weekly kanban approach. I was able to get this into a progressive web application and now I use it daily on my phone."}
-                    reason={"This started as a test project for using Claude Code, and a replacement for my Apple Notes which were out of control, and avoid paying a subscription for a to-do app. This was my first personal-use app and I love having complete control to create any feature I want."}
-                >
-                    <User slot="statusIcon" />
-                </ProjectCard>
+                    name="hey, pal creative"
+                    tagline="Marketing website for a videography agency."
+                    link="https://heypalcreative.co?ref=beckyschmidt.me"
+                />
                 <ProjectCard
-                    logo={WellspringLogo}
-                    name="Wellspring Archive - Directory"
-                    statusText="Actively maintained"
-                    stack={["Astro", "Tailwind", "Supabase"]}
-                    link="wellspringarchive.com?ref=beckyschmidt.me"
-                    description={"A podcast directory designed to help Christians find new, curated content. I developed the directory using Astro as the framework (migrated from NextJS) and I'm storing the directory listings in Supabase."}
-                    reason={"Directories are all the rage again and I wanted to try creating one about something I'm passionate about."}
-                >
-                    <Repeat slot="statusIcon" />
-                </ProjectCard>
-                <ProjectCard
-                    logo={IndyCreatorLogo}
-                    name="Indy Creator"
-                    statusText="Paused"
-                    stack={["Astro", "Tailwind", "Supabase", "Stripe"]}
-                    link="https://indycreator.com?ref=beckyschmidt.me"
-                    description={"An Indianapolis-only two-sided marketplace for local content creators and businesses to connect and grow their brands. I developed the marketing landing page and app using Astro as my framework, with Supabase as the backend database."}
-                    reason={"Born out of a love for my hometown, I wanted to try my hand at a micro-SaaS while also benefitting my local community. Now paused, realizing I bit off a little more than I could chew creating a 2-sided marketplace."}
-                >
-                    <Pause slot="statusIcon" />
-                </ProjectCard>
-                <ProjectCard
-                    logo={WellspringLogo}
-                    name="Wellspring Archive - Substack"
-                    statusText="Not actively writing"
-                    stack={["Substack"]}
-                    link="https://wellspringarchive.substack.com"
-                    description={"Writing about the intersections of faith and technology on Substack. I was using Substack as a launchpad for the Wellspring Archive website."}
-                    reason={"I didn't get as much traction on Substack as I would've liked. I probably needed to market this harder with my personal network, rather than relying on Substack's algorithms."}
-                >
-                    <Archive slot="statusIcon" />
-                </ProjectCard>
-                <ProjectCard
-                    logo={BibleplanLogo}
                     name="bibleplan.app"
-                    statusText="Not actively maintained"
-                    stack={["Next.js", "DaisyUI", "Supabase"]}
+                    tagline="A Bible reading plan generator that allows for complete flexibility in what you read and when."
                     link="https://bibleplan.app/?ref=beckyschmidt.me"
-                    description={"A Bible reading plan generator that allows for complete flexibility in what you read and when. This was my first foray into vibe coding at the start of 2025 – I started with ChatGPT and finished it in Cursor, using Next.js and Supabase."}
-                    reason={"I implemented quite a few features here that I am proud of, including real-time plan tracking and a plan generation algorithm that is designed to evenly distribute readings across days based on your selection and plan duration."}
-                >
-                    <Archive slot="statusIcon" />
-                </ProjectCard>
+                />
+                <ProjectCard
+                    name="Personal Kanban Home Scheduler"
+                    tagline="A personal app for organizing home tasks with a weekly kanban approach."
+                    link="https://home.beckyschmidt.me?ref=beckyschmidt.me"
+                />
+                <ProjectCard
+                    name="Wellspring Archive - Directory"
+                    tagline="A podcast directory designed to help Christians find new, curated content."
+                    link="wellspringarchive.com?ref=beckyschmidt.me"
+                />
             </div>
         </div>
     </div>
