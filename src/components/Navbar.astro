@@ -113,7 +113,7 @@ const navLinks = SITE.nav;
         <a href="/" class="text-lg font-medium hover:underline">
             {SITE.name || SITE.title}
         </a>
-        <ul class="flex items-center space-x-6">
+        <ul class="flex items-center gap-6">
             {
                 navLinks.map((link) => (
                     <li>
@@ -128,7 +128,9 @@ const navLinks = SITE.nav;
                     Search
                 </a>
             </li>
-            <ThemeToggle />
+            <li>
+                <ThemeToggle />
+            </li>
         </ul>
     </div>
 
@@ -139,7 +141,7 @@ const navLinks = SITE.nav;
                 {SITE.name || SITE.title}
             </a>
 
-            <div class="flex items-center space-x-4">
+            <div class="flex items-center gap-4">
                 <ThemeToggle />
 
                 <!-- Move checkbox and label outside the flex div, as siblings of mobile-menu -->

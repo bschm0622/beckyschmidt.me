@@ -4,13 +4,13 @@ import PagefindSearch from "astro-pagefind/components/Search";
 ---
 
 <Layout title="Search" description="Search my website">
-    <div class="mx-auto w-full max-w-4xl mt-5 md:mt-10 space-y-10">
+    <div class="mx-auto w-full mt-5 md:mt-10 space-y-10">
         <div class="space-y-6">
             <h1>Search</h1>
             <PagefindSearch
                 id="search"
                 className="pagefind-ui"
-                uiOptions={{ showImages: false }}
+                uiOptions={{ showImages: false, translations: { placeholder: "Type to search..." } }}
             />
         </div>
     </div>
@@ -30,8 +30,8 @@ import PagefindSearch from "astro-pagefind/components/Search";
     </script>
     <style is:global>
         :root {
-            --pagefind-ui-scale: 1;
-            --pagefind-ui-primary: var(--color-surface);
+            --pagefind-ui-scale: 0.8;
+            --pagefind-ui-primary: var(--color-primary);
             --pagefind-ui-text: var(--color-foreground);
             --pagefind-ui-background: var(--color-background);
             --pagefind-ui-border: var(--color-muted);
@@ -41,7 +41,7 @@ import PagefindSearch from "astro-pagefind/components/Search";
         }
 
         .dark {
-            --pagefind-ui-primary: var(--color-surface);
+            --pagefind-ui-primary: var(--color-primary);
             --pagefind-ui-text: var(--color-foreground);
             --pagefind-ui-background: var(--color-background);
             --pagefind-ui-border: var(--color-muted);
@@ -52,22 +52,12 @@ import PagefindSearch from "astro-pagefind/components/Search";
             background-color: var(--color-surface);
             border: 1px solid var(--color-muted);
             color: var(--color-foreground);
-            font-size: 1.125rem;
-            padding: 0.75rem 1rem 0.75rem 3rem;
-            border-radius: 8px;
-            font-family: var(--font-sans);
-        }
-
-        /* Search icon positioning */
-        #search .pagefind-ui__search-input::before {
-            left: 1rem;
-            z-index: 1;
+            font-weight: 400;
         }
 
         #search .pagefind-ui__search-input:focus {
             border-color: var(--color-primary);
             outline: none;
-            box-shadow: 0 0 0 3px rgb(79 70 229 / 0.1);
         }
 
         /* Search clear button */
@@ -78,24 +68,24 @@ import PagefindSearch from "astro-pagefind/components/Search";
 
         /* Search results */
         #search .pagefind-ui__result {
-            background-color: var(--color-surface);
-            border: 1px solid var(--color-muted);
-            border-radius: 8px;
-            padding: 1.5rem;
-            margin-bottom: 1rem;
+            background-color: transparent;
+            border: none;
+            border-radius: 0;
+            padding: 0;
+            margin-bottom: 1.5rem;
         }
 
         #search .pagefind-ui__result-title,
         #search .pagefind-ui__result-link {
-            color: var(--color-primary);
-            font-size: 1.5rem;
-            font-weight: 600;
-            text-decoration: underline;
+            color: var(--color-link);
+            font-size: 1.25rem;
+            font-weight: 500;
+            text-decoration: none;
             line-height: 1.4;
         }
 
         #search .pagefind-ui__result-link:hover {
-            opacity: 0.8;
+            text-decoration: underline;
         }
 
         #search .pagefind-ui__result-excerpt {
@@ -106,10 +96,11 @@ import PagefindSearch from "astro-pagefind/components/Search";
         }
 
         #search .pagefind-ui__result-excerpt mark {
-            background-color: var(--color-accent);
+            background-color: var(--color-muted);
             color: var(--color-foreground);
             padding: 0.125rem 0.25rem;
             border-radius: 4px;
+            font-weight: 500;
         }
 
         /* Messages */
