@@ -88,23 +88,57 @@ const navLinks = SITE.nav;
 </style>
 
 <script>
-    document.addEventListener("DOMContentLoaded", () => {
+    function initNavbar() {
         const toggleBtn = document.getElementById("menu-toggle-btn");
         const mobileMenu = document.getElementById("mobile-menu");
+        const searchTriggerDesktop = document.getElementById("search-trigger-desktop");
+        const searchTriggerMobile = document.getElementById("search-trigger-mobile");
 
-        if (!toggleBtn || !mobileMenu) return;
-
-        toggleBtn.addEventListener("click", () => {
-            mobileMenu.classList.toggle("open");
-        });
-
-        // Optional: close menu when clicking a link inside it
-        mobileMenu.querySelectorAll("a").forEach((link) => {
-            link.addEventListener("click", () => {
-                mobileMenu.classList.remove("open");
+        if (toggleBtn && mobileMenu) {
+            toggleBtn.addEventListener("click", () => {
+                mobileMenu.classList.toggle("open");
             });
-        });
-    });
+
+            // Optional: close menu when clicking a link inside it
+            mobileMenu.querySelectorAll("a").forEach((link) => {
+                link.addEventListener("click", () => {
+                    mobileMenu.classList.remove("open");
+                });
+            });
+        }
+
+        // Hook up search triggers to modal
+        if (searchTriggerDesktop) {
+            searchTriggerDesktop.addEventListener("click", (e) => {
+                e.preventDefault();
+                if ((window as any).openSearchModal) {
+                    (window as any).openSearchModal();
+                }
+            });
+        }
+
+        if (searchTriggerMobile) {
+            searchTriggerMobile.addEventListener("click", (e) => {
+                e.preventDefault();
+                if ((window as any).openSearchModal) {
+                    (window as any).openSearchModal();
+                }
+                // Close mobile menu
+                const menuToggle = document.getElementById("menu-toggle") as HTMLInputElement;
+                if (menuToggle) {
+                    menuToggle.checked = false;
+                }
+            });
+        }
+    }
+
+    // Initialize on page load and after view transitions
+    if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", initNavbar);
+    } else {
+        initNavbar();
+    }
+    document.addEventListener("astro:page-load", initNavbar);
 </script>
 
 <nav class="px-6 py-6 flex items-center justify-between w-full text-md">
@@ -113,25 +147,32 @@ const navLinks = SITE.nav;
         <a href="/" class="text-lg font-medium hover:underline">
             {SITE.name || SITE.title}
         </a>
-        <ul class="flex items-center gap-6">
-            {
-                navLinks.map((link) => (
-                    <li>
-                        <a href={link.href} class="hover:underline">
-                            {link.label}
-                        </a>
-                    </li>
-                ))
-            }
-            <li>
-                <a href="/search" class="hover:underline">
-                    Search
-                </a>
-            </li>
-            <li>
-                <ThemeToggle />
-            </li>
-        </ul>
+        <div class="flex items-center gap-6">
+            <ul class="flex items-center gap-6">
+                {
+                    navLinks.map((link) => (
+                        <li>
+                            <a href={link.href} class="hover:underline">
+                                {link.label}
+                            </a>
+                        </li>
+                    ))
+                }
+            </ul>
+            <button
+                type="button"
+                id="search-trigger-desktop"
+                class="flex items-center gap-2 px-3 py-1.5 rounded-md border border-muted hover:border-primary transition-colors cursor-pointer text-sm text-tertiary"
+                aria-label="Search"
+            >
+                <span>Search</span>
+                <kbd class="hidden lg:inline-flex items-center gap-1 px-1.5 py-0.5 bg-muted rounded text-xs text-foreground">
+                    <span>⌘</span>
+                    <span>K</span>
+                </kbd>
+            </button>
+            <ThemeToggle />
+        </div>
     </div>
 
     <!-- Mobile Nav -->
@@ -174,12 +215,13 @@ const navLinks = SITE.nav;
                             ))
                         }
                         <li>
-                            <a
-                                href="/search"
-                                class="block py-2 text-md hover:text-primary transition"
+                            <button
+                                type="button"
+                                id="search-trigger-mobile"
+                                class="block py-2 text-md hover:text-primary transition text-left w-full"
                             >
                                 Search
-                            </a>
+                            </button>
                         </li>
                     </ul>
                 </div>
