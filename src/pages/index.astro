@@ -1,66 +1,64 @@
 ---
 import Layout from "@/layouts/Layout.astro";
-import SocialIcon from "@/components/SocialIcon.astro";
 import BlogReel from "@/components/BlogReel.astro";
-import { Mail, Github, Linkedin } from "@lucide/astro";
 import { SITE } from "@/siteConfig";
-const slashPageLink =
-	SITE.nav.find((item) => item.label === "Slash Pages")?.href ??
-	"/slash-pages";
 const blogLink =
 	SITE.nav.find((item) => item.label === "Blog")?.href ?? "/blog";
 const projectsLink =
 	SITE.nav.find((item) => item.label === "Projects")?.href ?? "/projects";
+const experimentsLink =
+	SITE.nav.find((item) => item.label === "Experiments")?.href ?? "/experiments";
+
 ---
 
 <Layout title="Home" description="Home page">
-	<div class="mx-auto w-full max-w-4xl mt-5 md:mt-10 space-y-10">
+	<div class="mx-auto w-full mt-5 md:mt-10 space-y-10">
 		<div class="space-y-6">
-			<h1>Hi, there 👋</h1>
+			<h1>Hi, I'm Becky.</h1>
 			<p>
-				Thanks for visiting my personal website! For the past 4 years,
-				I've worked as a product manager at
+				I am a senior product manager at
 				<a
 					href="https://octane11.com"
 					target="_blank"
-					rel="noopener noreferrer">Octane11</a
-				>, a B2B SaaS startup. Outside of work, you can find me on walks
-				with my family, listening to my favorite podcasts, meeting
-				friends at a coffee shop (for the vibes, not the coffee),
-				gathering eggs from my backyard chickens, or playing a board
-				game.
+					rel="noopener noreferrer">Octane11</a>,
+				building the company's core data and AI products.
 			</p>
 			<p>
-				I'm endlessly curious about the world and the people in it,
-				because I know we were placed in this moment in time for a
-				reason. Recently, that's looked like pursuing my own <a
-					href={projectsLink}>side projects</a
-				> - creating websites and apps with AI.
+				I focus on solving hard problems - making complex data simple and shaping 
+				products around what people actually need.
 			</p>
 			<p>
-				I also post on my <a href={blogLink}>blog</a> here and there, and
-				you can find all sorts of experimental things at my random collection
-				of <a href={slashPageLink}>slash pages</a>, inspired by <a
-					href="https://slashpages.net/"
-					target="_blank"
-					rel="noopener noreferrer">slashpages.net</a
-				>.
-			</p>
+				Outside of work, I experiment with AI, building <a href={projectsLink}>
+				apps and websites</a> for my own enjoyment and learning.
+				</p>
 		</div>
-		<div class="flex items-center gap-3">
-			<p class="mr-2">Connect with me:</p>
-
-			<SocialIcon href={`mailto:${SITE.socials?.email}`} label="Email">
-				<Mail />
-			</SocialIcon>
-
-			<SocialIcon href={SITE.socials?.linkedin} label="LinkedIn">
-				<Linkedin />
-			</SocialIcon>
-
-			<SocialIcon href={SITE.socials?.github} label="GitHub">
-				<Github />
-			</SocialIcon>
+		<div class="flex items-center gap-4">
+			<a href={`mailto:${SITE.socials?.email}`} class="inline-flex items-center gap-1.5 hover:underline">
+				Email
+				<svg
+					class="text-muted-foreground size-4"
+					xmlns="http://www.w3.org/2000/svg"
+					width="24"
+					height="24"
+					viewBox="0 0 24 24"
+					><path
+						fill="currentColor"
+						d="M10 6v2H5v11h11v-5h2v6a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1zm11-3v8h-2V6.413l-7.793 7.794l-1.414-1.414L17.585 5H13V3z"
+					></path></svg>
+			</a>
+			<a href={SITE.socials?.linkedin} target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 hover:underline">
+				LinkedIn
+				<svg
+					class="text-muted-foreground size-4"
+					xmlns="http://www.w3.org/2000/svg"
+					width="24"
+					height="24"
+					viewBox="0 0 24 24"
+					><path
+						fill="currentColor"
+						d="M10 6v2H5v11h11v-5h2v6a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1zm11-3v8h-2V6.413l-7.793 7.794l-1.414-1.414L17.585 5H13V3z"
+					></path></svg>
+			</a>
 		</div>
 		<div class="space-y-6">
 		<h2>Latest blog posts</h2>

@@ -19,8 +19,8 @@ const slug = post.data.slug;
 
 <MarkdownPostLayout minutesRead={minutesRead} frontmatter={post.data}>
     <Content />
-    <p class="italic">
-        Thanks for reading! If you enjoyed this post, leave a reaction below 👇
+    <p class="italic text-sm text-muted-foreground mt-8 mb-3">
+        Thanks for reading!
     </p>
     <ReactionApp client:load postId={slug} />
 </MarkdownPostLayout>

@@ -100,19 +100,9 @@ const shouldLoadAnalytics = import.meta.env.PROD;
 <link rel="manifest" href="/site.webmanifest" />
 <link rel="sitemap" href="/sitemap-index.xml" />
 
-<Font cssVariable="--font-carlito" preload />
+<Font cssVariable="--font-karla" preload />
 <Favicons />
 <ClientRouter />
-
-<!-- Command+K Search Shortcut -->
-<script is:inline>
-  document.addEventListener('keydown', function(e) {
-    if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
-      e.preventDefault();
-      window.location.href = '/search';
-    }
-  });
-</script>
 
 <!-- Umami Analytics (only loaded in production) -->
 {shouldLoadAnalytics && (

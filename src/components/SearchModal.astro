@@ -1,0 +1,226 @@
+---
+import PagefindSearch from "astro-pagefind/components/Search";
+---
+
+<!-- Modal Backdrop -->
+<div
+    id="search-modal-backdrop"
+    class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden opacity-0 transition-opacity duration-200"
+    aria-hidden="true"
+>
+    <!-- Modal Container -->
+    <div id="search-modal-container" class="fixed inset-0 overflow-y-auto">
+        <div class="flex min-h-full items-start justify-center p-4 pt-[10vh]">
+            <!-- Modal Content -->
+            <div
+                id="search-modal-content"
+                class="relative w-full max-w-2xl bg-surface rounded-lg shadow-2xl transform scale-95 transition-transform duration-200"
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="search-modal-title"
+            >
+                <!-- Search UI -->
+                <div class="p-6">
+                    <h2 id="search-modal-title" class="sr-only">Search</h2>
+                    <PagefindSearch
+                        id="search-modal"
+                        className="pagefind-ui"
+                        uiOptions={{
+                            showImages: false,
+                            translations: { placeholder: "Search..." },
+                        }}
+                    />
+                </div>
+
+                <!-- Close hint - ESC key (desktop only) -->
+                <div class="hidden md:block absolute top-4 right-4 text-xs text-tertiary">
+                    <kbd class="px-2 py-1 bg-muted rounded text-foreground">ESC</kbd>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    declare global {
+        interface Window {
+            openSearchModal: () => void;
+        }
+    }
+
+    function initSearchModal() {
+        const backdrop = document.getElementById("search-modal-backdrop");
+        const container = document.getElementById("search-modal-container");
+        const content = document.getElementById("search-modal-content");
+
+        if (!backdrop || !container || !content) return;
+
+        const ANIMATION_DURATION = 200;
+        const FOCUS_DELAY = 100;
+
+        const elements = { backdrop, container, content };
+
+        function openModal() {
+            elements.backdrop.classList.remove("hidden");
+            void elements.backdrop.offsetHeight; // Trigger reflow for animation
+            elements.backdrop.classList.remove("opacity-0");
+            elements.content.classList.remove("scale-95");
+            elements.content.classList.add("scale-100");
+
+            setTimeout(() => {
+                const searchInput = document.querySelector(
+                    '#search-modal input[type="text"]',
+                ) as HTMLInputElement;
+                searchInput?.focus();
+            }, FOCUS_DELAY);
+        }
+
+        function closeModal() {
+            elements.backdrop.classList.add("opacity-0");
+            elements.content.classList.remove("scale-100");
+            elements.content.classList.add("scale-95");
+            setTimeout(() => elements.backdrop.classList.add("hidden"), ANIMATION_DURATION);
+        }
+
+        window.openSearchModal = openModal;
+
+        // Prevent clicks inside content from closing modal
+        elements.content.addEventListener("click", (e) => {
+            e.stopPropagation();
+        });
+
+        // Click outside modal content to close
+        elements.container.addEventListener("click", () => {
+            closeModal();
+        });
+
+        // Keyboard shortcuts
+        document.addEventListener("keydown", (e) => {
+            const isModalOpen = !elements.backdrop.classList.contains("hidden");
+
+            // ESC to close
+            if (e.key === "Escape" && isModalOpen) {
+                closeModal();
+            }
+
+            // Cmd/Ctrl + K to open
+            if ((e.metaKey || e.ctrlKey) && e.key === "k") {
+                e.preventDefault();
+                openModal();
+            }
+        });
+    }
+
+    // Initialize on page load and after view transitions
+    if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", initSearchModal);
+    } else {
+        initSearchModal();
+    }
+    document.addEventListener("astro:page-load", initSearchModal);
+</script>
+
+<style is:global>
+    /* Modal-specific Pagefind styling */
+    #search-modal {
+        --pagefind-ui-scale: 0.8;
+        --pagefind-ui-primary: var(--color-primary);
+        --pagefind-ui-text: var(--color-foreground);
+        --pagefind-ui-background: var(--color-background);
+        --pagefind-ui-border: var(--color-muted);
+        --pagefind-ui-border-width: 1px;
+        --pagefind-ui-border-radius: 8px;
+        --pagefind-ui-font: var(--font-sans);
+    }
+
+    /* Search input styling */
+    #search-modal .pagefind-ui__search-input {
+        background-color: var(--color-surface);
+        border: 1px solid var(--color-muted);
+        color: var(--color-foreground);
+        font-weight: 400;
+    }
+
+    #search-modal .pagefind-ui__search-input:focus {
+        border-color: var(--color-primary);
+        outline: none;
+    }
+
+    /* Search clear button */
+    #search-modal .pagefind-ui__search-clear {
+        background-color: transparent;
+        color: var(--color-tertiary);
+    }
+
+    /* Search results */
+    #search-modal .pagefind-ui__result {
+        background-color: transparent;
+        border: none;
+        border-radius: 0;
+        padding: 0;
+        margin-bottom: 1.5rem;
+    }
+
+    #search-modal .pagefind-ui__result-title,
+    #search-modal .pagefind-ui__result-link {
+        color: var(--color-link);
+        font-size: 1.25rem;
+        font-weight: 500;
+        text-decoration: none;
+        line-height: 1.4;
+    }
+
+    #search-modal .pagefind-ui__result-link:hover {
+        text-decoration: underline;
+    }
+
+    #search-modal .pagefind-ui__result-excerpt {
+        color: var(--color-foreground);
+        font-size: 1rem;
+        line-height: 1.6;
+        margin-top: 0.5rem;
+    }
+
+    #search-modal .pagefind-ui__result-excerpt mark {
+        background-color: var(--color-muted);
+        color: var(--color-foreground);
+        padding: 0.125rem 0.25rem;
+        border-radius: 4px;
+        font-weight: 500;
+    }
+
+    /* Messages */
+    #search-modal .pagefind-ui__message {
+        color: var(--color-tertiary);
+        font-size: 1rem;
+        margin: 1rem 0;
+    }
+
+    /* Hide image thumbnails */
+    #search-modal .pagefind-ui__result-thumb {
+        display: none;
+    }
+
+    /* Button styling */
+    #search-modal .pagefind-ui__button {
+        background-color: var(--color-primary);
+        color: white;
+        border: none;
+        border-radius: 6px;
+        padding: 0.5rem 1rem;
+        font-size: 0.875rem;
+        cursor: pointer;
+    }
+
+    #search-modal .pagefind-ui__button:hover {
+        opacity: 0.9;
+    }
+
+    /* Results container max height */
+    #search-modal .pagefind-ui__results-area {
+        max-height: 60vh;
+        overflow-y: auto;
+        margin-right: -0.5rem;
+        padding-right: 0.5rem;
+    }
+</style>

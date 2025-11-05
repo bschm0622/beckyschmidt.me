@@ -1,9 +1,6 @@
 ---
 import ThemeToggle from "@/components/ThemeToggle.astro";
 import { SITE } from "@/siteConfig";
-import { Picture } from "astro:assets";
-import BeckyHeadshot from "@/assets/becky-headshot.jpeg";
-import { Search } from "@lucide/astro";
 
 const navLinks = SITE.nav;
 ---
@@ -88,111 +85,104 @@ const navLinks = SITE.nav;
         opacity: 1;
         pointer-events: auto;
     }
-
-    .nav-squiggle {
-        position: relative;
-        color: inherit;
-        text-decoration: none; /* remove native underline */
-    }
-
-    .nav-squiggle::after {
-        content: "";
-        position: absolute;
-        left: 0;
-        right: 0;
-        bottom: -0.05rem; /* position roughly where underline would be */
-        height: 2px;
-        background-color: var(--color-primary);
-        pointer-events: none;
-        transition: height 0.1s ease;
-        z-index: 1; /* ensure it’s above the text */
-    }
-
-    .nav-squiggle:hover::after {
-        height: 4px;
-    }
 </style>
 
 <script>
-    document.addEventListener("DOMContentLoaded", () => {
+    function initNavbar() {
         const toggleBtn = document.getElementById("menu-toggle-btn");
         const mobileMenu = document.getElementById("mobile-menu");
+        const searchTriggerDesktop = document.getElementById("search-trigger-desktop");
+        const searchTriggerMobile = document.getElementById("search-trigger-mobile");
 
-        if (!toggleBtn || !mobileMenu) return;
-
-        toggleBtn.addEventListener("click", () => {
-            mobileMenu.classList.toggle("open");
-        });
-
-        // Optional: close menu when clicking a link inside it
-        mobileMenu.querySelectorAll("a").forEach((link) => {
-            link.addEventListener("click", () => {
-                mobileMenu.classList.remove("open");
+        if (toggleBtn && mobileMenu) {
+            toggleBtn.addEventListener("click", () => {
+                mobileMenu.classList.toggle("open");
             });
-        });
-    });
+
+            // Optional: close menu when clicking a link inside it
+            mobileMenu.querySelectorAll("a").forEach((link) => {
+                link.addEventListener("click", () => {
+                    mobileMenu.classList.remove("open");
+                });
+            });
+        }
+
+        // Hook up search triggers to modal
+        if (searchTriggerDesktop) {
+            searchTriggerDesktop.addEventListener("click", (e) => {
+                e.preventDefault();
+                if ((window as any).openSearchModal) {
+                    (window as any).openSearchModal();
+                }
+            });
+        }
+
+        if (searchTriggerMobile) {
+            searchTriggerMobile.addEventListener("click", (e) => {
+                e.preventDefault();
+                if ((window as any).openSearchModal) {
+                    (window as any).openSearchModal();
+                }
+                // Close mobile menu
+                const menuToggle = document.getElementById("menu-toggle") as HTMLInputElement;
+                if (menuToggle) {
+                    menuToggle.checked = false;
+                }
+            });
+        }
+    }
+
+    // Initialize on page load and after view transitions
+    if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", initNavbar);
+    } else {
+        initNavbar();
+    }
+    document.addEventListener("astro:page-load", initNavbar);
 </script>
 
-<nav class="px-6 py-6 flex items-center justify-between w-full text-xl">
+<nav class="px-6 py-6 flex items-center justify-between w-full text-md">
     <!-- Desktop Nav -->
     <div class="hidden md:flex items-center justify-between w-full">
-        <div class="flex items-center space-x-3">
-            <div class="w-10 h-10 rounded-md overflow-hidden">
-                <Picture
-                    src={BeckyHeadshot}
-                    alt="Becky Schmidt's headshot"
-                    loading="eager"
-                    width={500}
-                    height={500}
-                    class="w-full h-full object-cover"
-                />
-            </div>
-            <a href="/" class="text-3xl font-bold text-tertiary">
-                {SITE.name || SITE.title}
-            </a>
-        </div>
-        <ul class="flex items-center space-x-3">
-            {
-                navLinks.map((link, index) => (
-                    <>
+        <a href="/" class="text-lg font-medium hover:underline">
+            {SITE.name || SITE.title}
+        </a>
+        <div class="flex items-center gap-6">
+            <ul class="flex items-center gap-6">
+                {
+                    navLinks.map((link) => (
                         <li>
-                            <a href={link.href} class="nav-squiggle">
+                            <a href={link.href} class="hover:underline">
                                 {link.label}
                             </a>
                         </li>
-                        {index < navLinks.length - 1 && <li>/</li>}
-                    </>
-                ))
-            }
-            <li class="ml-4">
-                <a href="/search" class="flex h-9 w-9 items-center justify-center rounded-lg transition-all cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800">
-                    <Search size={20} class="stroke-gray-900 dark:stroke-gray-100" />
-                </a>
-            </li>
+                    ))
+                }
+            </ul>
+            <button
+                type="button"
+                id="search-trigger-desktop"
+                class="flex items-center gap-2 px-3 py-1.5 rounded-md border border-muted hover:border-primary transition-colors cursor-pointer text-sm text-tertiary"
+                aria-label="Search"
+            >
+                <span>Search</span>
+                <kbd class="hidden lg:inline-flex items-center gap-1 px-1.5 py-0.5 bg-muted rounded text-xs text-foreground">
+                    <span>⌘</span>
+                    <span>K</span>
+                </kbd>
+            </button>
             <ThemeToggle />
-        </ul>
+        </div>
     </div>
 
     <!-- Mobile Nav -->
     <div class="flex flex-col md:hidden w-full relative">
         <div class="flex items-center justify-between w-full">
-            <div class="flex items-center space-x-3">
-                <div class="w-10 h-10 rounded-md overflow-hidden">
-                    <Picture
-                        src={BeckyHeadshot}
-                        alt="Becky Schmidt's headshot"
-                        loading="eager"
-                        width={500}
-                        height={500}
-                        class="w-full h-full object-cover"
-                    />
-                </div>
-                <a href="/" class="text-2xl font-bold text-tertiary">
-                    {SITE.name || SITE.title}
-                </a>
-            </div>
+            <a href="/" class="text-lg font-medium">
+                {SITE.name || SITE.title}
+            </a>
 
-            <div class="flex items-center space-x-4">
+            <div class="flex items-center gap-4">
                 <ThemeToggle />
 
                 <!-- Move checkbox and label outside the flex div, as siblings of mobile-menu -->
@@ -225,12 +215,13 @@ const navLinks = SITE.nav;
                             ))
                         }
                         <li>
-                            <a
-                                href="/search"
-                                class="block py-2 text-md hover:text-primary transition"
+                            <button
+                                type="button"
+                                id="search-trigger-mobile"
+                                class="block py-2 text-md hover:text-primary transition text-left w-full"
                             >
                                 Search
-                            </a>
+                            </button>
                         </li>
                     </ul>
                 </div>
