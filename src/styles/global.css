@@ -3,7 +3,7 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 @theme {
-  --font-sans: var(--font-noto-sans-thai);
+  --font-sans: var(--font-karla);
   --color-primary: #334155; /* Deep slate navy */
   --color-muted: #e5e7eb; /* Neutral soft gray */
   --color-tertiary: #6b7280; /* Mid gray */
