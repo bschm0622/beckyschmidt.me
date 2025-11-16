@@ -1,9 +1,9 @@
 ---
-title: Opinionated AI Development
-slug: opinionated-ai-development
-pubDate: 2025-11-04
-author: Becky Schmidt
-description: Reflections on a year of coding with AI.
+title: "Opinionated AI development"
+slug: "opinionated-ai-development"
+pubDate: "2025-11-04"
+author: "Becky Schmidt"
+description: "Reflections on a year of coding with AI."
 tags: ["AI"]
 ---
 Earlier this year, I started AI-assisted coding. It was the first time I felt the magic of software \- a few hundred lines of code turning an empty canvas into a playground. As a product manager at a SaaS startup I had seen many ideas come to life, from idea to design to working software, but this was the first time I got to make all the decisions.
