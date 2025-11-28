@@ -2,13 +2,8 @@
 import Layout from "@/layouts/Layout.astro";
 import BlogReel from "@/components/BlogReel.astro";
 import { SITE } from "@/siteConfig";
-const blogLink =
-	SITE.nav.find((item) => item.label === "Blog")?.href ?? "/blog";
 const projectsLink =
 	SITE.nav.find((item) => item.label === "Projects")?.href ?? "/projects";
-const experimentsLink =
-	SITE.nav.find((item) => item.label === "Experiments")?.href ?? "/experiments";
-
 ---
 
 <Layout title="Home" description="Home page">
@@ -20,12 +15,13 @@ const experimentsLink =
 				<a
 					href="https://octane11.com"
 					target="_blank"
-					rel="noopener noreferrer">Octane11</a>,
+					rel="noopener noreferrer">Octane11</a>, a B2B SaaS company,
 				building the company's core data and AI products.
 			</p>
 			<p>
-				I focus on solving hard problems - making complex data simple and shaping 
-				products around what people actually need.
+				My product management philosophy is that software should feel like a well-run kitchen
+				- familiar, functional, and comfortable - where the tools don't get in the way of
+				making the meal.
 			</p>
 			<p>
 				Outside of work, I experiment with AI, building <a href={projectsLink}>

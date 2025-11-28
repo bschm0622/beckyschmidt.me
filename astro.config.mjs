@@ -9,6 +9,7 @@ import pagefind from "astro-pagefind";
 import remarkToc from "remark-toc";
 import remarkCollapse from "remark-collapse";
 import { remarkReadingTime } from './src/utils/remark-reading-time.mjs';
+import { rehypeExternalLinks } from './src/utils/rehype-external-links.mjs';
 
 
 import tailwindcss from '@tailwindcss/vite';
@@ -68,6 +69,9 @@ export default defineConfig({
       [remarkToc, { tight: true }],
       [remarkCollapse, { test: 'Table of contents' }],
       remarkReadingTime,
+    ],
+    rehypePlugins: [
+      rehypeExternalLinks,
     ],
   },
 
