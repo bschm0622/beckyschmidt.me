@@ -52,6 +52,7 @@ export const SITE: SiteConfiguration = {
         { label: "Blog", href: "/blog" },
         { label: "Projects", href: "/projects" },
         { label: "Resume", href: "/resume" },
+        { label: "Colophon", href: "/colophon" },
     ],
 
     copyright: `© ${new Date().getFullYear()} Becky Schmidt - all rights reserved`,
