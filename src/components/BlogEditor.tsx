@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import CodeMirror from '@uiw/react-codemirror';
 import { markdown } from '@codemirror/lang-markdown';
 import { oneDark } from '@codemirror/theme-one-dark';
+import { EditorView } from '@codemirror/view';
 import MarkdownIt from 'markdown-it';
 import BranchSelector from './BranchSelector';
 
@@ -622,7 +623,7 @@ ${frontMatter.description || 'Blog post updates via CMS'}
               <CodeMirror
                 value={markdownContent}
                 onChange={handleMarkdownChange}
-                extensions={[markdown()]}
+                extensions={[markdown(), EditorView.lineWrapping]}
                 theme={oneDark}
                 basicSetup={{
                   lineNumbers: true,
