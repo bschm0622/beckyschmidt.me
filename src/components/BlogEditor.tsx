@@ -1,10 +1,11 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import CodeMirror from '@uiw/react-codemirror';
 import { markdown } from '@codemirror/lang-markdown';
-import { oneDark } from '@codemirror/theme-one-dark';
 import { EditorView } from '@codemirror/view';
+import type { EditorView as EditorViewType } from '@codemirror/view';
 import MarkdownIt from 'markdown-it';
 import BranchSelector from './BranchSelector';
+import { validateImage, optimizeImage } from '../utils/imageProcessor';
 
 interface FrontMatter {
   title: string;
@@ -48,8 +49,40 @@ export default function BlogEditor() {
       state: string;
     };
   } | null>(null);
-  
+
+  // Image upload state
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
+  const [uploadMessage, setUploadMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const editorViewRef = useRef<EditorViewType | null>(null);
+  const [pendingImages, setPendingImages] = useState<Array<{
+    file: File;
+    placeholder: string;
+    filename: string;
+  }>>([]);
+  const [editorTheme, setEditorTheme] = useState<'light' | 'dark'>('light');
+
   const mdParser = new MarkdownIt();
+
+  // Detect theme changes
+  useEffect(() => {
+    const updateTheme = () => {
+      const isDark = document.documentElement.classList.contains('dark');
+      setEditorTheme(isDark ? 'dark' : 'light');
+    };
+
+    // Set initial theme
+    updateTheme();
+
+    // Listen for theme changes
+    const observer = new MutationObserver(updateTheme);
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['class']
+    });
+
+    return () => observer.disconnect();
+  }, []);
 
   // Check authentication and load content
   useEffect(() => {
@@ -309,9 +342,36 @@ tags: ${frontMatter.tags}
     setError('');
 
     try {
+      // First, upload any pending images
+      if (pendingImages.length > 0) {
+        setError(`Uploading ${pendingImages.length} image(s)...`);
+
+        for (const pendingImage of pendingImages) {
+          const formData = new FormData();
+          formData.append('file', pendingImage.file);
+          formData.append('slug', frontMatter.slug);
+          formData.append('branch', targetBranch);
+          formData.append('message', `Add image for ${frontMatter.slug}`);
+
+          const imageResponse = await fetch('/api/github/upload-image', {
+            method: 'POST',
+            body: formData,
+          });
+
+          if (!imageResponse.ok) {
+            const errorData = await imageResponse.json();
+            throw new Error(`Failed to upload image ${pendingImage.filename}: ${errorData.error}`);
+          }
+        }
+
+        // Clear pending images after successful upload
+        setPendingImages([]);
+        setError('Images uploaded. Saving post...');
+      }
+
       // Use slug for new files, keep original filename for existing files
       const filename = currentFile || `${frontMatter.slug || 'new-post'}.md`;
-      const commitMessage = currentFile 
+      const commitMessage = currentFile
         ? `Update ${filename} via CMS`
         : `Create ${filename} via CMS`;
 
@@ -342,17 +402,111 @@ tags: ${frontMatter.tags}
       setCurrentFile(filename);
       setCurrentFileSha(data.content?.sha || null);
       setHasUnsavedChanges(false);
-      
+
       // Check PR status after saving
       await checkPRStatus(targetBranch);
-      
+
       // Show success message
       alert(`Saved ${filename} to ${targetBranch} successfully!`);
+      setError('');
 
     } catch (err: any) {
       setError(err.message || 'Failed to save file');
     } finally {
       setIsSaving(false);
+    }
+  };
+
+  // Handle image selection (doesn't upload yet, just stages the image)
+  const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    // Clear previous messages
+    setUploadMessage(null);
+
+    // Validate image
+    const validation = validateImage(file);
+    if (!validation.valid) {
+      setUploadMessage({ type: 'error', text: validation.error || 'Invalid image' });
+      return;
+    }
+
+    // Check if we have a slug
+    const slug = frontMatter.slug || 'untitled';
+    if (!slug || slug === 'untitled') {
+      setUploadMessage({ type: 'error', text: 'Please set a post slug before adding images' });
+      return;
+    }
+
+    setIsUploadingImage(true);
+    setUploadMessage({ type: 'success', text: 'Processing image...' });
+
+    try {
+      // Optimize image
+      const optimizedFile = await optimizeImage(file);
+
+      // Generate filename
+      const timestamp = Date.now();
+      const sanitizedName = file.name.replace(/[^a-zA-Z0-9.-]/g, '-');
+      const filename = `${slug}-${timestamp}-${sanitizedName}`;
+      const imagePath = `../../assets/blog-images/${slug}/${filename}`;
+
+      // Create object URL for preview
+      const previewUrl = URL.createObjectURL(optimizedFile);
+
+      // Add to pending images
+      setPendingImages(prev => [...prev, {
+        file: optimizedFile,
+        placeholder: imagePath,
+        filename: filename
+      }]);
+
+      // Insert markdown at cursor position
+      const altText = file.name.split('.')[0];
+      const imageMarkdown = `![${altText}](${imagePath})`;
+
+      // Get cursor position and insert
+      if (editorViewRef.current) {
+        const view = editorViewRef.current;
+        const cursorPos = view.state.selection.main.head;
+
+        view.dispatch({
+          changes: {
+            from: cursorPos,
+            insert: imageMarkdown
+          },
+          selection: { anchor: cursorPos + imageMarkdown.length }
+        });
+      } else {
+        // Fallback: append to end of markdown content
+        setMarkdownContent(prev => prev + '\n' + imageMarkdown + '\n');
+      }
+
+      setUploadMessage({
+        type: 'success',
+        text: `Image added! It will be uploaded when you save the post. (${pendingImages.length + 1} pending)`
+      });
+
+      setHasUnsavedChanges(true);
+
+      // Clear the file input
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+
+      // Clear success message after 5 seconds
+      setTimeout(() => {
+        setUploadMessage(null);
+      }, 5000);
+
+    } catch (err: any) {
+      setUploadMessage({
+        type: 'error',
+        text: err.message || 'Failed to process image'
+      });
+    } finally {
+      setIsUploadingImage(false);
     }
   };
 
@@ -616,15 +770,44 @@ ${frontMatter.description || 'Blog post updates via CMS'}
             {/* Editor */}
             <div className={`${activeTab !== 'editor' ? 'hidden md:block' : ''}`}>
           <div className="bg-surface border border-muted rounded-lg overflow-hidden">
-            <div className="bg-secondary px-4 py-2 border-b border-muted">
+            <div className="bg-secondary px-4 py-2 border-b border-muted flex items-center justify-between">
               <h4 className="font-medium text-foreground">Markdown Editor</h4>
+              <div className="flex items-center gap-2">
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/jpeg,image/jpg,image/png,image/webp,image/gif"
+                  onChange={handleImageUpload}
+                  className="hidden"
+                />
+                <button
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={isUploadingImage || !frontMatter.slug}
+                  className="px-3 py-1 text-sm bg-primary text-white rounded hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  title={!frontMatter.slug ? "Set a post slug first" : "Add image (will upload when you save)"}
+                >
+                  {isUploadingImage ? 'Processing...' : `📷 Add Image${pendingImages.length > 0 ? ` (${pendingImages.length})` : ''}`}
+                </button>
+              </div>
             </div>
+            {uploadMessage && (
+              <div className={`px-4 py-2 text-sm border-b ${
+                uploadMessage.type === 'error'
+                  ? 'bg-red-50 text-red-700 border-red-200'
+                  : 'bg-green-50 text-green-700 border-green-200'
+              }`}>
+                {uploadMessage.text}
+              </div>
+            )}
             <div className="min-h-96 max-h-[32rem] overflow-auto">
               <CodeMirror
                 value={markdownContent}
                 onChange={handleMarkdownChange}
                 extensions={[markdown(), EditorView.lineWrapping]}
-                theme={oneDark}
+                theme={editorTheme}
+                onCreateEditor={(view) => {
+                  editorViewRef.current = view;
+                }}
                 basicSetup={{
                   lineNumbers: true,
                   foldGutter: true,
