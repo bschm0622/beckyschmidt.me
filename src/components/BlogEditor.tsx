@@ -351,6 +351,7 @@ tags: ${frontMatter.tags}
           formData.append('file', pendingImage.file);
           formData.append('slug', frontMatter.slug);
           formData.append('branch', targetBranch);
+          formData.append('filename', pendingImage.filename);
           formData.append('message', `Add image for ${frontMatter.slug}`);
 
           const imageResponse = await fetch('/api/github/upload-image', {
@@ -451,9 +452,6 @@ tags: ${frontMatter.tags}
       const sanitizedName = file.name.replace(/[^a-zA-Z0-9.-]/g, '-');
       const filename = `${slug}-${timestamp}-${sanitizedName}`;
       const imagePath = `../../assets/blog-images/${slug}/${filename}`;
-
-      // Create object URL for preview
-      const previewUrl = URL.createObjectURL(optimizedFile);
 
       // Add to pending images
       setPendingImages(prev => [...prev, {

@@ -27,6 +27,7 @@ export const POST: APIRoute = async ({ request }) => {
     const slug = formData.get('slug') as string;
     const branch = formData.get('branch') as string || 'master';
     const message = formData.get('message') as string || 'Add blog image';
+    const providedFilename = formData.get('filename') as string | null;
 
     // Validation
     if (!file || !slug) {
@@ -67,10 +68,12 @@ export const POST: APIRoute = async ({ request }) => {
       );
     }
 
-    // Generate filename with timestamp
-    const timestamp = Date.now();
-    const originalName = file.name.replace(/[^a-zA-Z0-9.-]/g, '-'); // Sanitize filename
-    const filename = `${slug}-${timestamp}-${originalName}`;
+    // Use provided filename or generate new one with timestamp
+    const filename = providedFilename || (() => {
+      const timestamp = Date.now();
+      const originalName = file.name.replace(/[^a-zA-Z0-9.-]/g, '-');
+      return `${slug}-${timestamp}-${originalName}`;
+    })();
 
     // Convert file to base64
     const arrayBuffer = await file.arrayBuffer();
