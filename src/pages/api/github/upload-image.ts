@@ -84,8 +84,8 @@ export const POST: APIRoute = async ({ request }) => {
       auth: githubToken,
     });
 
-    // Upload to GitHub in src/assets/blog-images/{slug}/
-    const filePath = `src/assets/blog-images/${slug}/${filename}`;
+    // Upload to GitHub in public/blog-images/{slug}/
+    const filePath = `public/blog-images/${slug}/${filename}`;
 
     const response = await octokit.rest.repos.createOrUpdateFileContents({
       owner,
@@ -96,8 +96,8 @@ export const POST: APIRoute = async ({ request }) => {
       branch,
     });
 
-    // Calculate relative path from src/blog/ to src/assets/blog-images/
-    const relativePath = `../../assets/blog-images/${slug}/${filename}`;
+    // Public files are accessible at /blog-images/...
+    const relativePath = `/blog-images/${slug}/${filename}`;
 
     return new Response(JSON.stringify({
       success: true,

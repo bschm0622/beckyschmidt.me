@@ -451,7 +451,7 @@ tags: ${frontMatter.tags}
       const timestamp = Date.now();
       const sanitizedName = file.name.replace(/[^a-zA-Z0-9.-]/g, '-');
       const filename = `${slug}-${timestamp}-${sanitizedName}`;
-      const imagePath = `../../assets/blog-images/${slug}/${filename}`;
+      const imagePath = `/blog-images/${slug}/${filename}`;
 
       // Add to pending images
       setPendingImages(prev => [...prev, {

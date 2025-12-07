@@ -8,7 +8,7 @@ tags: ["product management"]
 ---
 This [tweet](https://x.com/justinbieber/status/1997125645437194682) from Justin Bieber blew up on X, particularly amongst design and product management folks.
 
-![justin-bieber-tweet](../../assets/blog-images/stop-overcomplicating-product-taste/stop-overcomplicating-product-taste-1765072366982-justin-bieber-tweet.png)
+![justin-bieber-tweet](/blog-images/stop-overcomplicating-product-taste/stop-overcomplicating-product-taste-1765072366982-justin-bieber-tweet.png)
 
 Some of my favorite comments:
 > you’re officially invited to our weekly design crits
