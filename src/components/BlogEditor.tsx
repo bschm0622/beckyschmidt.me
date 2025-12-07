@@ -64,6 +64,40 @@ export default function BlogEditor() {
 
   const mdParser = new MarkdownIt();
 
+  // Configure markdown-it to handle missing images gracefully
+  const defaultRender = mdParser.renderer.rules.image || function(tokens, idx, options, env, self) {
+    return self.renderToken(tokens, idx, options);
+  };
+
+  mdParser.renderer.rules.image = function (tokens, idx, options, env, self) {
+    const token = tokens[idx];
+    const srcIndex = token.attrIndex('src');
+    const altIndex = token.attrIndex('alt');
+
+    if (srcIndex >= 0) {
+      const src = token.attrs![srcIndex][1];
+      const alt = altIndex >= 0 ? token.attrs![altIndex][1] : 'Image';
+
+      // Check if this is a pending image (starts with /blog-images/)
+      if (src.startsWith('/blog-images/')) {
+        // Return a placeholder for images that don't exist yet
+        return `<div class="border border-dashed border-muted rounded p-4 text-center text-tertiary my-4">
+          <svg class="inline-block w-8 h-8 mb-2 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+          </svg>
+          <p class="text-sm">Image: ${alt}</p>
+          <p class="text-xs mt-1 opacity-75">(Will be uploaded when you save)</p>
+        </div>`;
+      }
+
+      // For other images, render normally with error handling
+      token.attrPush(['onerror', "this.style.display='none'"]);
+      token.attrPush(['loading', 'lazy']);
+    }
+
+    return defaultRender(tokens, idx, options, env, self);
+  };
+
   // Detect theme changes
   useEffect(() => {
     const updateTheme = () => {
@@ -351,6 +385,7 @@ tags: ${frontMatter.tags}
           formData.append('file', pendingImage.file);
           formData.append('slug', frontMatter.slug);
           formData.append('branch', targetBranch);
+          formData.append('filename', pendingImage.filename);
           formData.append('message', `Add image for ${frontMatter.slug}`);
 
           const imageResponse = await fetch('/api/github/upload-image', {
@@ -450,10 +485,7 @@ tags: ${frontMatter.tags}
       const timestamp = Date.now();
       const sanitizedName = file.name.replace(/[^a-zA-Z0-9.-]/g, '-');
       const filename = `${slug}-${timestamp}-${sanitizedName}`;
-      const imagePath = `../../assets/blog-images/${slug}/${filename}`;
-
-      // Create object URL for preview
-      const previewUrl = URL.createObjectURL(optimizedFile);
+      const imagePath = `/blog-images/${slug}/${filename}`;
 
       // Add to pending images
       setPendingImages(prev => [...prev, {

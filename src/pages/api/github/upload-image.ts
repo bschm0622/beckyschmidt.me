@@ -27,6 +27,7 @@ export const POST: APIRoute = async ({ request }) => {
     const slug = formData.get('slug') as string;
     const branch = formData.get('branch') as string || 'master';
     const message = formData.get('message') as string || 'Add blog image';
+    const providedFilename = formData.get('filename') as string | null;
 
     // Validation
     if (!file || !slug) {
@@ -67,10 +68,12 @@ export const POST: APIRoute = async ({ request }) => {
       );
     }
 
-    // Generate filename with timestamp
-    const timestamp = Date.now();
-    const originalName = file.name.replace(/[^a-zA-Z0-9.-]/g, '-'); // Sanitize filename
-    const filename = `${slug}-${timestamp}-${originalName}`;
+    // Use provided filename or generate new one with timestamp
+    const filename = providedFilename || (() => {
+      const timestamp = Date.now();
+      const originalName = file.name.replace(/[^a-zA-Z0-9.-]/g, '-');
+      return `${slug}-${timestamp}-${originalName}`;
+    })();
 
     // Convert file to base64
     const arrayBuffer = await file.arrayBuffer();
@@ -81,8 +84,8 @@ export const POST: APIRoute = async ({ request }) => {
       auth: githubToken,
     });
 
-    // Upload to GitHub in src/assets/blog-images/{slug}/
-    const filePath = `src/assets/blog-images/${slug}/${filename}`;
+    // Upload to GitHub in public/blog-images/{slug}/
+    const filePath = `public/blog-images/${slug}/${filename}`;
 
     const response = await octokit.rest.repos.createOrUpdateFileContents({
       owner,
@@ -93,8 +96,8 @@ export const POST: APIRoute = async ({ request }) => {
       branch,
     });
 
-    // Calculate relative path from src/blog/ to src/assets/blog-images/
-    const relativePath = `../../assets/blog-images/${slug}/${filename}`;
+    // Public files are accessible at /blog-images/...
+    const relativePath = `/blog-images/${slug}/${filename}`;
 
     return new Response(JSON.stringify({
       success: true,
