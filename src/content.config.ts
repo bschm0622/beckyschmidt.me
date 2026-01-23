@@ -2,7 +2,8 @@
 import { glob } from "astro/loaders";
 // Import utilities from `astro:content`
 import { z, defineCollection } from "astro:content";
-// Define a `loader` and `schema` for each collection
+
+// Blog posts collection
 const blog = defineCollection({
     loader: glob({ pattern: '**/[^_]*.md', base: "./src/blog" }),
     schema: z.object({
@@ -22,5 +23,32 @@ const blog = defineCollection({
             ),
     })
 });
-// Export a single `collections` object to register your collection(s)
-export const collections = { blog };
+
+// Resume/work history collection
+// Body content contains: first paragraph = description, bullet list = accomplishments
+const resume = defineCollection({
+    loader: glob({ pattern: '**/[^_]*.md', base: "./src/content/resume" }),
+    schema: z.object({
+        position: z.string(),
+        company: z.string(),
+        companyUrl: z.string().url(),
+        location: z.string(),
+        dates: z.string(),
+        order: z.number(),
+        type: z.enum(['job', 'education']).default('job'),
+    })
+});
+
+// Projects/portfolio collection
+const projects = defineCollection({
+    loader: glob({ pattern: '**/[^_]*.md', base: "./src/content/projects" }),
+    schema: z.object({
+        name: z.string(),
+        tagline: z.string(),
+        link: z.string().url(),
+        order: z.number(),
+    })
+});
+
+// Export collections
+export const collections = { blog, resume, projects };

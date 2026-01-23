@@ -1,7 +1,5 @@
 ---
-import { getCollection, render } from "astro:content";
-import MarkdownPostLayout from "@/layouts/MarkdownPostLayout.astro";
-import ReactionApp from "@/components/ReactionApp";
+import { getCollection } from "astro:content";
 
 export async function getStaticPaths() {
     const posts = await getCollection("blog");
@@ -11,16 +9,7 @@ export async function getStaticPaths() {
     }));
 }
 
-const { post } = Astro.props;
-const { Content, remarkPluginFrontmatter } = await render(post);
-const minutesRead = remarkPluginFrontmatter?.minutesRead ?? "";
-const slug = post.data.slug;
+const { slug } = Astro.params;
+// Redirect /blog/[slug] to /notes/[slug]
+return Astro.redirect(`/notes/${slug}`, 301);
 ---
-
-<MarkdownPostLayout minutesRead={minutesRead} frontmatter={post.data}>
-    <Content />
-    <p class="italic text-sm text-muted-foreground mt-8 mb-3">
-        Thanks for reading!
-    </p>
-    <ReactionApp client:load postId={slug} />
-</MarkdownPostLayout>

@@ -1,14 +1,12 @@
 ---
-// ResumeItem.astro
+// ResumeCard.astro
 const {
     position,
     company,
     companyUrl,
     location,
     dates,
-    description,
-    bullets = [],
-    showBorder
+    showBorder = true
 } = Astro.props;
 ---
 
@@ -29,9 +27,21 @@ const {
         <span class="text-md text-muted-foreground">{dates}</span>
     </div>
 
-    <p>{description}</p>
-
-    <ul class="list-disc pl-5 space-y-1">
-        {bullets.map((bullet: any) => <li>{bullet}</li>)}
-    </ul>
+    <div class="resume-content prose prose-sm max-w-none">
+        <slot />
+    </div>
 </article>
+
+<style>
+    .resume-content :global(p) {
+        margin-bottom: 0.5rem;
+    }
+    .resume-content :global(ul) {
+        list-style-type: disc;
+        padding-left: 1.25rem;
+        margin-top: 0.5rem;
+    }
+    .resume-content :global(li) {
+        margin-bottom: 0.25rem;
+    }
+</style>

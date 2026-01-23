@@ -1,13 +1,18 @@
 import type { APIRoute } from 'astro';
 
-const getRobotsTxt = (sitemapURL: URL) => `\
+const getRobotsTxt = (siteURL: URL) => `\
 User-agent: *
 Allow: /
 
-Sitemap: ${sitemapURL.href}
+Sitemap: ${new URL('sitemap-index.xml', siteURL).href}
+
+# LLM-specific files
+# See https://llmstxt.org for more information
+LLMs-Txt: ${new URL('llms.txt', siteURL).href}
+LLMs-Full-Txt: ${new URL('llms-full.txt', siteURL).href}
 `;
 
 export const GET: APIRoute = ({ site }) => {
-    const sitemapURL = new URL('sitemap-index.xml', site);
-    return new Response(getRobotsTxt(sitemapURL));
+    const siteURL = site ?? new URL('https://beckyschmidt.me');
+    return new Response(getRobotsTxt(siteURL));
 };

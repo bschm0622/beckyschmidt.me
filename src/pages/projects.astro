@@ -1,6 +1,17 @@
 ---
 import Layout from "@/layouts/Layout.astro";
 import ProjectCard from "@/components/ui/ProjectCard.astro";
+import { getCollection } from "astro:content";
+
+// Get all project entries, sorted by order
+const projectEntries = await getCollection("projects");
+const sortedProjects = projectEntries.sort((a, b) => a.data.order - b.data.order);
+
+// Add ref parameter to project links
+const addRef = (url: string) => {
+    const separator = url.includes('?') ? '&' : '?';
+    return `${url}${separator}ref=beckyschmidt.me`;
+};
 ---
 
 <Layout title="Projects" description="Projects page">
@@ -8,44 +19,16 @@ import ProjectCard from "@/components/ui/ProjectCard.astro";
         <div class="space-y-6">
             <h1>Projects</h1>
             <p>
-                Apps, websites, and experiments I’ve built to learn, iterate, and try new ideas.
+                Apps, websites, and experiments I've built to learn, iterate, and try new ideas.
             </p>
             <div class="space-y-6">
-                <ProjectCard
-                    name="TeethWhiteningFind"
-                    tagline="A teeth whitening provider directory to help people compare and find places to get their teeth whitened."
-                    link="https://teethwhiteningfind.com?ref=beckyschmidt.me"
-                />
-                <ProjectCard
-                    name="SplitReceipts"
-                    tagline="An AI-powered receipt scanner - reads the receipt, breaks out line items, categorizes, and creates a report."
-                    link="https://splitreceipts.com?ref=beckyschmidt.me"
-                />
-                <ProjectCard
-                    name="Quick Tip Calculator"
-                    tagline="A tip calculator I vibe-coded that I am using to learn SEO."
-                    link="https://quick-tip-calculator.com?ref=beckyschmidt.me"
-                />
-                <ProjectCard
-                    name="GolfSimFind"
-                    tagline="A golf simulators near me directory to help people find and compare golf simulators in their area."
-                    link="https://golfsimfind.com?ref=beckyschmidt.me"
-                />
-                <ProjectCard
-                    name="hey, pal creative"
-                    tagline="Marketing website for my friend's videography agency."
-                    link="https://heypalcreative.co?ref=beckyschmidt.me"
-                />
-                <ProjectCard
-                    name="bibleplan.app"
-                    tagline="A Bible reading plan generator that allows for complete flexibility in what you read and when."
-                    link="https://bibleplan.app/?ref=beckyschmidt.me"
-                />
-                <ProjectCard
-                    name="Wellspring Archive"
-                    tagline="A podcast directory designed to help Christians find new, curated content."
-                    link="wellspringarchive.com?ref=beckyschmidt.me"
-                />
+                {sortedProjects.map((project) => (
+                    <ProjectCard
+                        name={project.data.name}
+                        tagline={project.data.tagline}
+                        link={addRef(project.data.link)}
+                    />
+                ))}
             </div>
         </div>
     </div>

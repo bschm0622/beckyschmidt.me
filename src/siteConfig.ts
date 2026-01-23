@@ -49,7 +49,7 @@ export const SITE: SiteConfiguration = {
 
     nav: [
         { label: "Home", href: "/" },
-        { label: "Blog", href: "/blog" },
+        { label: "Notes", href: "/notes" },
         { label: "Projects", href: "/projects" },
         { label: "Resume", href: "/resume" },
         { label: "Colophon", href: "/colophon" },

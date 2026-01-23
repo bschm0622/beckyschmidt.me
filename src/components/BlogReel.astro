@@ -27,9 +27,9 @@ if (posts) {
 
 <div class="space-y-6">
   {postsToShow.map((post: any) => (
-    <article class="pb-4">
+    <article>
       <a
-        href={`/blog/${post.id}/`}
+        href={`/notes/${post.id}/`}
         class="text-xl font-semibold text-primary hover:underline"
       >
         {post.data.title}
@@ -43,7 +43,7 @@ if (posts) {
           <div class="flex flex-wrap space-x-2">
             {post.data.tags.map((tag: any) => (
               <BlogTag
-                href={`/blog/tag/${slugifyStr(tag)}/`}
+                href={`/notes/tag/${slugifyStr(tag)}/`}
               >
                 {tag}
               </BlogTag>
@@ -55,12 +55,12 @@ if (posts) {
   ))}
 
   {preview && (
-    <div class="pt-4">
+    <div>
       <a
-        href="/blog"
+        href="/notes"
         class="inline-flex items-center text-primary hover:underline"
       >
-        See all posts
+        See all notes
         <svg
           class="ml-1 h-5 w-5"
           fill="none"
