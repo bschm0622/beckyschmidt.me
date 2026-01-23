@@ -8,100 +8,77 @@ const projectsLink =
 ---
 
 <Layout title="Home" description="Home page">
-  <div class="mx-auto w-full mt-5 md:mt-10 space-y-10">
+  <div class="mx-auto w-full mt-5 md:mt-10 space-y-8">
+    <!-- Intro + Bio -->
     <div class="space-y-6">
       <h1>Hi, I'm Becky.</h1>
 
-		<p>
-		I am a senior product manager at
-		<a
-			href="https://octane11.com"
-			target="_blank"
-			rel="noopener noreferrer"
-		>Octane11</a>, a B2B SaaS company, where I build our core data and AI products.
-		</p>
-
       <p>
-        I'm a native Hoosier, based in Indianapolis and raising a family (and four
-        chickens) with my husband.
+        I love to build, learn, and untangle. Lately that looks like
+        a lot of <a href={projectsLink}>side projects</a> and experimenting with
+        AI tools to stretch how I think and work.
       </p>
 
       <p>
-        Outside of work, you can usually find me tinkering on my own
-        <a href="/projects" target="_blank"> side projects</a>, playing a board
-        game, or meeting up with a friend at my neighborhood coffee shop.
+        I'm a product manager at
+        <a
+          href="https://octane11.com"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          Octane11
+        </a>,
+        building data and AI products. I'm a native Hoosier living in Indianapolis with my husband,
+        our toddler, and four backyard chickens.
       </p>
+
+      <!-- Social links (visually attached to bio) -->
+      <div class="flex items-center gap-4">
+        <a
+          href={`mailto:${SITE.socials?.email}`}
+          class="inline-flex items-center gap-1.5 hover:underline"
+        >
+          Email
+          <svg
+            class="text-muted-foreground size-4"
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+          >
+            <path
+              fill="currentColor"
+              d="M10 6v2H5v11h11v-5h2v6a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1zm11-3v8h-2V6.413l-7.793 7.794l-1.414-1.414L17.585 5H13V3z"
+            />
+          </svg>
+        </a>
+
+        <a
+          href={SITE.socials?.linkedin}
+          target="_blank"
+          rel="noopener noreferrer"
+          class="inline-flex items-center gap-1.5 hover:underline"
+        >
+          LinkedIn
+          <svg
+            class="text-muted-foreground size-4"
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+          >
+            <path
+              fill="currentColor"
+              d="M10 6v2H5v11h11v-5h2v6a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1zm11-3v8h-2V6.413l-7.793 7.794l-1.414-1.414L17.585 5H13V3z"
+            />
+          </svg>
+        </a>
+      </div>
     </div>
 
-    <div class="flex items-center gap-4">
-      <a
-        href={`mailto:${SITE.socials?.email}`}
-        class="inline-flex items-center gap-1.5 hover:underline"
-      >
-        Email
-        <svg
-          class="text-muted-foreground size-4"
-          xmlns="http://www.w3.org/2000/svg"
-          width="24"
-          height="24"
-          viewBox="0 0 24 24"
-        >
-          <path
-            fill="currentColor"
-            d="M10 6v2H5v11h11v-5h2v6a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1zm11-3v8h-2V6.413l-7.793 7.794l-1.414-1.414L17.585 5H13V3z"
-          />
-        </svg>
-      </a>
-
-      <a
-        href={SITE.socials?.linkedin}
-        target="_blank"
-        rel="noopener noreferrer"
-        class="inline-flex items-center gap-1.5 hover:underline"
-      >
-        LinkedIn
-        <svg
-          class="text-muted-foreground size-4"
-          xmlns="http://www.w3.org/2000/svg"
-          width="24"
-          height="24"
-          viewBox="0 0 24 24"
-        >
-          <path
-            fill="currentColor"
-            d="M10 6v2H5v11h11v-5h2v6a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1zm11-3v8h-2V6.413l-7.793 7.794l-1.414-1.414L17.585 5H13V3z"
-          />
-        </svg>
-      </a>
-
-      <a
-        href="https://beckyschmidt.substack.com"
-        target="_blank"
-        rel="noopener noreferrer"
-        class="inline-flex items-center gap-1.5 hover:underline"
-      >
-        Newsletter
-        <svg
-          class="text-muted-foreground size-4"
-          xmlns="http://www.w3.org/2000/svg"
-          width="24"
-          height="24"
-          viewBox="0 0 24 24"
-        >
-          <path
-            fill="currentColor"
-            d="M14 3h7v7h-2V6.41l-9.29 9.3l-1.42-1.42l9.3-9.29H14z"
-          />
-          <path
-            fill="currentColor"
-            d="M5 5h6v2H7v10h10v-4h2v5a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1z"
-          />
-        </svg>
-      </a>
-    </div>
-
-    <div class="space-y-6">
-      <h2>Latest blog posts</h2>
+    <!-- Latest notes -->
+    <div class="space-y-6 pt-6 md:pt-8">
+      <h2>Latest notes</h2>
       <BlogReel preview={true} />
     </div>
   </div>

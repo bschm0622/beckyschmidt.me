@@ -1,81 +1,36 @@
 ---
 import Layout from "@/layouts/Layout.astro";
 import ResumeCard from "@/components/ui/ResumeCard.astro";
+import { getCollection } from "astro:content";
+import MarkdownIt from "markdown-it";
+
+// Initialize markdown renderer
+const md = new MarkdownIt();
+
+// Get all resume entries, sorted by order
+const resumeEntries = await getCollection("resume");
+const sortedEntries = resumeEntries.sort((a, b) => a.data.order - b.data.order);
 ---
 
 <Layout title="Resume" description="My work history">
     <div class="mx-auto w-full max-w-4xl mt-5 md:mt-10 space-y-10">
         <div class="space-y-6">
             <h1>Resume</h1>
-            <ResumeCard
-                position="Senior Product Manager"
-                company="Octane11"
-                companyUrl="https://octane11.com"
-                location="Remote"
-                dates="May 2022 – Present"
-                description="Trusted product leader across data transformation, integrations, and UX. Promoted to Senior PM within 10 months for driving high-impact delivery and clear results."
-                bullets={[
-                    "Own end-to-end product strategy for the data transformation layer, increasing marketing account signal by 50% and driving major gains in client product value.",
-                    "Lead strategic integrations with key partners, including the LinkedIn Company Intelligence API beta, achieving a 130%+ lift in account signal and hitting critical partnership deadlines.",
-                    "Directed concept-to-beta development of Octane11’s first AI-powered user tools, shaping product requirements and collaborating closely with engineering to accelerate delivery.",
-                ]}
-                showBorder={true}
-            />
-            <ResumeCard
-                position="Martech Operations Associate"
-                company="Octane11"
-                companyUrl="https://octane11.com"
-                location="Remote"
-                dates="August 2021 - May 2022"
-                description="Second product team hire at a B2B SaaS startup. Drove product and data initiatives by collaborating with engineering and client teams to develop impactful solutions and streamline onboarding."
-                ,
-                bullets={[
-                    "Led white-glove technical onboarding for new clients, ensuring seamless integration and optimal user experience",
-                    "Designed and maintained client-facing dashboards in Looker Studio, leveraging SQL to transform and visualize key insights",
-                    "Created engineering requirements and conducted QA testing for new features, driving product quality and usability",
-                ]}
-                showBorder={true}
-            />
-            <ResumeCard
-                position="Business Analyst"
-                company="Financial Center First Credit Union"
-                companyUrl="https://fcfcu.com"
-                location="Indianapolis, IN"
-                dates="August 2019 - August 2021"
-                description="Leveraged data, automation, and strategic insights to enhance marketing effectiveness, streamline reporting, and drive data-informed decision-making across lending, retail, and executive teams."
-                ,
-                bullets={[
-                    "Automated daily reporting with Python, reducing runtime from two hours to twenty minutes and improving operational efficiency",
-                    "Deployed a new lead management system, increasing follow-up rates from 30% to 90% and driving higher conversion rates",
-                    "Designed and analyzed market monitoring reports, enabling leadership to measure KPIs and optimize expansion strategies in newly acquired markets",
-                ]}
-                showBorder={true}
-            />
-            <ResumeCard
-                position="Program Manager"
-                company="Loyalty Research Center"
-                companyUrl="https://loyaltyresearch.com"
-                location="Indianapolis, IN"
-                dates="June 2018 - August 2019"
-                description="Managed multiple research projects from inception to delivery, driving data-driven insights for client growth, retention, and customer experience strategies. Optimized processes, enhanced reporting, and improved efficiency through automation and training."
-                ,
-                bullets={[
-                    "Led 5–8 concurrent projects ($26K–$82K) end-to-end, overseeing timelines, data analysis, reporting, and client communication",
-                    "Designed and executed customer insights studies using SPSS, Excel, and advanced statistical methods to drive strategic decision-making",
-                    "Developed process improvements and automation using Excel and VBA, increasing efficiency and standardizing program management workflows",
-                ]}
-                showBorder={true}
-            />
-            <ResumeCard
-                position="Bachelor of Science in Marketing"
-                company="Ball State University"
-                companyUrl="https://bsu.edu"
-                location="Muncie, IN"
-                dates="2014 - 2018"
-                description="Miller College of Business graduate with a minor in Professional Writing and Emerging Media. Received a full tuition scholarship and direct admission to the Miller Scholars Honors Program."
-                ,
-                showBorder={true}
-            />
+            {sortedEntries.map((entry, index) => {
+                const renderedContent = md.render(entry.body || '');
+                return (
+                    <ResumeCard
+                        position={entry.data.position}
+                        company={entry.data.company}
+                        companyUrl={entry.data.companyUrl}
+                        location={entry.data.location}
+                        dates={entry.data.dates}
+                        showBorder={index < sortedEntries.length - 1}
+                    >
+                        <Fragment set:html={renderedContent} />
+                    </ResumeCard>
+                );
+            })}
         </div>
     </div>
 </Layout>

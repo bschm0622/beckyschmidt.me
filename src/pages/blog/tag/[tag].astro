@@ -1,8 +1,6 @@
 ---
 import { getCollection } from "astro:content";
-import { slugifyAll, slugifyStr } from "@/utils/Slugify";
-import Layout from "@/layouts/Layout.astro";
-import BlogReel from "@/components/BlogReel.astro";
+import { slugifyStr } from "@/utils/Slugify";
 
 export async function getStaticPaths() {
     const allPosts = await getCollection("blog");
@@ -18,67 +16,6 @@ export async function getStaticPaths() {
 }
 
 const { tag } = Astro.params;
-const allPosts = await getCollection("blog");
-
-const filteredPosts = allPosts.filter((post) =>
-    slugifyAll(post.data.tags || []).includes(tag),
-);
+// Redirect /blog/tag/[tag] to /notes/tag/[tag]
+return Astro.redirect(`/notes/tag/${tag}`, 301);
 ---
-
-<Layout
-    title={`Posts tagged with "${tag}"`}
-    description={`Blog posts tagged with ${tag}`}
->
-    <div
-        class="mx-auto w-full max-w-4xl mt-5 md:mt-10 space-y-10"
-        data-pagefind-ignore="all"
-    >
-        <div
-            class="flex flex-wrap items-center gap-x-4 text-3xl text-foreground"
-        >
-            <h1>Tagged with "{tag}"</h1>
-            <span class="flex items-center gap-1 text-tertiary">
-                <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="24"
-                    height="24"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="2"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    class="lucide lucide-notebook-text"
-                >
-                    <path d="M2 6h4"></path>
-                    <path d="M2 10h4"></path>
-                    <path d="M2 14h4"></path>
-                    <path d="M2 18h4"></path>
-                    <rect width="16" height="20" x="4" y="2" rx="2"></rect>
-                    <path d="M9.5 8h5"></path>
-                    <path d="M9.5 12H16"></path>
-                    <path d="M9.5 16H14"></path>
-                </svg>
-                <span>
-                    {filteredPosts.length}
-                    {filteredPosts.length === 1 ? "post" : "posts"}
-                </span>
-            </span>
-        </div>
-
-        {
-            filteredPosts.length === 0 ? (
-                <p>No posts found with this tag.</p>
-            ) : (
-                <BlogReel posts={filteredPosts} />
-            )
-        }
-        <a
-            href="/blog"
-            class="inline-block mt-2 text-primary font-semibold hover:underline"
-            aria-label="Back to blog"
-        >
-            ← Back to Blog
-        </a>
-    </div>
-</Layout>

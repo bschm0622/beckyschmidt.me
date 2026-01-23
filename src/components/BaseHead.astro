@@ -96,6 +96,57 @@ const shouldLoadAnalytics = import.meta.env.PROD;
 <!-- Canonical -->
 <link rel="canonical" href={canonicalStr} />
 
+<!-- Schema.org JSON-LD Structured Data -->
+<script is:inline type="application/ld+json" set:html={JSON.stringify({
+    "@context": "https://schema.org",
+    "@graph": [
+        {
+            "@type": "WebSite",
+            "@id": `${siteOrigin}#website`,
+            "url": siteOrigin,
+            "name": "Becky Schmidt",
+            "description": SITE.description,
+            "inLanguage": SITE.locale,
+            "publisher": {
+                "@id": `${siteOrigin}#person`
+            }
+        },
+        {
+            "@type": "Person",
+            "@id": `${siteOrigin}#person`,
+            "name": "Becky Schmidt",
+            "url": siteOrigin,
+            "email": "beckyschmidt0622@gmail.com",
+            "jobTitle": "Senior Product Manager",
+            "worksFor": {
+                "@type": "Organization",
+                "name": "Octane11",
+                "url": "https://octane11.com"
+            },
+            "address": {
+                "@type": "PostalAddress",
+                "addressLocality": "Indianapolis",
+                "addressRegion": "IN",
+                "addressCountry": "US"
+            },
+            "sameAs": [
+                "https://www.linkedin.com/in/becky--schmidt/"
+            ]
+        },
+        {
+            "@type": "WebPage",
+            "@id": canonicalStr,
+            "url": canonicalStr,
+            "name": fullTitle,
+            "description": description,
+            "isPartOf": {
+                "@id": `${siteOrigin}#website`
+            },
+            "inLanguage": SITE.locale
+        }
+    ]
+})} />
+
 <!-- Manifest + Sitemap -->
 <link rel="manifest" href="/site.webmanifest" />
 <link rel="sitemap" href="/sitemap-index.xml" />
