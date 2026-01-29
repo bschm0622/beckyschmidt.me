@@ -1,5 +1,5 @@
 ---
-title: "Product Management Lessons from 8 Hours of Alex Hormozi"
+title: "Product management lessons from 8 hours of Alex Hormozi"
 slug: "product-management-lessons-alex-hormozi"
 pubDate: "2026-01-29"
 author: "Becky Schmidt"
