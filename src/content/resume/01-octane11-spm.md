@@ -8,8 +8,11 @@ order: 1
 type: job
 ---
 
-Trusted product leader across data transformation, integrations, and UX. Promoted to Senior PM within 10 months for driving high-impact delivery and clear results.
+Building products that unify marketing data across platforms and bring AI capabilities to B2B marketers. Promoted to Senior PM within 10 months.
 
-- Own end-to-end product strategy for the data transformation layer, increasing marketing account signal by 50% and driving major gains in client product value.
-- Lead strategic integrations with key partners, including the LinkedIn Company Intelligence API beta, achieving a 130%+ lift in account signal and hitting critical partnership deadlines.
-- Directed concept-to-beta development of Octane11's first AI-powered user tools, shaping product requirements and collaborating closely with engineering to accelerate delivery.
+- Prototype AI tools UI/UX in Figma and Claude Code as product discovery, exploring solutions and making design decisions before engineering handoff.
+- Own AI product roadmap, managing dev team through implementation, coordinating QA, and shipping features to production.
+- Built data blending logic to surface stronger account signals from multiple data vendors, increasing marketing account signal by 50%.
+- Designed "key moments" detection to identify high-impact touchpoints that help marketers tell the story of marketing's impact on sales.
+- Prototype dashboards and data models in SQL to solve cross-platform attribution across marketing integrations like Salesforce, HubSpot, LinkedIn, Google, and more.
+- Led LinkedIn Company Intelligence API beta integration, achieving 130%+ lift in account signal.

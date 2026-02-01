@@ -50,8 +50,7 @@ export const SITE: SiteConfiguration = {
     nav: [
         { label: "Home", href: "/" },
         { label: "Notes", href: "/notes" },
-        { label: "Projects", href: "/projects" },
-        { label: "Resume", href: "/resume" },
+        { label: "Work", href: "/work" },
         { label: "Colophon", href: "/colophon" },
     ],
 

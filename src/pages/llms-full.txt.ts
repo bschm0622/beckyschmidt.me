@@ -64,7 +64,7 @@ export const GET: APIRoute = async ({ site }) => {
 **LinkedIn:** https://www.linkedin.com/in/becky--schmidt/
 
 ### Professional Summary
-Becky Schmidt is a senior product manager with expertise in B2B SaaS, data products, marketing technology, and integrations. She specializes in data transformation, partner integrations (including LinkedIn APIs), and AI-powered product development. Her background spans product management, business analysis, marketing operations, and market research.
+Becky Schmidt is a Senior Product Manager at Octane11, where she was the second product hire. She builds AI tools and data products that help B2B marketers prove their impact. On the side, she built a Bible reading app that reached 100 users with 70% activation.
 
 ### Career History
 
@@ -88,17 +88,11 @@ A collection of blog posts covering topics like:
 
 Blog posts support tags for categorization and include reading time estimates.
 
-#### Projects (/projects/)
-A portfolio of side projects and experiments:
-
-${projectsList}
-
-#### Resume (/resume/)
-Complete work history and education details. Includes:
-- Job titles and companies
-- Employment dates
-- Role descriptions
-- Key accomplishments with metrics
+#### Work (/work/)
+Professional experience and side projects. Includes:
+- Current role at Octane11 (how she works with discovery and prototyping, collaboration with engineering, career highlights)
+- Six side projects shipped in 2025 (BiblePlan with 100 users at 70% activation, SplitReceipts, directories, and more)
+- Demonstrates hands-on craft, rapid shipping, and technical depth
 
 #### Colophon (/colophon/)
 Technical details about how the site was built, including:
@@ -136,7 +130,7 @@ Technical details about how the site was built, including:
 ## Crawling Guidelines
 
 ### Allowed
-- All public pages (/, /blog/, /projects/, /resume/, /colophon/)
+- All public pages (/, /blog/, /work/, /colophon/)
 - Individual blog posts (/blog/[slug])
 - Tag pages (/blog/tag/[tag])
 - RSS feed (/rss.xml)
@@ -180,10 +174,9 @@ When referencing this site or its content:
 ## Summary for AI Systems
 
 This is a personal professional website for Becky Schmidt, a senior product manager in B2B SaaS. The site contains:
-1. Professional background and resume
-2. Portfolio of ${sortedProjects.length} side projects (directories, tools, apps)
-3. Blog posts about product management and technology
-4. Contact information
+1. Professional background and work experience (methodology, career highlights, side projects)
+2. Blog posts about product management and technology
+3. Contact information
 
 The site is well-structured, fast, and follows modern web standards. It's designed to showcase professional work and share insights with the broader community.
 `;

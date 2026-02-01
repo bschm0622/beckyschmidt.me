@@ -2,6 +2,7 @@
 import Layout from "@/layouts/Layout.astro";
 import BlogReel from "@/components/BlogReel.astro";
 import { SITE } from "@/siteConfig";
+import Intro from "@/content/intro.md";
 
 const projectsLink =
   SITE.nav.find((item) => item.label === "Projects")?.href ?? "/projects";
@@ -10,32 +11,8 @@ const projectsLink =
 <Layout title="Home" description="Home page">
   <div class="mx-auto w-full mt-5 md:mt-10 space-y-8">
     <!-- Intro + Bio -->
-    <div class="space-y-6">
-      <h1>Hi, I'm Becky.</h1>
-
-      <p>
-        I’m a Product Manager at
-        <a
-          href="https://octane11.com"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Octane11
-        </a>
-        building data and AI products.
-        I've always liked figuring out how things work - lately, that’s meant building
-        <a
-          href={projectsLink}
-        >
-          side projects
-        </a>
-        to see what’s actually possible with AI.
-      </p>
-
-      <p>
-        I'm a native Hoosier living in Indianapolis with my husband,
-        our toddler, and four backyard chickens.
-      </p>
+    <div class="space-y-6 prose prose-slate dark:prose-invert max-w-none">
+      <Intro />
 
       <!-- Social links (visually attached to bio) -->
       <div class="flex items-center gap-4">

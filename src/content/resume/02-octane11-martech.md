@@ -8,8 +8,8 @@ order: 2
 type: job
 ---
 
-Second product team hire at a B2B SaaS startup. Drove product and data initiatives by collaborating with engineering and client teams to develop impactful solutions and streamline onboarding.
+Second product team hire at an early-stage B2B SaaS startup. Worked closely with users and engineering to solve problems and build data solutions.
 
-- Led white-glove technical onboarding for new clients, ensuring seamless integration and optimal user experience
-- Designed and maintained client-facing dashboards in Looker Studio, leveraging SQL to transform and visualize key insights
-- Created engineering requirements and conducted QA testing for new features, driving product quality and usability
+- Led technical onboarding for new clients, interfacing directly with users to solve problems and help them adopt the platform.
+- Built and maintained client-facing dashboards in Looker Studio, using SQL to pull data, create dashboard concepts, and visualize insights.
+- Collaborated with engineering on product development, writing requirements and conducting QA - early foundation for future product management work.
