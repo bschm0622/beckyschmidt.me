@@ -16,6 +16,8 @@ import tailwindcss from '@tailwindcss/vite';
 
 import netlify from "@astrojs/netlify";
 
+const isDev = process.argv.includes('dev');
+
 // https://astro.build/config
 export default defineConfig({
   site: "https://beckyschmidt.me",
@@ -84,7 +86,7 @@ export default defineConfig({
     }]
   },
 
-  adapter: netlify({
+  adapter: isDev ? undefined : netlify({
     edgeMiddleware: false,
   }),
 });
