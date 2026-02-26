@@ -1,10 +1,10 @@
 ---
 title: "The lanes are collapsing"
-pubDate: 2026-02-26
+slug: "the-lanes-are-collapsing"
+pubDate: "2026-02-26"
+author: "Becky Schmidt"
 description: ""
-author: Becky Schmidt
 tags: ["AI", "product-management"]
-slug: the-lanes-are-collapsing
 ---
 ![2025 GitHub contribution graph](/contributions.png)
 
@@ -24,4 +24,4 @@ After a year of trying every AI tool and watching the industry change, I don't t
 
 But at the right company, with the right tools, the lane thing is just less true than it used to be. I'm leading the roadmap for our AI Assistant at work. With prototyping tools, we haven't needed a designer because I can just try a bunch of different UX patterns and share that with my lead engineer. I'm also sitting close to the implementation and system prompting. A year ago, I wouldn't have been doing either of those things.
 
-It's not too late to start using AI in your life and at work. The majority of people either will not bother or give up when it gets hard, because AI still isn't a magic bullet. It's a skill that needs to be honed, and by getting in and staying in the game, you'll be in the top 10%.
+It's not too late to start using AI in your life and at work. Most people will use it at surface level and call it done because it’s not a magic bullet. It's a skill that needs to be honed, and by getting in and staying in the game, you'll be in the top 10%.
