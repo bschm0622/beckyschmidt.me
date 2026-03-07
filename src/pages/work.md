@@ -25,7 +25,8 @@ Some career highlights:
 I started building in early 2025, going from never coding before to my first app deployed in a month. Here's what I've shipped so far:
 
 - **[BiblePlan](https://bibleplan.app?ref=personal-website-work)**: Flexible Bible reading plans - choose any books, any timeframe, skip days to make it sustainable. 120+ users, 70% activation.
-- **[Product Analytics Tools](https://productanalytics.tools)**: Product analytics directory where I also write up testing a bunch of these tools.
+- **[Product Analytics Tools](https://productanalytics.tools?ref=personal-website-work)**: Product analytics directory where I also write up testing a bunch of these tools.
+- **[FindColoringPages](https://findcoloringpages.com?ref=personal-website-work)**: Free coloring pages directory.
 - **[SplitReceipts](https://splitreceipts.com?ref=personal-website-work)**: Receipt scanner - upload a photo, get line items broken out and categorized.
 - **[Wellspring Archive](https://wellspringarchive.com?ref=personal-website-work)**: Christian podcast directory
 - **[Teeth Whitening Find](https://teethwhiteningfind.com?ref=personal-website-work)**: Teeth whitening providers directory
