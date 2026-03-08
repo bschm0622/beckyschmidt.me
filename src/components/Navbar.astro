@@ -84,7 +84,7 @@ const iconMap: Record<string, any> = {
     }
 
     .group:hover .nav-tooltip,
-    .group:focus-within .nav-tooltip {
+    .group:has(:focus-visible) .nav-tooltip {
         opacity: 1;
     }
 
