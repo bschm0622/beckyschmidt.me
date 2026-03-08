@@ -6,7 +6,7 @@ const uniqueId = `themeToggle-${crypto.randomUUID().slice(0, 8)}`;
     id={uniqueId}
     type="button"
     aria-label="Toggle theme"
-    class="theme-toggle-btn flex items-center justify-center rounded-lg transition-all cursor-pointer hover:bg-muted p-1"
+    class="theme-toggle-btn flex items-center justify-center w-9 h-9 rounded-lg transition-all cursor-pointer hover:bg-foreground/13"
 >
     <!-- Dark (Moon) Icon - shows in light mode -->
     <svg
@@ -44,14 +44,23 @@ const uniqueId = `themeToggle-${crypto.randomUUID().slice(0, 8)}`;
 </button>
 
 <script define:vars={{ buttonId: uniqueId }}>
+    const THEME_COLORS = { dark: "#0f172a", light: "#f9fafb" };
+
+    const updateThemeColor = (isDark) => {
+        const meta = document.getElementById("theme-color-meta");
+        if (meta) meta.setAttribute("content", isDark ? THEME_COLORS.dark : THEME_COLORS.light);
+    };
+
     const applyThemeFromLocalStorage = () => {
         const theme = localStorage.getItem("theme");
         if (theme === "dark") {
             document.documentElement.classList.remove("light");
             document.documentElement.classList.add("dark");
+            updateThemeColor(true);
         } else if (theme === "light") {
             document.documentElement.classList.remove("dark");
             document.documentElement.classList.add("light");
+            updateThemeColor(false);
         }
     };
 
@@ -60,6 +69,7 @@ const uniqueId = `themeToggle-${crypto.randomUUID().slice(0, 8)}`;
         const isDark = document.documentElement.classList.contains("dark");
         document.documentElement.classList.toggle("light", !isDark);
         localStorage.setItem("theme", isDark ? "dark" : "light");
+        updateThemeColor(isDark);
     };
 
     const setupThemeToggleButton = () => {

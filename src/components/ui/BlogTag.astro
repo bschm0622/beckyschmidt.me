@@ -5,7 +5,7 @@ const { href, children } = Astro.props;
 
 <a
     href={href}
-    class="px-2 py-0.5 bg-muted rounded text-sm font-medium !text-foreground !no-underline"
+    class="px-2 py-0.5 border border-muted rounded text-sm text-tertiary! no-underline! hover:border-foreground/30 transition-colors"
 >
     <slot />
 </a>

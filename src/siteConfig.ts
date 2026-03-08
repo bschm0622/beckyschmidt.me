@@ -51,7 +51,7 @@ export const SITE: SiteConfiguration = {
         { label: "Home", href: "/" },
         { label: "Notes", href: "/notes" },
         { label: "Work", href: "/work" },
-        { label: "Colophon", href: "/colophon" },
+        { label: "More", href: "/more" },
     ],
 
     copyright: `© ${new Date().getFullYear()} Becky Schmidt - all rights reserved`,

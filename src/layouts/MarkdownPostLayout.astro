@@ -5,6 +5,7 @@ import Navbar from "@/components/Navbar.astro";
 import Footer from "@/components/Footer.astro";
 import SearchModal from "@/components/SearchModal.astro";
 import FormattedDate from "@/components/ui/FormattedDate.astro";
+import BlogTag from "@/components/ui/BlogTag.astro";
 import { SITE } from "@/siteConfig";
 
 const {
@@ -169,9 +170,7 @@ const blogPostingSchema = {
                 {
                     tags &&
                         tags.map((tag: string) => (
-                            <span class="px-2 py-0.5 bg-muted rounded text-sm font-medium">
-                                {tag}
-                            </span>
+                            <BlogTag href={`/notes/tag/${tag}`}>{tag}</BlogTag>
                         ))
                 }
             </div>
