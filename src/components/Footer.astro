@@ -4,8 +4,8 @@ import { SITE } from "@/siteConfig";
 const footerLinks = SITE.footerNav ?? [];
 ---
 
-<footer class="px-6 py-6 text-sm text-tertiary">
-    <div class="flex flex-wrap gap-x-2 gap-y-1 justify-center md:justify-end">
+<footer class="px-6 py-10 text-sm text-tertiary">
+    <div class="flex flex-wrap gap-x-2 gap-y-1 justify-center md:justify-end max-w-3xl mx-auto">
         {footerLinks.map((link) => (
             <>
                 <a href={link.href} class="hover:underline whitespace-nowrap">

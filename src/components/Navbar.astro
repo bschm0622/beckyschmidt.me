@@ -1,8 +1,17 @@
 ---
 import ThemeToggle from "@/components/ThemeToggle.astro";
 import { SITE } from "@/siteConfig";
+import { Home, Briefcase, NotebookPen, Ellipsis, Search } from "@lucide/astro";
 
 const navLinks = SITE.nav;
+const currentPath = Astro.url.pathname;
+
+const iconMap: Record<string, any> = {
+    Home: Home,
+    Work: Briefcase,
+    Notes: NotebookPen,
+    More: Ellipsis,
+};
 ---
 
 <style>
@@ -57,6 +66,25 @@ const navLinks = SITE.nav;
         transform: rotate(-45deg) translateY(0);
         position: absolute;
         top: 11px;
+    }
+
+    /* Icon nav tooltips */
+    .nav-tooltip {
+        position: absolute;
+        top: calc(100% + 6px);
+        left: 50%;
+        transform: translateX(-50%);
+        padding: 3px 8px;
+        font-size: 0.75rem;
+        border-radius: 4px;
+        white-space: nowrap;
+        pointer-events: none;
+        opacity: 0;
+        transition: opacity 0.15s ease;
+    }
+
+    .group:hover .nav-tooltip {
+        opacity: 1;
     }
 
     /* Mobile menu hidden by default */
@@ -139,26 +167,62 @@ const navLinks = SITE.nav;
         initNavbar();
     }
     document.addEventListener("astro:page-load", initNavbar);
+
+    function updateThemeTooltip() {
+        const tooltip = document.getElementById("theme-tooltip");
+        if (!tooltip) return;
+        const isDark = document.documentElement.classList.contains("dark");
+        tooltip.textContent = isDark ? "Light mode" : "Dark mode";
+    }
+
+    // Update on load and after view transitions
+    updateThemeTooltip();
+    document.addEventListener("astro:page-load", updateThemeTooltip);
+
+    // Update whenever the html class changes (theme toggle fires this)
+    new MutationObserver(updateThemeTooltip).observe(document.documentElement, {
+        attributes: true,
+        attributeFilter: ["class"],
+    });
 </script>
 
-<nav class="px-6 py-6 flex items-center justify-between w-full text-md">
+<nav class="px-4 py-6 flex items-center justify-between w-full max-w-3xl mx-auto text-md">
     <!-- Desktop Nav -->
     <div class="hidden md:flex items-center justify-between w-full">
-        <a href="/" class="text-lg font-medium hover:underline">
-            {SITE.name || SITE.title}
-        </a>
-        <div class="flex items-center gap-6">
-            <ul class="flex items-center gap-6">
-                {
-                    navLinks.map((link) => (
-                        <li>
-                            <a href={link.href} class="hover:underline">
-                                {link.label}
-                            </a>
-                        </li>
-                    ))
-                }
-            </ul>
+        <!-- Icon nav: home + page links -->
+        <div class="flex items-center gap-3">
+            <!-- Home icon -->
+            <div class="relative group">
+                <a
+                    href="/"
+                    aria-label="Home"
+                    class:list={["flex items-center justify-center w-9 h-9 rounded-lg text-foreground hover:bg-foreground/13 transition-colors", { "bg-foreground/[0.07]": currentPath === "/" }]}
+                >
+                    <Home class="w-[1.15rem] h-[1.15rem]" />
+                </a>
+                <span class="nav-tooltip bg-primary text-background dark:bg-secondary dark:text-foreground">Home</span>
+            </div>
+            <!-- Page links as icons -->
+            {navLinks.filter(l => l.label !== "Home").map((link) => {
+                const Icon = iconMap[link.label];
+                const isActive = currentPath.startsWith(link.href);
+                return Icon ? (
+                    <div class="relative group">
+                        <a
+                            href={link.href}
+                            aria-label={link.label}
+                            class:list={["flex items-center justify-center w-9 h-9 rounded-lg text-foreground hover:bg-foreground/13 transition-colors", { "bg-foreground/[0.07]": isActive }]}
+                        >
+                            <Icon class="w-[1.15rem] h-[1.15rem]" />
+                        </a>
+                        <span class="nav-tooltip bg-primary text-background dark:bg-secondary dark:text-foreground">{link.label}</span>
+                    </div>
+                ) : null;
+            })}
+        </div>
+
+        <!-- Right side: search + theme toggle (unchanged) -->
+        <div class="flex items-center gap-3">
             <button
                 type="button"
                 id="search-trigger-desktop"
@@ -171,21 +235,27 @@ const navLinks = SITE.nav;
                     <span>K</span>
                 </kbd>
             </button>
-            <ThemeToggle />
+            <div class="relative group">
+                <ThemeToggle />
+                <span id="theme-tooltip" class="nav-tooltip bg-primary text-background dark:bg-secondary dark:text-foreground">Dark mode</span>
+            </div>
         </div>
     </div>
 
     <!-- Mobile Nav -->
     <div class="flex flex-col md:hidden w-full relative">
         <div class="flex items-center justify-between w-full">
-            <a href="/" class="text-lg font-medium">
-                {SITE.name || SITE.title}
+            <a
+                href="/"
+                aria-label="Home"
+                class:list={["flex items-center justify-center w-9 h-9 rounded-lg text-foreground hover:bg-foreground/13 transition-colors", { "bg-foreground/[0.07]": currentPath === "/" }]}
+            >
+                <Home class="w-[1.15rem] h-[1.15rem]" />
             </a>
 
             <div class="flex items-center gap-4">
                 <ThemeToggle />
 
-                <!-- Move checkbox and label outside the flex div, as siblings of mobile-menu -->
                 <input type="checkbox" id="menu-toggle" />
 
                 <label
@@ -203,23 +273,28 @@ const navLinks = SITE.nav;
                 <div id="mobile-menu" class="mobile-menu">
                     <ul class="space-y-2">
                         {
-                            navLinks.map((link) => (
-                                <li>
-                                    <a
-                                        href={link.href}
-                                        class="block py-2 text-md hover:text-primary transition"
-                                    >
-                                        {link.label}
-                                    </a>
-                                </li>
-                            ))
+                            navLinks.filter(l => l.label !== "Home").map((link) => {
+                                const Icon = iconMap[link.label];
+                                return (
+                                    <li>
+                                        <a
+                                            href={link.href}
+                                            class="flex items-center gap-3 py-2 text-md hover:text-primary transition"
+                                        >
+                                            {Icon && <Icon class="w-[1.1rem] h-[1.1rem] text-tertiary" />}
+                                            {link.label}
+                                        </a>
+                                    </li>
+                                );
+                            })
                         }
                         <li>
                             <button
                                 type="button"
                                 id="search-trigger-mobile"
-                                class="block py-2 text-md hover:text-primary transition text-left w-full"
+                                class="flex items-center gap-3 py-2 text-md hover:text-primary transition text-left w-full"
                             >
+                                <Search class="w-[1.1rem] h-[1.1rem] text-tertiary" />
                                 Search
                             </button>
                         </li>

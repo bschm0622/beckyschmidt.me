@@ -51,9 +51,6 @@ export const SITE: SiteConfiguration = {
         { label: "Home", href: "/" },
         { label: "Notes", href: "/notes" },
         { label: "Work", href: "/work" },
-    ],
-
-    footerNav: [
         { label: "More", href: "/more" },
     ],
 
