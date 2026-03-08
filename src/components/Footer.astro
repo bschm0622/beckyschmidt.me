@@ -1,5 +1,19 @@
+---
+import { SITE } from "@/siteConfig";
+
+const footerLinks = SITE.footerNav ?? [];
+---
+
 <footer class="px-6 py-6 text-sm text-tertiary">
     <div class="flex flex-wrap gap-x-2 gap-y-1 justify-center md:justify-end">
+        {footerLinks.map((link) => (
+            <>
+                <a href={link.href} class="hover:underline whitespace-nowrap">
+                    {link.label}
+                </a>
+                <span aria-hidden="true">•</span>
+            </>
+        ))}
         <a
             href="https://astro.build"
             class="hover:underline whitespace-nowrap"
@@ -9,10 +23,7 @@
             Made with Astro
         </a>
         <span aria-hidden="true">•</span>
-        <a
-            href="/rss.xml"
-            class="hover:underline whitespace-nowrap"
-        >
+        <a href="/rss.xml" class="hover:underline whitespace-nowrap">
             RSS
         </a>
     </div>
