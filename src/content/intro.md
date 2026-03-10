@@ -1,5 +1,7 @@
 # Hi, I'm Becky.
 
-I'm a product manager at [Octane11](https://octane11.com), where I was the second product hire. I build AI tools and data products that help B2B marketers prove their impact. On the side, I'm building a [Bible reading app](https://bibleplan.app) with 120+ lifetime users.
+I'm a product manager from Indianapolis.
 
-I'm a native Hoosier, living in Indianapolis with my husband, our toddler, and four backyard chickens. When I'm not at work, you can find me tinkering on [side projects](/work#side-projects), getting coffee with a friend, or playing a board game.
+I work at [Octane11](https://octane11.com), where I own our core data and AI products. I like deeply understanding a problem, prototyping solutions, and guiding through development to well-built software. Last year I started building with AI and have been [shipping side projects](/work#side-projects) ever since.
+
+In my personal life my husband and I are raising our toddler and four backyard chickens. I like to cycle on Zwift, have a cup of coffee with friends at [Ascend](https://www.ascendindy.com/), and play board games like [Moonrakers](https://www.moonrakersgame.com/).

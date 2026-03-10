@@ -8,29 +8,21 @@ description: What I'm working on
 
 ## Day job
 
-I'm a Senior Product Manager at [Octane11](https://octane11.com), where I own our core data & AI products. I was the second product and seventh overall hire.
+I'm a Senior Product Manager at [Octane11](https://octane11.com), an early-stage B2B data platform where I joined as the seventh hire. I own our data and AI products end-to-end, from discovery through launch and go-to-market.
 
-I start with discovery - prototyping features in Figma and Claude Code, testing ideas with users, and using SQL to question assumptions. I get curious about the gaps between what users think they need and what the data shows. The interesting challenge is helping B2B marketers prove the value of their efforts - showing they're reaching target accounts and influencing real deals by turning signals from all their marketing channels into clear attribution.
+Before writing a spec, I'll usually build a working concept with tools like Claude Code, v0, or Figma and put it in front of stakeholders early. I use data to question my own assumptions. A lot of my best product decisions have come from the gap between what users ask for and what the data actually shows.
 
-I work closely with engineering to turn those prototypes into shipped features, staying hands-on through technical specs, QA, and release. I help the team understand user needs and make good product decisions, which means I'm in the details - writing SQL to prototype data models, reviewing code for edge cases, and testing features before they ship. Post-launch, I enable sales and marketing to effectively communicate the value to customers through release notes and knowledge base updates.
-
-Some career highlights:
-- **AI product suite:** Own the roadmap for our AI assistant (powered by our proprietary dataset) and AI-enabled user tools. Prototyped the UX in Claude Code and designed with familiar patterns to make the interface intuitive.
-- **Data products:** Own data blending logic that chooses the best account match across multiple vendors (50% signal increase) and "key moments" detection that surfaces critical touchpoints in the customer journey.
-- **Product partnerships:** Led integrations with LinkedIn's Company Intelligence API (130%+ signal lift) and The Trade Desk REDS, handling both technical scoping and business development.
-- **Internal tools:** Built AI-powered tools to reduce operational overhead, including Google Apps Scripts, YouTrack automations, and Slack workflows that save our team hours weekly.
+- **AI product suite:** I own the roadmap for our AI assistant and AI-enabled tools. I prototyped the UX myself, designed the interaction patterns, and sit close to implementation and system prompting.
+- **Data products:** I built the data blending logic that chooses the best account match across multiple vendors (50% signal increase) and "key moments" detection that surfaces critical touchpoints in the customer journey.
+- **Product partnerships:** Led integrations with LinkedIn's Company Intelligence API (130%+ signal lift) and The Trade Desk REDS. Scoped the technical requirements, negotiated the partnerships, and shipped them.
+- **Go-to-market:** I stay involved post-launch, enabling sales and marketing through release notes, knowledge base content, and training.
 
 ## Side projects
 
-I started building in early 2025, going from never coding before to my first app deployed in a month. Here's what I've shipped so far:
+I started building with AI in early 2025. Main projects:
 
-- **[BiblePlan](https://bibleplan.app?ref=personal-website-work)**: Flexible Bible reading plans - choose any books, any timeframe, skip days to make it sustainable. 120+ users, 70% activation.
-- **[Product Analytics Tools](https://productanalytics.tools?ref=personal-website-work)**: Product analytics directory where I also write up testing a bunch of these tools.
+- **[BiblePlan](https://bibleplan.app?ref=personal-website-work)**: Flexible Bible reading plans. 120+ users, 70% activation.
+- **[Product Analytics Tools](https://productanalytics.tools?ref=personal-website-work)**: Product analytics directory with hands-on tool reviews.
 - **[FindColoringPages](https://findcoloringpages.com?ref=personal-website-work)**: Free coloring pages directory.
-- **[SplitReceipts](https://splitreceipts.com?ref=personal-website-work)**: Receipt scanner - upload a photo, get line items broken out and categorized.
-- **[Wellspring Archive](https://wellspringarchive.com?ref=personal-website-work)**: Christian podcast directory
-- **[Teeth Whitening Find](https://teethwhiteningfind.com?ref=personal-website-work)**: Teeth whitening providers directory
-- **[GolfSim Find](https://golfsimfind.com?ref=personal-website-work)**: Golf simulator finder
-- **[hey, pal creative](https://heypalcreative.co)**: Marketing site for a friend's videography agency
-
-...and a bunch of other experiments that didn't make it out of GitHub.
+- **[SplitReceipts](https://splitreceipts.com?ref=personal-website-work)**: Receipt scanner that breaks out and categorizes line items from a photo.
+- **[hey, pal creative](https://heypalcreative.co)**: Marketing site for a friend's videography agency.
