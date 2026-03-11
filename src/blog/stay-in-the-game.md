@@ -1,6 +1,6 @@
 ---
-title: "The lanes are collapsing"
-slug: "the-lanes-are-collapsing"
+title: "Stay in the game"
+slug: "stay-in-the-game"
 pubDate: "2026-02-26"
 author: "Becky Schmidt"
 description: ""
