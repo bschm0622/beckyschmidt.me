@@ -38,7 +38,10 @@ const canonicalStr =
 const shouldLoadAnalytics = import.meta.env.PROD;
 ---
 
-<!-- Theme mode initialization with debug logs -->
+<!-- Theme color meta must come before the init script so the script can find it -->
+<meta id="theme-color-meta" name="theme-color" content="#f9fafb" />
+
+<!-- Theme mode initialization -->
 <script is:inline>
     (function () {
         let theme = localStorage.getItem("theme");
@@ -79,7 +82,6 @@ const shouldLoadAnalytics = import.meta.env.PROD;
 <meta name="description" content={description} />
 <meta name="robots" content="index, follow" />
 <meta name="author" content={SITE.author} />
-<meta id="theme-color-meta" name="theme-color" content="#f9fafb" />
 
 <!-- Open Graph / Facebook -->
 <meta property="og:type" content="website" />

@@ -2,10 +2,6 @@
 import { defineConfig, fontProviders, envField } from 'astro/config';
 import sitemap from "@astrojs/sitemap";
 import react from '@astrojs/react';
-import pagefind from "astro-pagefind";
-
-
-
 import remarkToc from "remark-toc";
 import remarkCollapse from "remark-collapse";
 import { remarkReadingTime } from './src/utils/remark-reading-time.mjs';
@@ -22,9 +18,8 @@ const isDev = process.argv.includes('dev');
 export default defineConfig({
   site: "https://beckyschmidt.me",
   integrations: [
-    sitemap({ filter: (page) => page !== 'https://beckyschmidt.me/admin' }), 
-    react(),
-    pagefind()
+    sitemap({ filter: (page) => page !== 'https://beckyschmidt.me/admin' }),
+    react()
   ],
     
 

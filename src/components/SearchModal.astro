@@ -1,5 +1,5 @@
 ---
-import PagefindSearch from "astro-pagefind/components/Search";
+import FuseSearch from "./FuseSearch";
 ---
 
 <!-- Modal Backdrop -->
@@ -22,14 +22,7 @@ import PagefindSearch from "astro-pagefind/components/Search";
                 <!-- Search UI -->
                 <div class="p-6">
                     <h2 id="search-modal-title" class="sr-only">Search</h2>
-                    <PagefindSearch
-                        id="search-modal"
-                        className="pagefind-ui"
-                        uiOptions={{
-                            showImages: false,
-                            translations: { placeholder: "Search..." },
-                        }}
-                    />
+                    <FuseSearch maxHeight="60vh" client:load />
                 </div>
 
                 <!-- Close hint - ESC key (desktop only) -->
@@ -62,14 +55,14 @@ import PagefindSearch from "astro-pagefind/components/Search";
 
         function openModal() {
             elements.backdrop.classList.remove("hidden");
-            void elements.backdrop.offsetHeight; // Trigger reflow for animation
+            void elements.backdrop.offsetHeight;
             elements.backdrop.classList.remove("opacity-0");
             elements.content.classList.remove("scale-95");
             elements.content.classList.add("scale-100");
 
             setTimeout(() => {
-                const searchInput = document.querySelector(
-                    '#search-modal input[type="text"]',
+                const searchInput = content.querySelector(
+                    'input[type="text"]',
                 ) as HTMLInputElement;
                 searchInput?.focus();
             }, FOCUS_DELAY);
@@ -84,26 +77,21 @@ import PagefindSearch from "astro-pagefind/components/Search";
 
         window.openSearchModal = openModal;
 
-        // Prevent clicks inside content from closing modal
         elements.content.addEventListener("click", (e) => {
             e.stopPropagation();
         });
 
-        // Click outside modal content to close
         elements.container.addEventListener("click", () => {
             closeModal();
         });
 
-        // Keyboard shortcuts
         document.addEventListener("keydown", (e) => {
             const isModalOpen = !elements.backdrop.classList.contains("hidden");
 
-            // ESC to close
             if (e.key === "Escape" && isModalOpen) {
                 closeModal();
             }
 
-            // Cmd/Ctrl + K to open
             if ((e.metaKey || e.ctrlKey) && e.key === "k") {
                 e.preventDefault();
                 openModal();
@@ -111,7 +99,6 @@ import PagefindSearch from "astro-pagefind/components/Search";
         });
     }
 
-    // Initialize on page load and after view transitions
     if (document.readyState === "loading") {
         document.addEventListener("DOMContentLoaded", initSearchModal);
     } else {
@@ -119,108 +106,3 @@ import PagefindSearch from "astro-pagefind/components/Search";
     }
     document.addEventListener("astro:page-load", initSearchModal);
 </script>
-
-<style is:global>
-    /* Modal-specific Pagefind styling */
-    #search-modal {
-        --pagefind-ui-scale: 0.8;
-        --pagefind-ui-primary: var(--color-primary);
-        --pagefind-ui-text: var(--color-foreground);
-        --pagefind-ui-background: var(--color-background);
-        --pagefind-ui-border: var(--color-muted);
-        --pagefind-ui-border-width: 1px;
-        --pagefind-ui-border-radius: 8px;
-        --pagefind-ui-font: var(--font-sans);
-    }
-
-    /* Search input styling */
-    #search-modal .pagefind-ui__search-input {
-        background-color: var(--color-surface);
-        border: 1px solid var(--color-muted);
-        color: var(--color-foreground);
-        font-weight: 400;
-    }
-
-    #search-modal .pagefind-ui__search-input:focus {
-        border-color: var(--color-primary);
-        outline: none;
-    }
-
-    /* Search clear button */
-    #search-modal .pagefind-ui__search-clear {
-        background-color: transparent;
-        color: var(--color-tertiary);
-    }
-
-    /* Search results */
-    #search-modal .pagefind-ui__result {
-        background-color: transparent;
-        border: none;
-        border-radius: 0;
-        padding: 0;
-        margin-bottom: 1.5rem;
-    }
-
-    #search-modal .pagefind-ui__result-title,
-    #search-modal .pagefind-ui__result-link {
-        color: var(--color-link);
-        font-size: 1.25rem;
-        font-weight: 500;
-        text-decoration: none;
-        line-height: 1.4;
-    }
-
-    #search-modal .pagefind-ui__result-link:hover {
-        text-decoration: underline;
-    }
-
-    #search-modal .pagefind-ui__result-excerpt {
-        color: var(--color-foreground);
-        font-size: 1rem;
-        line-height: 1.6;
-        margin-top: 0.5rem;
-    }
-
-    #search-modal .pagefind-ui__result-excerpt mark {
-        background-color: var(--color-muted);
-        color: var(--color-foreground);
-        padding: 0.125rem 0.25rem;
-        border-radius: 4px;
-        font-weight: 500;
-    }
-
-    /* Messages */
-    #search-modal .pagefind-ui__message {
-        color: var(--color-tertiary);
-        font-size: 1rem;
-        margin: 1rem 0;
-    }
-
-    /* Hide image thumbnails */
-    #search-modal .pagefind-ui__result-thumb {
-        display: none;
-    }
-
-    /* Button styling */
-    #search-modal .pagefind-ui__button {
-        background-color: var(--color-primary);
-        color: white;
-        border: none;
-        border-radius: 6px;
-        padding: 0.5rem 1rem;
-        font-size: 0.875rem;
-        cursor: pointer;
-    }
-
-    #search-modal .pagefind-ui__button:hover {
-        opacity: 0.9;
-    }
-
-    /* Results container max height */
-    #search-modal .pagefind-ui__results-area {
-        max-height: 60vh;
-        overflow-y: auto;
-        margin-right: -0.5rem;
-        padding-right: 0.5rem;
-    }
-</style>
