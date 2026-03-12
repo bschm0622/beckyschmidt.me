@@ -1,14 +1,14 @@
 ---
 import ThemeToggle from "@/components/ThemeToggle.astro";
 import { SITE } from "@/siteConfig";
-import { Home, Briefcase, NotebookPen, Ellipsis, Search } from "@lucide/astro";
+import { Home, LampDesk, NotebookPen, Ellipsis, Search } from "@lucide/astro";
 
 const navLinks = SITE.nav;
 const currentPath = Astro.url.pathname;
 
 const iconMap: Record<string, any> = {
     Home: Home,
-    Work: Briefcase,
+    Work: LampDesk,
     Notes: NotebookPen,
     More: Ellipsis,
 };
@@ -66,6 +66,65 @@ const iconMap: Record<string, any> = {
         transform: rotate(-45deg) translateY(0);
         position: absolute;
         top: 11px;
+    }
+
+    /* === Nav icon hover animations === */
+
+    /* Home: smoke puffs from chimney */
+    .smoke {
+        opacity: 0;
+        transform-box: fill-box;
+    }
+    .group:hover .smoke-1 {
+        animation: smoke-rise 1.2s ease-out infinite;
+    }
+    .group:hover .smoke-2 {
+        animation: smoke-rise 1.2s ease-out 0.4s infinite;
+    }
+    @keyframes smoke-rise {
+        0% { opacity: 0; transform: translateY(0) scale(0.6); }
+        15% { opacity: 0.55; }
+        100% { opacity: 0; transform: translateY(-10px) scale(2.2); }
+    }
+
+    /* Notes: pen writes left-right */
+    .notes-pen {
+        transform-box: fill-box;
+    }
+    .group:hover .notes-pen {
+        animation: pen-write 0.6s ease-in-out;
+    }
+    @keyframes pen-write {
+        0%, 100% { transform: translateX(0); }
+        25% { transform: translateX(-1.5px); }
+        75% { transform: translateX(1.5px); }
+    }
+
+    /* Work: desk lamp wiggles */
+    .lamp-head {
+        transform-box: fill-box;
+        transform-origin: bottom left;
+    }
+    .group:hover .lamp-head {
+        animation: lamp-wiggle 0.5s ease-in-out;
+    }
+    @keyframes lamp-wiggle {
+        0%, 100% { transform: rotate(0deg); }
+        25% { transform: rotate(-6deg); }
+        75% { transform: rotate(4deg); }
+    }
+
+    /* More: dots do a sequential bounce wave */
+    .dot {
+        transform-box: fill-box;
+    }
+    .group:hover .dot-1 { animation: dot-bounce 0.4s ease 0s; }
+    .group:hover .dot-2 { animation: dot-bounce 0.4s ease 0.1s; }
+    .group:hover .dot-3 { animation: dot-bounce 0.4s ease 0.2s; }
+
+    @keyframes dot-bounce {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-3px); }
     }
 
     /* Icon nav tooltips */
@@ -192,34 +251,75 @@ const iconMap: Record<string, any> = {
     <div class="hidden md:flex items-center justify-between w-full">
         <!-- Icon nav: home + page links -->
         <div class="flex items-center gap-3">
-            <!-- Home icon -->
+            <!-- Home: chimney smoke on hover -->
             <div class="relative group">
                 <a
                     href="/"
                     aria-label="Home"
                     class:list={["flex items-center justify-center w-9 h-9 rounded-lg text-foreground hover:bg-foreground/13 transition-colors", { "bg-foreground/[0.07]": currentPath === "/" }]}
                 >
-                    <Home class="w-[1.15rem] h-[1.15rem]" />
+                    <svg class="w-[1.4rem] h-[1.4rem]" viewBox="0 -6 24 30" overflow="visible" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M3 9 L12 2 L15.5 4.72 V0 A1 1 0 0 1 16.5 -1 H18.5 A1 1 0 0 1 19.5 0 V7.28 L21 9 V20 A2 2 0 0 1 19 22 H5 A2 2 0 0 1 3 20 Z"/>
+                        <polyline points="9 22 9 12 15 12 15 22"/>
+                        <circle class="smoke smoke-1" cx="17.5" cy="-2.5" r="1.8" fill="currentColor" stroke="none"/>
+                        <circle class="smoke smoke-2" cx="17.5" cy="-2.5" r="1.4" fill="currentColor" stroke="none"/>
+                    </svg>
                 </a>
                 <span class="nav-tooltip bg-primary text-background dark:bg-secondary dark:text-foreground">Home</span>
             </div>
-            <!-- Page links as icons -->
-            {navLinks.filter(l => l.label !== "Home").map((link) => {
-                const Icon = iconMap[link.label];
-                const isActive = currentPath.startsWith(link.href);
-                return Icon ? (
-                    <div class="relative group">
-                        <a
-                            href={link.href}
-                            aria-label={link.label}
-                            class:list={["flex items-center justify-center w-9 h-9 rounded-lg text-foreground hover:bg-foreground/13 transition-colors", { "bg-foreground/[0.07]": isActive }]}
-                        >
-                            <Icon class="w-[1.15rem] h-[1.15rem]" />
-                        </a>
-                        <span class="nav-tooltip bg-primary text-background dark:bg-secondary dark:text-foreground">{link.label}</span>
-                    </div>
-                ) : null;
-            })}
+
+            <!-- Notes: pen wiggles on hover -->
+            <div class="relative group">
+                <a
+                    href="/notes"
+                    aria-label="Notes"
+                    class:list={["flex items-center justify-center w-9 h-9 rounded-lg text-foreground hover:bg-foreground/13 transition-colors", { "bg-foreground/[0.07]": currentPath.startsWith("/notes") }]}
+                >
+                    <svg class="w-[1.15rem] h-[1.15rem]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M13.4 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7.4"/>
+                        <path d="M2 6h4"/><path d="M2 10h4"/><path d="M2 14h4"/><path d="M2 18h4"/>
+                        <path class="notes-pen" d="m21.378 5.626a1 1 0 1 0-3.004-3.004l-5.01 5.012a2 2 0 0 0-.506.854l-.837 2.87a.5.5 0 0 0 .62.62l2.87-.837a2 2 0 0 0 .854-.506z"/>
+                    </svg>
+                </a>
+                <span class="nav-tooltip bg-primary text-background dark:bg-secondary dark:text-foreground">Notes</span>
+            </div>
+
+            <!-- Work: desk lamp wiggles on hover -->
+            <div class="relative group">
+                <a
+                    href="/work"
+                    aria-label="Work"
+                    class:list={["flex items-center justify-center w-9 h-9 rounded-lg text-foreground hover:bg-foreground/13 transition-colors", { "bg-foreground/[0.07]": currentPath.startsWith("/work") }]}
+                >
+                    <svg class="w-[1.15rem] h-[1.15rem]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <!-- Base (stays still) -->
+                        <path d="M3 20a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v1a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1z"/>
+                        <!-- Lamp arm + head (wiggles) -->
+                        <g class="lamp-head">
+                            <path d="m9.086 6.5-4.793 4.793a1 1 0 0 0-.18 1.17L7 18"/>
+                            <path d="M10.293 2.293a1 1 0 0 1 1.414 0l2.5 2.5 5.994 1.227a1 1 0 0 1 .506 1.687l-7 7a1 1 0 0 1-1.687-.506l-1.227-5.994-2.5-2.5a1 1 0 0 1 0-1.414z"/>
+                            <path d="m14.207 4.793-3.414 3.414"/>
+                        </g>
+                    </svg>
+                </a>
+                <span class="nav-tooltip bg-primary text-background dark:bg-secondary dark:text-foreground">Work</span>
+            </div>
+
+            <!-- More: dots bounce in a wave on hover -->
+            <div class="relative group">
+                <a
+                    href="/more"
+                    aria-label="More"
+                    class:list={["flex items-center justify-center w-9 h-9 rounded-lg text-foreground hover:bg-foreground/13 transition-colors", { "bg-foreground/[0.07]": currentPath.startsWith("/more") }]}
+                >
+                    <svg class="w-[1.15rem] h-[1.15rem]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle class="dot dot-1" cx="5" cy="12" r="1"/>
+                        <circle class="dot dot-2" cx="12" cy="12" r="1"/>
+                        <circle class="dot dot-3" cx="19" cy="12" r="1"/>
+                    </svg>
+                </a>
+                <span class="nav-tooltip bg-primary text-background dark:bg-secondary dark:text-foreground">More</span>
+            </div>
         </div>
 
         <!-- Right side: search + theme toggle (unchanged) -->
