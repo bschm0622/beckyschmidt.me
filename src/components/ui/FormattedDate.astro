@@ -1,5 +1,5 @@
 ---
-const { date } = Astro.props;
+const { date, class: className } = Astro.props;
 
 let formattedDate;
 
@@ -27,6 +27,6 @@ if (typeof date === "string") {
 }
 ---
 
-<time datetime={typeof date === "string" ? date : date.toISOString()}>
+<time datetime={typeof date === "string" ? date : date.toISOString()} class={className}>
     {formattedDate}
 </time>

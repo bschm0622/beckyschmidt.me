@@ -3,65 +3,63 @@ import Layout from "@/layouts/Layout.astro";
 import BlogReel from "@/components/BlogReel.astro";
 import { SITE } from "@/siteConfig";
 import Intro from "@/content/intro.md";
+import projects from "@/data/projects.json";
 
-const projectsLink =
-  SITE.nav.find((item) => item.label === "Projects")?.href ?? "/projects";
 ---
 
 <Layout title="Home" description="Home page">
-  <div class="mx-auto w-full mt-5 md:mt-10 space-y-8">
-    <!-- Intro + Bio -->
-    <div class="space-y-6 prose prose-slate dark:prose-invert max-w-none">
-      <Intro />
+  <div class="mx-auto w-full mt-5 md:mt-10 space-y-12">
 
-      <!-- Social links (visually attached to bio) -->
+    <!-- Intro + Bio -->
+    <div class="space-y-6">
+      <Intro />
       <div class="flex items-center gap-4">
-        <a
-          href={`mailto:${SITE.socials?.email}`}
-          class="inline-flex items-center gap-1.5 hover:underline"
-        >
+        <a href={`mailto:${SITE.socials?.email}`} class="inline-flex items-center gap-1.5">
           Email
-          <svg
-            class="text-muted-foreground size-4"
-            xmlns="http://www.w3.org/2000/svg"
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-          >
-            <path
-              fill="currentColor"
-              d="M10 6v2H5v11h11v-5h2v6a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1zm11-3v8h-2V6.413l-7.793 7.794l-1.414-1.414L17.585 5H13V3z"
-            />
+          <svg class="text-tertiary size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+            <path fill="currentColor" d="M10 6v2H5v11h11v-5h2v6a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1zm11-3v8h-2V6.413l-7.793 7.794l-1.414-1.414L17.585 5H13V3z" />
           </svg>
         </a>
-
-        <a
-          href={SITE.socials?.linkedin}
-          target="_blank"
-          rel="noopener noreferrer"
-          class="inline-flex items-center gap-1.5 hover:underline"
-        >
+        <a href={SITE.socials?.linkedin} target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5">
           LinkedIn
-          <svg
-            class="text-muted-foreground size-4"
-            xmlns="http://www.w3.org/2000/svg"
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-          >
-            <path
-              fill="currentColor"
-              d="M10 6v2H5v11h11v-5h2v6a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1zm11-3v8h-2V6.413l-7.793 7.794l-1.414-1.414L17.585 5H13V3z"
-            />
+          <svg class="text-tertiary size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+            <path fill="currentColor" d="M10 6v2H5v11h11v-5h2v6a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1zm11-3v8h-2V6.413l-7.793 7.794l-1.414-1.414L17.585 5H13V3z" />
           </svg>
         </a>
       </div>
     </div>
 
-    <!-- Latest notes -->
-    <div class="space-y-6 pt-6 md:pt-8">
-      <h2>Latest notes</h2>
+    <!-- Projects -->
+    <div class="space-y-6">
+      <h2>Projects</h2>
+      <div class="space-y-4">
+        {projects.map((project) => (
+          <a
+            href={project.href}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="group flex flex-col sm:flex-row sm:items-baseline gap-1 sm:gap-2 no-underline!"
+          >
+            <div class="flex items-baseline gap-2 shrink-0">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" class="size-4 shrink-0 fill-foreground transition-colors group-hover:fill-tertiary translate-y-[2px]">
+                <path d={project.iconPath} />
+              </svg>
+              <p class="font-medium text-foreground! group-hover:underline decoration-1 decoration-muted group-hover:decoration-foreground">{project.name}</p>
+            </div>
+            <p class="text-tertiary">{project.description}</p>
+          </a>
+        ))}
+      </div>
+    </div>
+
+    <!-- Notes -->
+    <div class="space-y-6">
+      <a href="/notes" class="group inline-flex items-baseline gap-1.5 text-foreground! no-underline!">
+        <h2>Notes</h2>
+        <span class="text-tertiary group-hover:text-foreground transition-colors">→</span>
+      </a>
       <BlogReel preview={true} />
     </div>
+
   </div>
 </Layout>

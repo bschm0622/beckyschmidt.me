@@ -22,33 +22,6 @@ function readPage(relPath: string): string {
     return stripMarkdown(fs.readFileSync(path.resolve(relPath), "utf-8"));
 }
 
-const staticPages = [
-    {
-        title: "Work",
-        description: "What I'm working on — day job, side projects, and more.",
-        tags: [] as string[],
-        url: "/work/",
-        pubDate: "",
-        body: readPage("src/pages/work.md"),
-    },
-    {
-        title: "Uses",
-        description: "Tools I use for product management and building",
-        tags: [] as string[],
-        url: "/uses/",
-        pubDate: "",
-        body: readPage("src/pages/uses.md"),
-    },
-    {
-        title: "Colophon",
-        description: "How this site is built",
-        tags: [] as string[],
-        url: "/colophon/",
-        pubDate: "",
-        body: readPage("src/pages/colophon.md"),
-    },
-];
-
 export const GET: APIRoute = async () => {
     const posts = await getCollection("blog");
 
@@ -61,7 +34,7 @@ export const GET: APIRoute = async () => {
         body: stripMarkdown(post.body ?? ""),
     }));
 
-    const index = [...blogItems, ...staticPages];
+    const index = [...blogItems];
 
     return new Response(JSON.stringify(index), {
         headers: { "Content-Type": "application/json" },

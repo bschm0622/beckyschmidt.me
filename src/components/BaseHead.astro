@@ -155,7 +155,7 @@ const shouldLoadAnalytics = import.meta.env.PROD;
 <link rel="manifest" href="/site.webmanifest" />
 <link rel="sitemap" href="/sitemap-index.xml" />
 
-<Font cssVariable="--font-karla" preload />
+<Font cssVariable="--font-overpass" preload />
 <Favicons />
 <ClientRouter />
 
@@ -169,7 +169,6 @@ const shouldLoadAnalytics = import.meta.env.PROD;
       s.defer = true;
       document.head.appendChild(s);
     } else {
-      console.log("Umami tracking disabled for this device.");
     }
   </script>
 )}

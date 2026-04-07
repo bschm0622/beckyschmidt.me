@@ -50,8 +50,6 @@ export const SITE: SiteConfiguration = {
     nav: [
         { label: "Home", href: "/" },
         { label: "Notes", href: "/notes" },
-        { label: "Work", href: "/work" },
-        { label: "More", href: "/more" },
     ],
 
     copyright: `© ${new Date().getFullYear()} Becky Schmidt - all rights reserved`,

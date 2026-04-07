@@ -1,307 +1,53 @@
 ---
 import ThemeToggle from "@/components/ThemeToggle.astro";
-import { SITE } from "@/siteConfig";
-import { Home, Briefcase, NotebookPen, Ellipsis, Search } from "@lucide/astro";
 
-const navLinks = SITE.nav;
-const currentPath = Astro.url.pathname;
+const path = Astro.url.pathname;
 
-const iconMap: Record<string, any> = {
-    Home: Home,
-    Work: Briefcase,
-    Notes: NotebookPen,
-    More: Ellipsis,
-};
+const isHome = path === "/";
 ---
 
-<style>
-    input#menu-toggle {
-        position: absolute;
-        opacity: 0;
-        width: 0;
-        height: 0;
-        pointer-events: none;
-    }
-
-    /* Hamburger styling */
-    .hamburger {
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        gap: 5px;
-        width: 24px;
-        height: 24px;
-        cursor: pointer;
-        color: var(--color-tertiary);
-        background: transparent;
-        border: none;
-        padding: 0;
-        position: relative;
-        z-index: 50; /* above mobile-menu */
-    }
-
-    .hamburger-line {
-        width: 24px;
-        height: 2px;
-        background-color: currentColor;
-        transition:
-            transform 0.3s ease,
-            opacity 0.3s ease;
-        transform-origin: center;
-    }
-
-    /* Animate hamburger to X when menu open */
-    input#menu-toggle:checked + label.hamburger .line1 {
-        transform: rotate(45deg) translateY(0);
-        position: absolute;
-        top: 11px;
-    }
-
-    input#menu-toggle:checked + label.hamburger .line2 {
-        opacity: 0;
-    }
-
-    input#menu-toggle:checked + label.hamburger .line3 {
-        transform: rotate(-45deg) translateY(0);
-        position: absolute;
-        top: 11px;
-    }
-
-    /* Icon nav tooltips */
-    .nav-tooltip {
-        position: absolute;
-        top: calc(100% + 6px);
-        left: 50%;
-        transform: translateX(-50%);
-        padding: 3px 8px;
-        font-size: 0.75rem;
-        border-radius: 4px;
-        white-space: nowrap;
-        pointer-events: none;
-        opacity: 0;
-        transition: opacity 0.15s ease;
-    }
-
-    .group:hover .nav-tooltip,
-    .group:has(:focus-visible) .nav-tooltip {
-        opacity: 1;
-    }
-
-    /* Mobile menu hidden by default */
-    .mobile-menu {
-        position: fixed;
-        top: 88px; /* navbar height */
-        left: 0;
-        right: 0;
-        background: var(--color-background);
-        overflow-y: auto;
-        padding: 1rem 1.5rem;
-        z-index: 40;
-
-        max-height: 0; /* hide menu */
-        opacity: 0;
-        pointer-events: none;
-        overflow: hidden; /* hide contents when closed */
-
-        transition:
-            max-height 0.3s ease,
-            opacity 0.3s ease;
-    }
-
-    input#menu-toggle:checked ~ .mobile-menu {
-        min-height: 100vh;
-        opacity: 1;
-        pointer-events: auto;
-    }
-</style>
-
 <script>
-    function initNavbar() {
-        const toggleBtn = document.getElementById("menu-toggle-btn");
-        const mobileMenu = document.getElementById("mobile-menu");
-        const searchTriggerDesktop = document.getElementById("search-trigger-desktop");
-        const searchTriggerMobile = document.getElementById("search-trigger-mobile");
-
-        if (toggleBtn && mobileMenu) {
-            toggleBtn.addEventListener("click", () => {
-                mobileMenu.classList.toggle("open");
-            });
-
-            // Optional: close menu when clicking a link inside it
-            mobileMenu.querySelectorAll("a").forEach((link) => {
-                link.addEventListener("click", () => {
-                    mobileMenu.classList.remove("open");
-                });
-            });
-        }
-
-        // Hook up search triggers to modal
-        if (searchTriggerDesktop) {
-            searchTriggerDesktop.addEventListener("click", (e) => {
-                e.preventDefault();
+    function initSearchTrigger() {
+        const btn = document.getElementById("search-trigger");
+        if (btn) {
+            btn.addEventListener("click", () => {
                 if ((window as any).openSearchModal) {
                     (window as any).openSearchModal();
-                }
-            });
-        }
-
-        if (searchTriggerMobile) {
-            searchTriggerMobile.addEventListener("click", (e) => {
-                e.preventDefault();
-                if ((window as any).openSearchModal) {
-                    (window as any).openSearchModal();
-                }
-                // Close mobile menu
-                const menuToggle = document.getElementById("menu-toggle") as HTMLInputElement;
-                if (menuToggle) {
-                    menuToggle.checked = false;
                 }
             });
         }
     }
 
-    // Initialize on page load and after view transitions
     if (document.readyState === "loading") {
-        document.addEventListener("DOMContentLoaded", initNavbar);
+        document.addEventListener("DOMContentLoaded", initSearchTrigger);
     } else {
-        initNavbar();
+        initSearchTrigger();
     }
-    document.addEventListener("astro:page-load", initNavbar);
-
-    function updateThemeTooltip() {
-        const tooltip = document.getElementById("theme-tooltip");
-        if (!tooltip) return;
-        const isDark = document.documentElement.classList.contains("dark");
-        tooltip.textContent = isDark ? "Light mode" : "Dark mode";
-    }
-
-    // Update on load and after view transitions
-    updateThemeTooltip();
-    document.addEventListener("astro:page-load", updateThemeTooltip);
-
-    // Update whenever the html class changes (theme toggle fires this)
-    new MutationObserver(updateThemeTooltip).observe(document.documentElement, {
-        attributes: true,
-        attributeFilter: ["class"],
-    });
+    document.addEventListener("astro:page-load", initSearchTrigger);
 </script>
 
-<nav class="px-4 py-6 flex items-center justify-between w-full max-w-3xl mx-auto text-md">
-    <!-- Desktop Nav -->
-    <div class="hidden md:flex items-center justify-between w-full">
-        <!-- Icon nav: home + page links -->
-        <div class="flex items-center gap-3">
-            <!-- Home icon -->
-            <div class="relative group">
-                <a
-                    href="/"
-                    aria-label="Home"
-                    class:list={["flex items-center justify-center w-9 h-9 rounded-lg text-foreground hover:bg-foreground/13 transition-colors", { "bg-foreground/[0.07]": currentPath === "/" }]}
-                >
-                    <Home class="w-[1.15rem] h-[1.15rem]" />
-                </a>
-                <span class="nav-tooltip bg-primary text-background dark:bg-secondary dark:text-foreground">Home</span>
-            </div>
-            <!-- Page links as icons -->
-            {navLinks.filter(l => l.label !== "Home").map((link) => {
-                const Icon = iconMap[link.label];
-                const isActive = currentPath.startsWith(link.href);
-                return Icon ? (
-                    <div class="relative group">
-                        <a
-                            href={link.href}
-                            aria-label={link.label}
-                            class:list={["flex items-center justify-center w-9 h-9 rounded-lg text-foreground hover:bg-foreground/13 transition-colors", { "bg-foreground/[0.07]": isActive }]}
-                        >
-                            <Icon class="w-[1.15rem] h-[1.15rem]" />
-                        </a>
-                        <span class="nav-tooltip bg-primary text-background dark:bg-secondary dark:text-foreground">{link.label}</span>
-                    </div>
-                ) : null;
-            })}
-        </div>
+<nav class="px-4 py-6 flex items-center justify-between w-full max-w-3xl mx-auto">
+    <!-- Back to home (hidden on homepage) -->
+    {!isHome && (
+        <a
+            href="/"
+            aria-label="Go home"
+            class="flex items-center justify-center w-9 h-9 rounded-lg transition-all hover:bg-foreground/13 text-foreground"
+        >
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 256 256"><path d="M232,56A104.11,104.11,0,0,1,128,160H51.31l34.35,34.34a8,8,0,0,1-11.32,11.32l-48-48a8,8,0,0,1,0-11.32l48-48a8,8,0,0,1,11.32,11.32L51.31,144H128a88.1,88.1,0,0,0,88-88,8,8,0,0,1,16,0Z"></path></svg>
+        </a>
+    )}
 
-        <!-- Right side: search + theme toggle (unchanged) -->
-        <div class="flex items-center gap-3">
-            <button
-                type="button"
-                id="search-trigger-desktop"
-                class="flex items-center gap-2 px-3 py-1.5 rounded-md border border-muted hover:border-primary transition-colors cursor-pointer text-sm text-tertiary"
-                aria-label="Search"
-            >
-                <span>Search</span>
-                <kbd class="hidden lg:inline-flex items-center gap-1 px-1.5 py-0.5 bg-muted rounded text-xs text-foreground">
-                    <span>⌘</span>
-                    <span>K</span>
-                </kbd>
-            </button>
-            <div class="relative group">
-                <ThemeToggle />
-                <span id="theme-tooltip" class="nav-tooltip bg-primary text-background dark:bg-secondary dark:text-foreground">Dark mode</span>
-            </div>
-        </div>
-    </div>
-
-    <!-- Mobile Nav -->
-    <div class="flex flex-col md:hidden w-full relative">
-        <div class="flex items-center justify-between w-full">
-            <a
-                href="/"
-                aria-label="Home"
-                class:list={["flex items-center justify-center w-9 h-9 rounded-lg text-foreground hover:bg-foreground/13 transition-colors", { "bg-foreground/[0.07]": currentPath === "/" }]}
-            >
-                <Home class="w-[1.15rem] h-[1.15rem]" />
-            </a>
-
-            <div class="flex items-center gap-4">
-                <ThemeToggle />
-
-                <input type="checkbox" id="menu-toggle" />
-
-                <label
-                    for="menu-toggle"
-                    class="hamburger"
-                    aria-label="Toggle menu"
-                    role="button"
-                    tabindex="0"
-                >
-                    <span class="hamburger-line line1"></span>
-                    <span class="hamburger-line line2"></span>
-                    <span class="hamburger-line line3"></span>
-                </label>
-
-                <div id="mobile-menu" class="mobile-menu">
-                    <ul class="space-y-2">
-                        {
-                            navLinks.filter(l => l.label !== "Home").map((link) => {
-                                const Icon = iconMap[link.label];
-                                return (
-                                    <li>
-                                        <a
-                                            href={link.href}
-                                            class="flex items-center gap-3 py-2 text-md hover:text-primary transition"
-                                        >
-                                            {Icon && <Icon class="w-[1.1rem] h-[1.1rem] text-tertiary" />}
-                                            {link.label}
-                                        </a>
-                                    </li>
-                                );
-                            })
-                        }
-                        <li>
-                            <button
-                                type="button"
-                                id="search-trigger-mobile"
-                                class="flex items-center gap-3 py-2 text-md hover:text-primary transition text-left w-full"
-                            >
-                                <Search class="w-[1.1rem] h-[1.1rem] text-tertiary" />
-                                Search
-                            </button>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-        </div>
+    <!-- Right side controls -->
+    <div class="flex items-center gap-2 ml-auto">
+        <button
+            type="button"
+            id="search-trigger"
+            aria-label="Search"
+            class="flex items-center justify-center w-9 h-9 rounded-lg transition-all cursor-pointer hover:bg-foreground/13"
+        >
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 256 256"><path d="M229.66,218.34l-50.07-50.06a88.11,88.11,0,1,0-11.31,11.31l50.06,50.07a8,8,0,0,0,11.32-11.32ZM40,112a72,72,0,1,1,72,72A72.08,72.08,0,0,1,40,112Z"></path></svg>
+        </button>
+        <ThemeToggle />
     </div>
 </nav>

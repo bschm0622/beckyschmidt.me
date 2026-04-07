@@ -19,11 +19,8 @@ const slug = post.data.slug;
 
 <MarkdownPostLayout minutesRead={minutesRead} frontmatter={post.data}>
     <Content />
-    <p class="italic text-sm text-muted-foreground mt-8 mb-3">
-        Thanks for reading!
-    </p>
     <ReactionApp client:load postId={slug} />
-    <a href="/notes" class="inline-flex items-center gap-1 text-sm text-tertiary hover:text-foreground transition-colors mt-8 no-underline">
-        ← All notes
+    <a href="/notes" class="text-sm text-tertiary hover:text-foreground transition-colors mt-8 inline-block no-underline">
+        all notes
     </a>
 </MarkdownPostLayout>

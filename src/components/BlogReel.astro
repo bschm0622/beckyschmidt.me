@@ -8,72 +8,50 @@ const { posts = null, preview = false } = Astro.props;
 let postsToShow;
 
 if (posts) {
-  // Use passed-in posts, sorted by pubDate descending
   postsToShow = posts.sort(
     (a: any, b: any) => b.data.pubDate.getTime() - a.data.pubDate.getTime(),
   );
   if (preview) {
-    postsToShow = postsToShow.slice(0, 3);
+    postsToShow = postsToShow.slice(0, 5);
   }
 } else {
-  // If no posts passed, fetch all and show sorted or preview slice
   const allPosts = await import("astro:content").then(mod => mod.getCollection("blog"));
   const sortedPosts = allPosts.sort(
     (a, b) => b.data.pubDate.getTime() - a.data.pubDate.getTime(),
   );
-  postsToShow = preview ? sortedPosts.slice(0, 3) : sortedPosts;
+  postsToShow = preview ? sortedPosts.slice(0, 5) : sortedPosts;
 }
 ---
 
-<div class="space-y-6">
+<div class="space-y-4">
   {postsToShow.map((post: any) => (
-    <article>
-      <a
-        href={`/notes/${post.id}/`}
-        class="text-xl font-semibold text-primary hover:underline"
-      >
-        {post.data.title}
-      </a>
-
-      {post.data.description && <p class="mt-1">{post.data.description}</p>}
-
-      <div class="mt-2 flex flex-wrap items-center text-sm text-tertiary space-x-2">
-        <FormattedDate date={post.data.pubDate} />
-        {post.data.tags && post.data.tags.length > 0 && (
-          <div class="flex flex-wrap space-x-2">
-            {post.data.tags.map((tag: any) => (
-              <BlogTag
-                href={`/notes/tag/${slugifyStr(tag)}/`}
-              >
-                {tag}
-              </BlogTag>
-            ))}
-          </div>
-        )}
+    <div>
+      <div class="flex items-baseline justify-between gap-6">
+        <div class="flex items-baseline gap-2 flex-wrap min-w-0">
+          <a
+            href={`/notes/${post.id}/`}
+            class="font-medium leading-snug shrink-0"
+          >
+            {post.data.title}
+          </a>
+          {post.data.tags && post.data.tags.length > 0 && (
+            <div class="hidden md:flex flex-wrap gap-1.5">
+              {post.data.tags.map((tag: any) => (
+                <BlogTag href={`/notes/tag/${slugifyStr(tag)}/`}>{tag}</BlogTag>
+              ))}
+            </div>
+          )}
+        </div>
+        <FormattedDate date={post.data.pubDate} class="text-sm text-tertiary shrink-0" />
       </div>
-    </article>
+      {post.data.tags && post.data.tags.length > 0 && (
+        <div class="flex md:hidden flex-wrap gap-1.5 mt-2">
+          {post.data.tags.map((tag: any) => (
+            <BlogTag href={`/notes/tag/${slugifyStr(tag)}/`}>{tag}</BlogTag>
+          ))}
+        </div>
+      )}
+    </div>
   ))}
 
-  {preview && (
-    <div>
-      <a
-        href="/notes"
-        class="inline-flex items-center text-primary hover:underline"
-      >
-        See all notes
-        <svg
-          class="ml-1 h-5 w-5"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          viewBox="0 0 24 24"
-          aria-hidden="true"
-        >
-          <path d="M5 12h14M13 6l6 6-6 6" />
-        </svg>
-      </a>
-    </div>
-  )}
 </div>

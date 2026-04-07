@@ -72,14 +72,12 @@ export default defineConfig({
     ],
   },
 
-  experimental: {
   fonts: [{
     provider: fontProviders.fontsource(),
-      name: "Karla",
-    cssVariable: "--font-karla",
+    name: "Overpass",
+    cssVariable: "--font-overpass",
     weights: ["400", "500", "600", "700"]
-    }]
-  },
+  }],
 
   adapter: isDev ? undefined : netlify({
     edgeMiddleware: false,

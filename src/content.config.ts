@@ -24,31 +24,5 @@ const blog = defineCollection({
     })
 });
 
-// Resume/work history collection
-// Body content contains: first paragraph = description, bullet list = accomplishments
-const resume = defineCollection({
-    loader: glob({ pattern: '**/[^_]*.md', base: "./src/content/resume" }),
-    schema: z.object({
-        position: z.string(),
-        company: z.string(),
-        companyUrl: z.string().url(),
-        location: z.string(),
-        dates: z.string(),
-        order: z.number(),
-        type: z.enum(['job', 'education']).default('job'),
-    })
-});
-
-// Projects/portfolio collection
-const projects = defineCollection({
-    loader: glob({ pattern: '**/[^_]*.md', base: "./src/content/projects" }),
-    schema: z.object({
-        name: z.string(),
-        tagline: z.string(),
-        link: z.string().url(),
-        order: z.number(),
-    })
-});
-
 // Export collections
-export const collections = { blog, resume, projects };
+export const collections = { blog };

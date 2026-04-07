@@ -7,7 +7,7 @@ html {
 }
 
 @theme {
-  --font-sans: var(--font-karla);
+  --font-sans: var(--font-overpass);
   --color-primary: #334155; /* Deep slate navy */
   --color-muted: #e5e7eb; /* Neutral soft gray */
   --color-tertiary: #6b7280; /* Mid gray */
@@ -16,7 +16,7 @@ html {
   --color-secondary: #f8fafc;
   --color-foreground: #1e293b; /* Deep slate text */
   --color-background: #f9fafb;
-  --color-link: #2563eb; /* Distinct accessible blue for links */
+  --color-link: #3b82f6;
 }
 
 .dark {
@@ -28,7 +28,7 @@ html {
   --color-secondary: #334155;
   --color-foreground: #f3f4f6;
   --color-background: #0f172a;
-  --color-link: #93c5fd; /* Softer, bright link color for dark mode */
+  --color-link: #60a5fa;
 }
 
 .typography {
@@ -66,10 +66,10 @@ html {
     @apply mb-1;
   }
 
-  /* Links — more distinct color */
+  /* Links */
   a {
     color: var(--color-link);
-    @apply no-underline hover:underline hover:opacity-80 transition;
+    @apply underline decoration-1 decoration-link/40 hover:decoration-2 hover:decoration-link transition-colors;
   }
 
   /* Blockquote */
@@ -140,10 +140,9 @@ html {
     @apply mb-1;
   }
 
-  /* Links — consistent blue tone */
+  /* Links */
   a {
-    color: var(--color-link);
-    @apply no-underline hover:underline hover:opacity-80 transition;
+    @apply text-foreground underline decoration-1 decoration-tertiary hover:decoration-2 hover:decoration-foreground hover:opacity-60 transition-all;
   }
 
   /* Quotes, separators, tables, etc. */
@@ -195,7 +194,7 @@ html.dark .astro-code span {
 
 /* Inline <code> styling */
 code {
-  @apply text-primary text-lg;
+  @apply text-foreground text-base;
 }
 
 /* Code blocks smaller font */
@@ -208,12 +207,6 @@ code {
 }
 
 /* Dark mode inline code */
-@media (prefers-color-scheme: dark) {
-  code {
-    @apply text-accent bg-secondary;
-  }
-}
-
 html.dark code {
-  @apply text-accent bg-secondary;
+  @apply bg-secondary;
 }

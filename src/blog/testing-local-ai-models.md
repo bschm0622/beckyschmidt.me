@@ -4,7 +4,7 @@ slug: "testing-local-ai-models"
 pubDate: "2026-04-07"
 author: "Becky Schmidt"
 description: ""
-tags: ["ai"]
+tags: ["AI","side-project"]
 ---
 Big labs like Anthropic and OpenAI have been subsidizing our AI subscriptions for years, but that's slowly starting to change. At the time of writing, Anthropic started throttling usage at peak hours. For now, OpenAI is taking the opposite approach by constantly resetting usage limits, but eventually it'll catch up to them too.
 
