@@ -5,7 +5,7 @@ export const prerender = false;
 export const POST: APIRoute = async ({ request }) => {
   try {
     const { password } = await request.json();
-    const adminPassword = import.meta.env.ADMIN_PASSWORD;
+    const adminPassword = process.env.ADMIN_PASSWORD;
     
     if (!adminPassword) {
       return new Response(

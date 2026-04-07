@@ -5,7 +5,7 @@ export const prerender = false;
 
 export const GET: APIRoute = async ({ url }) => {
   try {
-    const githubToken = import.meta.env.GITHUB_TOKEN;
+    const githubToken = process.env.GITHUB_TOKEN;
     const owner = import.meta.env.GITHUB_OWNER;
     const repo = import.meta.env.GITHUB_REPO;
     const path = url.searchParams.get('path') || '';

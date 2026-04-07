@@ -5,7 +5,7 @@ export const prerender = false;
 
 export const POST: APIRoute = async ({ request }) => {
   try {
-    const githubToken = import.meta.env.GITHUB_TOKEN;
+    const githubToken = process.env.GITHUB_TOKEN;
     const owner = import.meta.env.GITHUB_OWNER;
     const repo = import.meta.env.GITHUB_REPO;
 
