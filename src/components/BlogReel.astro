@@ -23,14 +23,14 @@ if (posts) {
 }
 ---
 
-<div class="space-y-4">
+<div class="divide-y divide-muted">
   {postsToShow.map((post: any) => (
-    <div>
+    <div class="py-3">
       <div class="flex items-baseline justify-between gap-6">
         <div class="flex items-baseline gap-2 flex-wrap min-w-0">
           <a
             href={`/notes/${post.id}/`}
-            class="font-medium leading-snug shrink-0"
+            class="text-sm font-medium leading-snug shrink-0"
           >
             {post.data.title}
           </a>
@@ -42,7 +42,7 @@ if (posts) {
             </div>
           )}
         </div>
-        <FormattedDate date={post.data.pubDate} class="text-sm text-tertiary shrink-0" />
+        <FormattedDate date={post.data.pubDate} class="text-xs text-tertiary shrink-0" />
       </div>
       {post.data.tags && post.data.tags.length > 0 && (
         <div class="flex md:hidden flex-wrap gap-1.5 mt-2">
@@ -53,5 +53,4 @@ if (posts) {
       )}
     </div>
   ))}
-
 </div>

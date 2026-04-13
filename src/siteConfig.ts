@@ -31,7 +31,6 @@ export interface SiteConfiguration {
     nav: NavLink[];
     footerNav?: NavLink[];
 
-    copyright?: string;
 }
 
 export const SITE: SiteConfiguration = {
@@ -52,5 +51,4 @@ export const SITE: SiteConfiguration = {
         { label: "Notes", href: "/notes" },
     ],
 
-    copyright: `© ${new Date().getFullYear()} Becky Schmidt - all rights reserved`,
 };

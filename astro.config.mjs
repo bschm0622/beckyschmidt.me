@@ -74,8 +74,8 @@ export default defineConfig({
 
   fonts: [{
     provider: fontProviders.fontsource(),
-    name: "Overpass",
-    cssVariable: "--font-overpass",
+    name: "Inter",
+    cssVariable: "--font-inter",
     weights: ["400", "500", "600", "700"]
   }],
 

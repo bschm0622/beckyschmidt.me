@@ -2,62 +2,58 @@
 import Layout from "@/layouts/Layout.astro";
 import BlogReel from "@/components/BlogReel.astro";
 import { SITE } from "@/siteConfig";
-import Intro from "@/content/intro.md";
 import projects from "@/data/projects.json";
 
 ---
 
 <Layout title="Home" description="Home page">
-  <div class="mx-auto w-full mt-5 md:mt-10 space-y-12">
+  <div class="mx-auto w-full mt-8 md:mt-14 space-y-16">
 
     <!-- Intro + Bio -->
-    <div class="space-y-6">
-      <Intro />
-      <div class="flex items-center gap-4">
-        <a href={`mailto:${SITE.socials?.email}`} class="inline-flex items-center gap-1.5">
-          Email
-          <svg class="text-tertiary size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
-            <path fill="currentColor" d="M10 6v2H5v11h11v-5h2v6a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1zm11-3v8h-2V6.413l-7.793 7.794l-1.414-1.414L17.585 5H13V3z" />
-          </svg>
-        </a>
-        <a href={SITE.socials?.linkedin} target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5">
-          LinkedIn
-          <svg class="text-tertiary size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
-            <path fill="currentColor" d="M10 6v2H5v11h11v-5h2v6a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1zm11-3v8h-2V6.413l-7.793 7.794l-1.414-1.414L17.585 5H13V3z" />
-          </svg>
-        </a>
+    <div class="space-y-3">
+      <h1 class="text-3xl font-bold leading-[1.1] tracking-[-0.03em]">Hi, I'm Becky.</h1>
+      <p class="text-base leading-7 text-tertiary">
+        I'm a Senior PM at <a href="https://octane11.com" target="_blank" rel="noopener noreferrer" class="text-foreground">Octane11</a>, where I oversee our data & AI products.
+      </p>
+      <p class="text-base leading-7 text-tertiary">
+        In my spare time I'm tinkering on side projects with agentic coding tools, cycling on Zwift, and raising my toddler with my husband in Indianapolis.
+      </p>
+      <div class="flex items-center gap-2 pt-1">
+        <a href={`mailto:${SITE.socials?.email}`} class="text-sm text-tertiary">Email</a>
+        <span class="text-muted select-none">·</span>
+        <a href={SITE.socials?.linkedin} target="_blank" rel="noopener noreferrer" class="text-sm text-tertiary">LinkedIn</a>
       </div>
     </div>
 
     <!-- Projects -->
-    <div class="space-y-6">
-      <h2>Projects</h2>
-      <div class="space-y-4">
+    <div class="space-y-3">
+      <p class="text-base font-semibold text-foreground">Projects</p>
+      <div class="divide-y divide-muted">
         {projects.map((project) => (
           <a
             href={project.href}
             target="_blank"
             rel="noopener noreferrer"
-            class="group flex flex-col sm:flex-row sm:items-baseline gap-1 sm:gap-2 no-underline!"
+            class="group flex items-center justify-between gap-6 py-3.5 no-underline!"
           >
-            <div class="flex items-baseline gap-2 shrink-0">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" class="size-4 shrink-0 fill-foreground transition-colors group-hover:fill-tertiary translate-y-[2px]">
-                <path d={project.iconPath} />
-              </svg>
-              <p class="font-medium text-foreground! group-hover:underline decoration-1 decoration-muted group-hover:decoration-foreground">{project.name}</p>
+            <div class="min-w-0">
+              <p class="text-sm font-medium text-foreground leading-snug group-hover:underline decoration-1">{project.name}</p>
+              <p class="text-sm text-tertiary mt-0.5 leading-snug">{project.description}</p>
             </div>
-            <p class="text-tertiary">{project.description}</p>
+            <svg class="size-3.5 shrink-0 text-muted group-hover:text-tertiary transition-colors" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+              <path fill="currentColor" d="M10 6v2H5v11h11v-5h2v6a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1zm11-3v8h-2V6.413l-7.793 7.794l-1.414-1.414L17.585 5H13V3z" />
+            </svg>
           </a>
         ))}
       </div>
     </div>
 
     <!-- Notes -->
-    <div class="space-y-6">
-      <a href="/notes" class="group inline-flex items-baseline gap-1.5 text-foreground! no-underline!">
-        <h2>Notes</h2>
-        <span class="text-tertiary group-hover:text-foreground transition-colors">→</span>
-      </a>
+    <div class="space-y-3">
+      <div class="flex items-center justify-between">
+        <p class="text-base font-semibold text-foreground">Notes</p>
+        <a href="/notes" class="text-sm text-tertiary">View all →</a>
+      </div>
       <BlogReel preview={true} />
     </div>
 

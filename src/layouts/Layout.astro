@@ -2,7 +2,6 @@
 import "@/styles/global.css";
 import BaseHead from "@/components/BaseHead.astro";
 import Navbar from "@/components/Navbar.astro";
-import Footer from "@/components/Footer.astro";
 import SearchModal from "@/components/SearchModal.astro";
 
 const { title, description, image, canonicalURL } = Astro.props;
@@ -22,10 +21,9 @@ const { title, description, image, canonicalURL } = Astro.props;
         class="bg-background text-foreground transition-colors min-h-screen flex flex-col"
     >
         <Navbar />
-        <main class="px-4 flex-1 mx-auto w-full max-w-3xl type-standard">
+        <main class="px-4 pb-16 flex-1 mx-auto w-full max-w-3xl type-standard">
             <slot />
         </main>
-        <Footer />
         <SearchModal />
     </body>
 </html>

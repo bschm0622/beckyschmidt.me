@@ -39,7 +39,7 @@ const shouldLoadAnalytics = import.meta.env.PROD;
 ---
 
 <!-- Theme color meta must come before the init script so the script can find it -->
-<meta id="theme-color-meta" name="theme-color" content="#f9fafb" />
+<meta id="theme-color-meta" name="theme-color" content="#ffffff" />
 
 <!-- Theme mode initialization -->
 <script is:inline>
@@ -59,7 +59,7 @@ const shouldLoadAnalytics = import.meta.env.PROD;
         document.documentElement.classList.remove("light", "dark");
         document.documentElement.classList.add(theme);
         var meta = document.getElementById("theme-color-meta");
-        if (meta) meta.setAttribute("content", theme === "dark" ? "#0f172a" : "#f9fafb");
+        if (meta) meta.setAttribute("content", theme === "dark" ? "#0f172a" : "#ffffff");
     })();
 </script>
 
@@ -155,7 +155,7 @@ const shouldLoadAnalytics = import.meta.env.PROD;
 <link rel="manifest" href="/site.webmanifest" />
 <link rel="sitemap" href="/sitemap-index.xml" />
 
-<Font cssVariable="--font-overpass" preload />
+<Font cssVariable="--font-inter" preload />
 <Favicons />
 <ClientRouter />
 
