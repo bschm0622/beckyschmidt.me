@@ -24,10 +24,12 @@ The script runs three separate enrichment passes, and that structure was intenti
 
 Compared to Gemini 2.5 Flash Lite, Gemma was a little worse out of the box. Gemini is more intuitive and needed less hand-holding. Gemma required more explicit guidance to get to the same place. But that tradeoff was worth it to me - the process of tightening up my prompts for Gemma actually made the whole enrichment pipeline better. And being able to run it hundreds of times while iterating without fear of running up a bill is pretty underrated.
 
-Gemma is also slower than hitting an API endpoint, but that doesn't really matter when I'm only enriching a handful of jobs per day.
+Gemma is also slower than hitting an API endpoint, but that doesn't really matter when I'm only enriching a handful of jobs per day. Whenever I add a bunch of new companies I call the script manually off-schedule to keep the processing low on the actual schedule.
 
 ## Are local models worth it?
 
 For this type of focused enrichment task, yes - 100%. The cost savings are obvious, but the real surprise was how much more freely I could experiment. No API bill watching means you can actually stress-test your prompts instead of being precious about it.
 
-I doubt Gemma would hold up on more complex coding tasks - that's still Codex and Claude territory for me. But I want to find out where the line actually is. That's the next test.
+So far, local models are excelling at "easy" tasks like summarization and categorization. Through cheap subscriptions like Claude & ChatGPT, we're being spoiled by state-of-the-art models at dirt-cheap prices, but I believe that tide will be changing soon. There are already [open-source models](https://z.ai/blog/glm-5.1) that are at Sonnet levels of intelligence, but right now those models require massive levels of compute beyond even a Mac Mini.
+
+Either way, this was a fun experiement and I intend to keep testing local models, as much as my Mac Mini can handle.
