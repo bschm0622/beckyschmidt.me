@@ -19,6 +19,8 @@ pnpm-debug.log*
 
 # macOS-specific files
 .DS_Store
+*.icloud
+.*.icloud
 
 # jetbrains setting folder
 .idea/
