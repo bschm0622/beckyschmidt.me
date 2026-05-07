@@ -20,15 +20,15 @@ html {
 }
 
 .dark {
-  --color-primary: #94a3b8; /* Muted silver-blue */
-  --color-muted: #475569;
-  --color-tertiary: #7e8fa8;
-  --color-surface: #1e293b;
-  --color-accent: #7dd3fc; /* Subtle blue accent pop */
-  --color-secondary: #334155;
-  --color-foreground: #f3f4f6;
-  --color-background: #0f172a;
-  --color-link: #60a5fa;
+  --color-primary: #d4d4d8;
+  --color-muted: #52525b;
+  --color-tertiary: #a1a1aa;
+  --color-surface: #27272a;
+  --color-accent: #818cf8;
+  --color-secondary: #3f3f46;
+  --color-foreground: #fafafa;
+  --color-background: #18181b;
+  --color-link: #a5b4fc;
 }
 
 .typography {
