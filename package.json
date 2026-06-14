@@ -34,5 +34,8 @@
   },
   "devDependencies": {
     "@types/lodash.kebabcase": "^4.1.9"
+  },
+  "overrides": {
+    "esbuild": "^0.28.1"
   }
 }
