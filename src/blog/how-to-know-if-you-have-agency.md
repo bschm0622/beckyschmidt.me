@@ -12,7 +12,7 @@ I read a lot of job descriptions for a [side project](https://remotepmjobs.com?u
 
 The clearest example I found is [Hightouch](https://hightouch.com/?utm_source=beckyschmidt.me&utm_medium=blog&utm_campaign=high-agency), a self-described agentic marketing platform built on top of a customer data warehouse. They're hiring a Lead Product Manager for their Agentic Ads Platform, and this is how they describe the thing they want to build:
 
-**\> Best-in-class agentic creation experience.** The interaction model for how marketers work with agents to go from objective to live campaign. This means the conversational interface, the review and approval workflows, the feedback loops that help agents learn what "good" looks like for each brand, and the progressive autonomy controls that let teams start with full human approval and graduate to agent-led execution as trust builds.
+> **Best-in-class agentic creation experience.** The interaction model for how marketers work with agents to go from objective to live campaign. This means the conversational interface, the review and approval workflows, the feedback loops that help agents learn what "good" looks like for each brand, and the progressive autonomy controls that let teams start with full human approval and graduate to agent-led execution as trust builds.
 
 Now read that again with the word "agent" taken out. What's left is a job description for a person:
 
@@ -49,4 +49,4 @@ Outside your job, build the same muscle on something nobody assigned you at all.
 
 Eighteen months ago I had never built a website, and I mostly used ChatGPT to ask it dumb questions. Today I have a job board that scrapes, enriches, and refreshes itself most of the way on its own, and I built it because I was curious, not because anyone asked. I can't stop tinkering with it. The questions I ask myself are always loop questions. How do I automate more of this? How do I cut the time on that? How do I make it more useful for the one person I'm building it for? The more I treated the whole thing as mine, instead of staying in some imagined lane, the more agency I built, and the more it leaked back into everything else I do.
 
-Curiosity points you at the problems nobody handed you. Closing the loop on them, over and over, is what turns those problems into trust. Do that enough times, at work and outside it, and "high agency" stops being a phrase you're hoping a recruiter notices in you \- it becomes the truest line on your resume.
+Curiosity points you at the problems nobody handed you. Closing the loop on them, over and over, is what turns those problems into trust. Do that enough times, at work and outside it, and "high agency" stops being something ambiguous but an actual skill you can demonstrate.

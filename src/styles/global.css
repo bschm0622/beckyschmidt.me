@@ -58,9 +58,11 @@ html {
   p {
     @apply text-base leading-7 mb-5 text-foreground/90;
   }
-  ul,
+  ul {
+    @apply list-disc pl-5 mb-5 text-base leading-7 text-foreground/90;
+  }
   ol {
-    @apply pl-5 mb-5 text-base leading-7 text-foreground/90;
+    @apply list-decimal pl-5 mb-5 text-base leading-7 text-foreground/90;
   }
   li {
     @apply mb-1;
