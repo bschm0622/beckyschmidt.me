@@ -5,7 +5,7 @@ import { getCollection } from "astro:content";
 import { Content as Hero } from "@/story/hero.md";
 import { Content as BuildingIntro } from "@/story/building.md";
 import { Content as Beliefs } from "@/story/beliefs.md";
-import { Content as Now } from "@/story/now.md";
+import { Content as Contact } from "@/story/contact.md";
 
 // All homepage copy lives in src/story/*.md — edit those files, not this one.
 const caseStudies = (await getCollection("building")).sort(
@@ -73,9 +73,9 @@ const caseStudies = (await getCollection("building")).sort(
       <a href="/notes" class="text-sm text-muted-foreground hover:text-foreground transition-colors inline-block">View all notes →</a>
     </section>
 
-    <!-- Now: edit src/story/now.md -->
+    <!-- Contact / closing CTA: edit src/story/contact.md -->
     <section class="typography">
-      <Now />
+      <Contact />
     </section>
 
   </div>
