@@ -81,14 +81,14 @@ export default function FuseSearch({ autoFocus = false, maxHeight }: Props) {
                     onChange={handleChange}
                     placeholder="Type to search..."
                     disabled={loading}
-                    className="w-full px-4 py-2.5 pr-10 rounded-lg border border-[var(--color-muted)] bg-[var(--color-surface)] text-[var(--color-foreground)] text-sm font-normal placeholder:text-[var(--color-tertiary)] focus:outline-none focus:border-[var(--color-primary)] transition-colors disabled:opacity-50"
+                    className="w-full px-4 py-2.5 pr-10 rounded-lg border border-[var(--color-muted)] bg-[var(--color-surface)] text-[var(--color-foreground)] text-sm font-normal placeholder:text-[var(--color-muted-foreground)] focus:outline-none focus:border-[var(--color-primary)] transition-colors disabled:opacity-50"
                     aria-label="Search"
                     autoComplete="off"
                 />
                 {query && (
                     <button
                         onClick={clearQuery}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--color-tertiary)] hover:text-[var(--color-foreground)] transition-colors"
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)] transition-colors"
                         aria-label="Clear search"
                     >
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -106,7 +106,7 @@ export default function FuseSearch({ autoFocus = false, maxHeight }: Props) {
                     style={maxHeight ? { maxHeight } : undefined}
                 >
                     {noResults && (
-                        <p className="text-[var(--color-tertiary)] text-sm">
+                        <p className="text-[var(--color-muted-foreground)] text-sm">
                             No results for &ldquo;{query}&rdquo;
                         </p>
                     )}
@@ -125,13 +125,13 @@ export default function FuseSearch({ autoFocus = false, maxHeight }: Props) {
                                 </div>
                             )}
                             <div className="flex flex-wrap gap-2 mt-1.5 items-center">
-                                <span className="text-[var(--color-tertiary)] text-xs">
+                                <span className="text-[var(--color-muted-foreground)] text-xs">
                                     {item.pubDate}
                                 </span>
                                 {item.tags.map((tag) => (
                                     <span
                                         key={tag}
-                                        className="text-xs text-[var(--color-tertiary)]"
+                                        className="text-xs text-[var(--color-muted-foreground)]"
                                     >
                                         #{tag}
                                     </span>

@@ -179,7 +179,7 @@ tags: ${fm.tags}
             onClick={() => setActiveTab('editor')}
             className={`flex-1 py-3 px-4 text-center font-medium transition-colors ${activeTab === 'editor'
                 ? 'bg-primary text-white'
-                : 'bg-surface text-tertiary hover:text-foreground'
+                : 'bg-surface text-muted-foreground hover:text-foreground'
               }`}
           >
             Editor
@@ -188,7 +188,7 @@ tags: ${fm.tags}
             onClick={() => setActiveTab('preview')}
             className={`flex-1 py-3 px-4 text-center font-medium transition-colors ${activeTab === 'preview'
                 ? 'bg-primary text-white'
-                : 'bg-surface text-tertiary hover:text-foreground'
+                : 'bg-surface text-muted-foreground hover:text-foreground'
               }`}
           >
             Preview

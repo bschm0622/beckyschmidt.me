@@ -84,7 +84,7 @@ function ReactionButton({ postId }: ReactionButtonProps) {
                             className={`flex items-center gap-2 px-3 py-2 rounded border text-sm transition
                                 ${alreadyReacted
                                     ? "bg-primary border-primary text-background dark:text-foreground"
-                                    : "border-muted text-tertiary hover:border-foreground/30 hover:text-foreground"
+                                    : "border-muted text-muted-foreground hover:border-foreground/30 hover:text-foreground"
                                 }`}
                             onClick={() => handleClick(reaction)}
                             aria-pressed={alreadyReacted}

@@ -24,5 +24,23 @@ const blog = defineCollection({
     })
 });
 
+// Case studies for things I've built (rendered at /building)
+const building = defineCollection({
+    loader: glob({ pattern: '**/[^_]*.md', base: "./src/building" }),
+    schema: z.object({
+        title: z.string(),
+        tagline: z.string(),
+        order: z.number(),
+        links: z
+            .array(
+                z.object({
+                    label: z.string(),
+                    href: z.string(),
+                })
+            )
+            .default([]),
+    })
+});
+
 // Export collections
-export const collections = { blog };
+export const collections = { blog, building };

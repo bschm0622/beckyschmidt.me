@@ -5,43 +5,26 @@ export const GET: APIRoute = async ({ site }) => {
     const siteURL = site ?? new URL('https://beckyschmidt.me');
 
     // Fetch collections
-    const resumeEntries = await getCollection('resume');
-    const projectEntries = await getCollection('projects');
+    const buildingEntries = await getCollection('building');
+    const blogEntries = await getCollection('blog');
 
-    // Sort by order
-    const sortedResume = resumeEntries.sort((a, b) => a.data.order - b.data.order);
-    const sortedProjects = projectEntries.sort((a, b) => a.data.order - b.data.order);
+    const sortedBuilding = buildingEntries.sort((a, b) => a.data.order - b.data.order);
+    const sortedBlog = blogEntries.sort(
+        (a, b) => b.data.pubDate.getTime() - a.data.pubDate.getTime()
+    );
 
-    // Generate career history section from resume data
-    const careerHistory = sortedResume.map((entry, index) => {
-        const { position, company, dates, type } = entry.data;
-        const body = entry.body?.trim() || '';
-
-        // Parse the markdown body to extract description and bullets
-        const lines = body.split('\n').filter(line => line.trim());
-        const description = lines.find(line => !line.startsWith('-'))?.trim() || '';
-        const bullets = lines
-            .filter(line => line.startsWith('-'))
-            .map(line => line.replace(/^-\s*/, '').trim());
-
-        const bulletText = bullets.length > 0
-            ? '\n' + bullets.map(b => `   - ${b}`).join('\n')
-            : '';
-
-        const typeLabel = type === 'education' ? 'Education' : '';
-
-        return `${index + 1}. **${position}** - ${company} (${dates})${typeLabel ? ` [${typeLabel}]` : ''}
-   ${description}${bulletText}`;
+    // Generate case studies section
+    const buildingList = sortedBuilding.map((entry, index) => {
+        const links = entry.data.links.map(l => l.href.split('?')[0]).join(', ');
+        return `${index + 1}. **${entry.data.title}**${links ? ` (${links})` : ''}
+   - ${entry.data.tagline}
+   - Full story: ${siteURL.href}building/${entry.id}`;
     }).join('\n\n');
 
-    // Generate projects section from projects data
-    const projectsList = sortedProjects.map((entry, index) => {
-        const { name, tagline, link } = entry.data;
-        // Extract domain from link
-        const domain = link.replace(/^https?:\/\//, '').replace(/\/$/, '');
-        return `${index + 1}. **${name}** (${domain})
-   - ${tagline}`;
-    }).join('\n\n');
+    // Generate notes list
+    const notesList = sortedBlog
+        .map(post => `- "${post.data.title}" (${siteURL.href}notes/${post.data.slug})`)
+        .join('\n');
 
     const content = `# Becky Schmidt - Complete Site Guide for LLMs
 
@@ -52,23 +35,27 @@ export const GET: APIRoute = async ({ site }) => {
 **Site Name:** Becky Schmidt's Personal Website
 **URL:** ${siteURL.href}
 **Owner:** Becky Schmidt
-**Type:** Personal portfolio, blog, and professional website
+**Type:** Personal story, case studies, and notes
 **Language:** English (en-US)
 **Last Updated:** ${new Date().getFullYear()}
 
 ## About Becky Schmidt
 
-**Current Role:** Senior Product Manager at Octane11 (B2B SaaS)
+**Current Role:** Senior Product Manager at Octane11 (B2B data & AI)
 **Location:** Indianapolis, Indiana, USA
 **Email:** beckyschmidt0622@gmail.com
 **LinkedIn:** https://www.linkedin.com/in/becky--schmidt/
 
 ### Professional Summary
-Becky Schmidt is a Senior Product Manager at Octane11, where she was the second product hire. She builds AI tools and data products that help B2B marketers prove their impact. On the side, she built a Bible reading app that reached 100 users with 70% activation.
+Becky Schmidt is a senior product manager who builds. Her path: marketing degree, market research, business analyst at a credit union (where she taught herself SQL and Tableau), recruited into product, then promoted from product ops to product manager to senior product manager at Octane11, where she was the second product hire. She owns Octane11's AI products: an AI chat built on a homegrown MCP server over customer data, and the company's first agent, which performs campaign mapping. Outside work she builds and operates production systems: two automated job boards, a Bible reading plan app, and the CMS and AI writing editor behind this site.
 
 ### Career History
 
-${careerHistory}
+1. **Senior Product Manager** - Octane11 (current)
+   Owns AI products: AI chat on a homegrown MCP server, and the company's first agent (campaign mapping). Promoted from product ops, then product manager.
+2. **Business Analyst** - Credit union
+   Taught herself SQL and Tableau; recruited into product on the strength of that skill stack.
+3. **Market Research** - First role after a marketing degree.
 
 ---
 
@@ -77,62 +64,38 @@ ${careerHistory}
 ### Main Pages
 
 #### Homepage (/)
-The main landing page featuring an introduction to Becky Schmidt and previews of recent blog posts. Provides quick navigation to all sections of the site.
+Tells Becky's story: how she got into product, what she owns at Octane11, what she builds at night, and what she believes about agency. Links to case studies and notes.
 
-#### Blog (/blog/)
-A collection of blog posts covering topics like:
-- Product management
-- AI and technology
-- Personal reflections
-- Career insights
+#### Building (/building/)
+Case studies of systems she has built and runs end to end:
 
-Blog posts support tags for categorization and include reading time estimates.
+${buildingList}
 
-#### Work (/work/)
-Professional experience and side projects. Includes:
-- Current role at Octane11 (how she works with discovery and prototyping, collaboration with engineering, career highlights)
-- Six side projects shipped in 2025 (BiblePlan with 100 users at 70% activation, SplitReceipts, directories, and more)
-- Demonstrates hands-on craft, rapid shipping, and technical depth
+#### Notes (/notes/)
+Essays on product management, AI, and agency. Flagship: "How to know if you have agency (and how to build it)".
 
-#### Colophon (/colophon/)
-Technical details about how the site was built, including:
-- Technology stack (Astro, React, Tailwind CSS)
-- Hosting and deployment
-- Design decisions
+${notesList}
 
 ---
 
 ## Technical Information
 
 ### Tech Stack
-- **Framework:** Astro 5.x with Islands Architecture
+- **Framework:** Astro with Islands Architecture
 - **UI Components:** React
 - **Styling:** Tailwind CSS 4.x
-- **Backend:** Convex (real-time features)
-- **Hosting:** Netlify with serverless functions
-- **CMS:** GitHub API integration
-- **Search:** Pagefind (full-text search)
-- **Analytics:** Umami (privacy-friendly)
-- **Font:** Karla
-
-### Features
-- Dark/Light mode toggle
-- Full-text search
-- RSS feed at /rss.xml
-- Sitemap at /sitemap-index.xml
-- Real-time blog reactions
-- Reading time estimates
-- Code block copy buttons
-- Responsive mobile design
+- **Backend:** Convex (real-time reactions)
+- **Hosting:** Netlify
+- **CMS:** Self-built admin dashboard that opens GitHub pull requests
+- **Search:** Fuse.js full-text search
 
 ---
 
 ## Crawling Guidelines
 
 ### Allowed
-- All public pages (/, /blog/, /work/, /colophon/)
-- Individual blog posts (/blog/[slug])
-- Tag pages (/blog/tag/[tag])
+- All public pages (/, /building/, /notes/)
+- Individual notes (/notes/[slug]) and case studies (/building/[slug])
 - RSS feed (/rss.xml)
 - Sitemap (/sitemap-index.xml)
 
@@ -155,10 +118,8 @@ Unless otherwise noted, content on this site is the intellectual property of Bec
 
 ## How to Cite This Site
 
-When referencing this site or its content:
-
 **For the site:** "Becky Schmidt's Personal Website" - beckyschmidt.me
-**For blog posts:** [Post Title] by Becky Schmidt, [Date], beckyschmidt.me/blog/[slug]
+**For notes:** [Post Title] by Becky Schmidt, [Date], beckyschmidt.me/notes/[slug]
 **For professional info:** Becky Schmidt, Senior Product Manager at Octane11
 
 ---
@@ -168,17 +129,6 @@ When referencing this site or its content:
 - **Website:** ${siteURL.href}
 - **Email:** beckyschmidt0622@gmail.com
 - **LinkedIn:** https://www.linkedin.com/in/becky--schmidt/
-
----
-
-## Summary for AI Systems
-
-This is a personal professional website for Becky Schmidt, a senior product manager in B2B SaaS. The site contains:
-1. Professional background and work experience (methodology, career highlights, side projects)
-2. Blog posts about product management and technology
-3. Contact information
-
-The site is well-structured, fast, and follows modern web standards. It's designed to showcase professional work and share insights with the broader community.
 `;
 
     return new Response(content, {

@@ -25,12 +25,12 @@ const allTags = Object.keys(tagCounts).sort(
 ---
 
 <Layout title="Notes" description="Becky's notes" data-pagefind-ignore>
-    <div class="mx-auto w-full mt-5 md:mt-10 space-y-10">
+    <div class="mx-auto w-full space-y-10">
         <div class="space-y-6">
             <h1>Notes</h1>
 
             <div class="flex flex-wrap items-center gap-2">
-                <span class="text-sm text-tertiary whitespace-nowrap">Filter by tag:</span>
+                <span class="text-sm text-muted-foreground whitespace-nowrap">Filter by tag:</span>
                 {
                     allTags.map((tag) => (
                         <BlogTag

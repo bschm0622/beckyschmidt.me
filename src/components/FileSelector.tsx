@@ -153,7 +153,7 @@ Add your content here.`;
         </div>
 
         {isLoading ? (
-          <div className="text-center py-8 text-tertiary">
+          <div className="text-center py-8 text-muted-foreground">
             Loading blog posts...
           </div>
         ) : (
@@ -179,7 +179,7 @@ Add your content here.`;
       </div>
 
       {blogPosts.length === 0 && !isLoading && (
-        <div className="text-center py-8 text-tertiary">
+        <div className="text-center py-8 text-muted-foreground">
           No blog posts found. Click "New Post" to create your first post.
         </div>
       )}
