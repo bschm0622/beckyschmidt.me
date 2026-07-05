@@ -1,44 +1,37 @@
 import type { APIRoute } from 'astro';
-import { getCollection } from 'astro:content';
+import projects from '../data/projects.json';
 
 export const GET: APIRoute = async ({ site }) => {
     const siteURL = site ?? new URL('https://beckyschmidt.me');
 
-    // Fetch projects collection
-    const projectEntries = await getCollection('projects');
-    const sortedProjects = projectEntries.sort((a, b) => a.data.order - b.data.order);
-
     // Generate projects list
-    const projectsList = sortedProjects
-        .map(p => `- ${p.data.name} - ${p.data.tagline}`)
+    const buildingList = projects
+        .map(p => `- ${p.name} (${p.href}) - ${p.description}`)
         .join('\n');
 
     const content = `# Becky Schmidt - Personal Website
 
-> Senior Product Manager at Octane11 | B2B SaaS | Indianapolis, IN
+> Senior Product Manager at Octane11 | AI & data products | Indianapolis, IN
 
 ## About This Site
 
-This is the personal website of Becky Schmidt, a senior product manager specializing in B2B SaaS, data products, and integrations. The site showcases her professional background, side projects, and occasional blog posts about product management, AI, and technology.
+This is the personal website of Becky Schmidt, a senior product manager who builds. The site tells her story (marketing degree to business analyst to senior PM of AI products), documents the production systems she has built and runs herself, and hosts her notes on product management, AI, and agency.
 
 ## Site Structure
 
 - Homepage: ${siteURL.href}
-- Blog: ${siteURL.href}blog/
-- Projects: ${siteURL.href}projects/
-- Resume: ${siteURL.href}resume/
-- Colophon: ${siteURL.href}colophon/
+- Notes (essays): ${siteURL.href}notes/
 
 ## Key Content
 
 ### Professional Background
-Becky is a Senior Product Manager at Octane11, where she leads product strategy for data transformation, integrations (including LinkedIn Company Intelligence API), and AI-powered user tools. Previously worked in business analysis, martech operations, and market research.
+Becky is a Senior Product Manager at Octane11, a B2B data and AI startup, where she was the second product hire and now owns the AI products: an AI chat built on a homegrown MCP server, and the company's first agent for campaign mapping. She got into product by teaching herself SQL and Tableau as a business analyst at a credit union.
 
-### Side Projects
-${projectsList}
+### Things She Has Built
+${buildingList}
 
-### Blog Topics
-Writing about product management, AI, technology, and personal reflections.
+### Notes Topics
+Essays on product management, AI, agency, and building in public. Flagship essay: ${siteURL.href}notes/how-to-know-if-you-have-agency
 
 ## Contact
 

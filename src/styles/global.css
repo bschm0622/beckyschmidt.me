@@ -10,7 +10,7 @@ html {
   --font-sans: var(--font-inter);
   --color-primary: #334155;
   --color-muted: #e2e8f0;
-  --color-tertiary: #64748b;
+  --color-muted-foreground: #64748b;
   --color-surface: #ffffff;
   --color-accent: #6366f1;
   --color-secondary: #f8fafc;
@@ -22,7 +22,7 @@ html {
 .dark {
   --color-primary: #d4d4d8;
   --color-muted: #52525b;
-  --color-tertiary: #a1a1aa;
+  --color-muted-foreground: #a1a1aa;
   --color-surface: #27272a;
   --color-accent: #818cf8;
   --color-secondary: #3f3f46;
@@ -54,29 +54,28 @@ html {
     @apply text-sm font-medium leading-[1.5] mt-4;
   }
 
-  /* Body & lists */
+  /* Body & lists — lighter gray is the default body color site-wide */
   p {
-    @apply text-base leading-7 mb-5 text-foreground/90;
+    @apply text-base leading-7 mb-5 text-muted-foreground;
   }
   ul {
-    @apply list-disc pl-5 mb-5 text-base leading-7 text-foreground/90;
+    @apply list-disc pl-5 mb-5 text-base leading-7 text-muted-foreground;
   }
   ol {
-    @apply list-decimal pl-5 mb-5 text-base leading-7 text-foreground/90;
+    @apply list-decimal pl-5 mb-5 text-base leading-7 text-muted-foreground;
   }
   li {
     @apply mb-1;
   }
 
-  /* Links */
+  /* Links: prose links are underlined, not colored */
   a {
-    color: var(--color-link);
-    @apply no-underline hover:underline decoration-1 transition-all;
+    @apply text-foreground underline decoration-1 underline-offset-2 decoration-foreground/30 hover:decoration-foreground transition-all;
   }
 
   /* Blockquote */
   blockquote {
-    @apply border-l-2 border-accent pl-4 italic text-tertiary text-base leading-7 my-6;
+    @apply border-l-2 border-accent pl-4 italic text-muted-foreground text-base leading-7 my-6;
   }
 
   /* Misc */
@@ -100,7 +99,7 @@ html {
     @apply italic text-foreground/90;
   }
   small {
-    @apply text-sm text-tertiary;
+    @apply text-sm text-muted-foreground;
   }
   pre {
     @apply mb-6 px-2 py-2 text-[0.95rem] leading-relaxed;
@@ -127,7 +126,7 @@ html {
     @apply text-base font-medium leading-[1.45];
   }
   h6 {
-    @apply text-sm font-medium uppercase tracking-wide text-tertiary leading-[1.5];
+    @apply text-sm font-medium uppercase tracking-wide text-muted-foreground leading-[1.5];
   }
 
   /* Lists */
@@ -149,7 +148,7 @@ html {
 
   /* Quotes, separators, tables, etc. */
   blockquote {
-    @apply border-l-2 border-accent pl-4 italic text-tertiary;
+    @apply border-l-2 border-accent pl-4 italic text-muted-foreground;
   }
   hr {
     @apply border-muted my-6;
@@ -171,8 +170,16 @@ html {
     @apply italic text-foreground/90;
   }
   small {
-    @apply text-sm text-tertiary;
+    @apply text-sm text-muted-foreground;
   }
+}
+
+/* Prose reset: the first element in a prose block never adds a top margin,
+   so a leading heading butts cleanly against the layout's own top spacing
+   instead of stacking .typography h1's mt-12 on top of it. */
+.typography > :first-child,
+.type-standard > :first-child {
+  margin-top: 0;
 }
 
 

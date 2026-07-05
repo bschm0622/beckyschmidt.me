@@ -30,7 +30,7 @@ if (posts) {
         <div class="flex items-baseline gap-2 flex-wrap min-w-0">
           <a
             href={`/notes/${post.id}/`}
-            class="text-sm font-medium leading-snug min-w-0"
+            class="text-base font-medium leading-snug min-w-0"
           >
             {post.data.title}
           </a>
@@ -42,7 +42,7 @@ if (posts) {
             </div>
           )}
         </div>
-        <FormattedDate date={post.data.pubDate} class="text-xs text-tertiary shrink-0" />
+        <FormattedDate date={post.data.pubDate} class="text-base text-muted-foreground shrink-0" />
       </div>
       {post.data.tags && post.data.tags.length > 0 && (
         <div class="flex md:hidden flex-wrap gap-1.5 mt-2">

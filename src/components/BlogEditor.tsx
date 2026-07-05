@@ -81,7 +81,7 @@ export default function BlogEditor() {
       // Check if this is a pending image (starts with /blog-images/)
       if (src.startsWith('/blog-images/')) {
         // Return a placeholder for images that don't exist yet
-        return `<div class="border border-dashed border-muted rounded p-4 text-center text-tertiary my-4">
+        return `<div class="border border-dashed border-muted rounded p-4 text-center text-muted-foreground my-4">
           <svg class="inline-block w-8 h-8 mb-2 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
           </svg>
@@ -346,7 +346,7 @@ tags: ${frontMatter.tags}
 
   const updatePreview = (content: string) => {
     if (!content.trim()) {
-      setPreviewHtml('<p class="text-tertiary">Preview will appear here...</p>');
+      setPreviewHtml('<p class="text-muted-foreground">Preview will appear here...</p>');
       return;
     }
     setPreviewHtml(mdParser.render(content));
@@ -620,7 +620,7 @@ ${frontMatter.description || 'Blog post updates via CMS'}
       <div className="flex items-center justify-center min-h-96">
         <div className="text-center">
           <div className="text-lg text-foreground mb-2">Loading editor...</div>
-          <div className="text-tertiary">Please wait</div>
+          <div className="text-muted-foreground">Please wait</div>
         </div>
       </div>
     );
@@ -646,7 +646,7 @@ ${frontMatter.description || 'Blog post updates via CMS'}
           <h1 className="text-2xl">
             {currentFile ? `Editing: ${currentFile}` : 'New Blog Post'}
           </h1>
-          <div className="text-md text-tertiary space-y-1">
+          <div className="text-md text-muted-foreground space-y-1">
             <div>Source: <span className="font-medium">{sourceBranch}</span></div>
             {hasUnsavedChanges && (
               <p className="text-orange-500">• Unsaved changes</p>
@@ -779,7 +779,7 @@ ${frontMatter.description || 'Blog post updates via CMS'}
             className={`flex-1 py-3 px-4 text-center font-medium transition-colors ${
               activeTab === 'editor'
                 ? 'bg-primary text-white'
-                : 'bg-surface text-tertiary hover:text-foreground'
+                : 'bg-surface text-muted-foreground hover:text-foreground'
             }`}
           >
             Editor
@@ -789,7 +789,7 @@ ${frontMatter.description || 'Blog post updates via CMS'}
             className={`flex-1 py-3 px-4 text-center font-medium transition-colors ${
               activeTab === 'preview'
                 ? 'bg-primary text-white'
-                : 'bg-surface text-tertiary hover:text-foreground'
+                : 'bg-surface text-muted-foreground hover:text-foreground'
             }`}
           >
             Preview
@@ -874,7 +874,7 @@ ${frontMatter.description || 'Blog post updates via CMS'}
       </div>
 
       {/* Usage Instructions */}
-      <div className="bg-muted border border-secondary rounded-lg p-4 text-sm text-tertiary">
+      <div className="bg-muted border border-secondary rounded-lg p-4 text-sm text-muted-foreground">
         <strong>Workflow:</strong>
         <ol className="mt-2 space-y-1 list-decimal list-inside">
           <li>Select or create a branch (avoid committing directly to master)</li>

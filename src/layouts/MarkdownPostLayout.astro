@@ -76,10 +76,10 @@ const blogPostingSchema = {
         >
         </div>
         <Navbar />
-        <main class="px-4 pb-16 flex-1 mx-auto w-full max-w-3xl typography">
+        <main class="px-4 pb-16 mt-4 md:mt-6 flex-1 mx-auto w-full max-w-3xl typography">
             <!-- Main Content -->
-            <h1 class="mt-4 mb-3">{frontmatter.title}</h1>
-            <div class="flex flex-wrap items-center gap-3 text-sm text-tertiary mb-8">
+            <h1 class="mt-0 mb-3">{frontmatter.title}</h1>
+            <div class="flex flex-wrap items-center gap-3 text-sm text-muted-foreground mb-8">
                 {frontmatter.pubDate && <FormattedDate date={frontmatter.pubDate} />}
                 {minutesRead && frontmatter.pubDate && <span>·</span>}
                 {minutesRead && <span>{minutesRead}</span>}

@@ -30,7 +30,7 @@ const filteredPosts = allPosts.filter((post) =>
     description={`Notes tagged with ${tag}`}
 >
     <div
-        class="mx-auto w-full max-w-4xl mt-5 md:mt-10 space-y-10"
+        class="mx-auto w-full max-w-4xl space-y-10"
         data-pagefind-ignore="all"
     >
         <div
@@ -48,7 +48,7 @@ const filteredPosts = allPosts.filter((post) =>
         }
         <a
             href="/notes"
-            class="inline-block mt-2 text-tertiary hover:text-foreground transition-colors no-underline!"
+            class="inline-block mt-2 text-muted-foreground hover:text-foreground transition-colors no-underline!"
             aria-label="Back to notes"
         >
             ← All notes

@@ -143,7 +143,7 @@ export default function BranchSelector({ selectedBranch, onBranchSelect }: Branc
                   setShowCreateForm(false);
                   setNewBranchName('');
                 }}
-                className="px-2 py-1 text-tertiary hover:text-foreground transition-colors text-md"
+                className="px-2 py-1 text-muted-foreground hover:text-foreground transition-colors text-md"
               >
                 Cancel
               </button>
@@ -154,7 +154,7 @@ export default function BranchSelector({ selectedBranch, onBranchSelect }: Branc
 
       {/* Branch Selection */}
       {isLoading ? (
-        <div className="text-center py-3 text-tertiary text-md">
+        <div className="text-center py-3 text-muted-foreground text-md">
           Loading branches...
         </div>
       ) : (
@@ -183,7 +183,7 @@ export default function BranchSelector({ selectedBranch, onBranchSelect }: Branc
       )}
 
       {branches.length === 0 && !isLoading && (
-        <div className="text-center py-4 text-tertiary text-sm">
+        <div className="text-center py-4 text-muted-foreground text-sm">
           No branches found. Check your GitHub configuration.
         </div>
       )}

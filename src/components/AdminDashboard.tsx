@@ -127,7 +127,7 @@ export default function AdminDashboard() {
               id="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-4 py-3 bg-background border border-muted rounded-md text-foreground placeholder-tertiary focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
+              className="w-full px-4 py-3 bg-background border border-muted rounded-md text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
               placeholder="Enter admin password"
               required
             />
@@ -161,7 +161,7 @@ export default function AdminDashboard() {
       <div className="flex items-center">
         <button
           onClick={handleLogout}
-          className="px-4 py-2 text-tertiary hover:text-foreground transition-colors"
+          className="px-4 py-2 text-muted-foreground hover:text-foreground transition-colors"
         >
           Logout
         </button>
@@ -200,11 +200,11 @@ export default function AdminDashboard() {
         </div>
 
         {loadingPosts ? (
-          <div className="text-center py-6 text-tertiary">
+          <div className="text-center py-6 text-muted-foreground">
             Loading posts...
           </div>
         ) : blogPosts.length === 0 ? (
-          <div className="text-center py-6 text-tertiary">
+          <div className="text-center py-6 text-muted-foreground">
             No blog posts found. Create your first post!
           </div>
         ) : (
@@ -219,7 +219,7 @@ export default function AdminDashboard() {
                     <div className="text-md font-semibold text-foreground mb-1">
                       {post.title}
                     </div>
-                    <div className="text-sm text-tertiary">
+                    <div className="text-sm text-muted-foreground">
                       <span>Published: {post.pubDate}</span>
                     </div>
                   </div>

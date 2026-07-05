@@ -21,7 +21,7 @@ const { title, description, image, canonicalURL } = Astro.props;
         class="bg-background text-foreground transition-colors min-h-screen flex flex-col"
     >
         <Navbar />
-        <main class="px-4 pb-16 flex-1 mx-auto w-full max-w-3xl type-standard">
+        <main class="px-4 pb-16 mt-4 md:mt-6 flex-1 mx-auto w-full max-w-3xl type-standard">
             <slot />
         </main>
         <SearchModal />
