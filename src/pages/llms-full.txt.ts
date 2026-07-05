@@ -1,23 +1,20 @@
 import type { APIRoute } from 'astro';
 import { getCollection } from 'astro:content';
+import projects from '../data/projects.json';
 
 export const GET: APIRoute = async ({ site }) => {
     const siteURL = site ?? new URL('https://beckyschmidt.me');
 
     // Fetch collections
-    const buildingEntries = await getCollection('building');
     const blogEntries = await getCollection('blog');
-
-    const sortedBuilding = buildingEntries.sort((a, b) => a.data.order - b.data.order);
     const sortedBlog = blogEntries.sort(
         (a, b) => b.data.pubDate.getTime() - a.data.pubDate.getTime()
     );
 
     // Generate side projects section
-    const buildingList = sortedBuilding.map((entry, index) => {
-        const links = entry.data.links.map(l => l.href.split('?')[0]).join(', ');
-        return `${index + 1}. **${entry.data.title}**${links ? ` (${links})` : ''}
-   - ${entry.data.tagline}`;
+    const buildingList = projects.map((p, index) => {
+        return `${index + 1}. **${p.name}** (${p.href})
+   - ${p.description}`;
     }).join('\n\n');
 
     // Generate notes list

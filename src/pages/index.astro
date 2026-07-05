@@ -1,16 +1,12 @@
 ---
 import Layout from "@/layouts/Layout.astro";
 import BlogReel from "@/components/BlogReel.astro";
-import { getCollection } from "astro:content";
+import projects from "@/data/projects.json";
 import { Content as Hero } from "@/story/hero.md";
-import { Content as BuildingIntro } from "@/story/building.md";
 import { Content as Beliefs } from "@/story/beliefs.md";
 import { Content as Contact } from "@/story/contact.md";
 
 // All homepage copy lives in src/story/*.md — edit those files, not this one.
-const caseStudies = (await getCollection("building")).sort(
-  (a, b) => a.data.order - b.data.order
-);
 ---
 
 <Layout
@@ -24,26 +20,25 @@ const caseStudies = (await getCollection("building")).sort(
       <Hero />
     </section>
 
-    <!-- Building: intro in src/story/building.md, cards from src/building/*.md -->
-    <section class="space-y-4">
-      <div class="typography">
-        <BuildingIntro />
-      </div>
-      <div class="divide-y divide-muted border-y border-muted">
-        {caseStudies.map((cs) => (
-          <div class="py-4">
-            <div class="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
-              <a
-                href={cs.data.links[0]?.href}
-                target="_blank"
-                rel="noopener noreferrer"
-                class="text-base font-medium text-foreground hover:underline decoration-1"
-              >
-                {cs.data.title} ↗
-              </a>
+    <!-- Projects -->
+    <section class="space-y-3">
+      <h2 class="text-2xl font-medium leading-[1.3] tracking-tight text-foreground">Projects</h2>
+      <div class="divide-y divide-muted">
+        {projects.map((project) => (
+          <a
+            href={project.href}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="group flex items-center justify-between gap-6 py-3.5 no-underline!"
+          >
+            <div class="min-w-0">
+              <p class="text-sm font-medium text-foreground leading-snug group-hover:underline decoration-1">{project.name}</p>
+              <p class="text-sm text-muted-foreground mt-0.5 leading-snug">{project.description}</p>
             </div>
-            <p class="text-sm text-muted-foreground mt-1 leading-snug">{cs.data.tagline}</p>
-          </div>
+            <svg class="size-3.5 shrink-0 text-muted group-hover:text-muted-foreground transition-colors" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+              <path fill="currentColor" d="M10 6v2H5v11h11v-5h2v6a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1zm11-3v8h-2V6.413l-7.793 7.794l-1.414-1.414L17.585 5H13V3z" />
+            </svg>
+          </a>
         ))}
       </div>
     </section>

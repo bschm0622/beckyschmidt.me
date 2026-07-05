@@ -1,16 +1,12 @@
 import type { APIRoute } from 'astro';
-import { getCollection } from 'astro:content';
+import projects from '../data/projects.json';
 
 export const GET: APIRoute = async ({ site }) => {
     const siteURL = site ?? new URL('https://beckyschmidt.me');
 
-    // Fetch case studies collection
-    const buildingEntries = await getCollection('building');
-    const sortedBuilding = buildingEntries.sort((a, b) => a.data.order - b.data.order);
-
     // Generate projects list
-    const buildingList = sortedBuilding
-        .map(p => `- ${p.data.title}${p.data.links[0] ? ` (${p.data.links[0].href.split('?')[0]})` : ''} - ${p.data.tagline}`)
+    const buildingList = projects
+        .map(p => `- ${p.name} (${p.href}) - ${p.description}`)
         .join('\n');
 
     const content = `# Becky Schmidt - Personal Website
