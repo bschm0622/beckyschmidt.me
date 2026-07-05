@@ -1,6 +1,6 @@
 ---
 title: "BiblePlan"
-tagline: "A free Bible reading plan maker, built because my family wanted it to exist."
+tagline: "A free Bible reading plan maker, built because my family couldn't find the Bible reading planner we wanted."
 order: 2
 links:
   - label: "bibleplan.app"

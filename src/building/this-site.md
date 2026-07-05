@@ -1,6 +1,6 @@
 ---
 title: "This site, and the tools behind it"
-tagline: "I built my own CMS and the markdown reader I write with."
+tagline: "I built the CMS, editor, and publishing workflow that powers this site."
 order: 3
 links:
   - label: "editor.beckyschmidt.me"

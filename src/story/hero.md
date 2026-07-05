@@ -1,11 +1,13 @@
 # Hi, I'm Becky.
 
-I'm a senior product manager who got into product by teaching myself SQL.
+I'm a senior product manager at [Octane11](https://octane11.com), where I build AI and data products for B2B marketers.
 
-My degree is in marketing, and I started my career at a local market research firm. I loved the creativity of marketing paired with the data of research, and that mix led me to my second role, business analyst at a credit union. At both jobs I analyzed data, taught myself SQL and Tableau, and presented to C-level stakeholders. That's where I learned that data isn't valuable just because it's statistically sound. It has to tell a coherent story and give someone a reason to act.
+I like taking complex enterprise systems, usually heavy on AI and data, and turning them into simple, usable products.
 
-In 2020 a recruiter reached out because of that skill set, and I joined [Octane11](https://octane11.com), a B2B marketing analytics startup, as the second product hire. My job was to help move the company from reporting partner to SaaS platform.
+I joined Octane11 in 2020 as the second product hire, when the company was moving from reporting partner to SaaS platform. Today I build and lead our AI product efforts. I launched our AI Assistant, built on our homegrown MCP server and proprietary data model, and I’m currently leading development of our first AI agent to help customers complete onboarding tasks and improve data quality. I prototype with tools like v0, Figma, and Claude, validate assumptions with SQL, and work closely with engineering on implementation, QA, and release. Our client base has more than tripled over the past five years, and my products have helped win and expand enterprise customers ranging from Fortune 500 companies to leading fintechs.
 
-Five years and two promotions later, I've seen the product through major economic shifts, key vendors going out of business, and the advent of AI. I dove straight into the AI shift and became the product owner for our AI suite, which today includes an AI chat that sits on a homegrown MCP server over our customers' data and turns any question into the right dashboard, already filtered. Now I'm building our first agent, which is learning to do campaign mapping, one of the core jobs of the platform.
+Previously, I worked at a regional credit union building internal reporting and data systems in SQL, Python, and Tableau. I automated reporting for lending and executive teams and helped drive a 25% increase in monthly loan production by improving how members were segmented and routed. That experience shaped how I think about product work today: the biggest leverage usually comes from improving how data flows through an organization.
 
-Nobody handed me any of those steps. I learned the skills first and the titles came after. I think that's the real advantage of an unconventional road into product: you get used to picking things up on your own. The side projects below are me doing the same thing on my own time.
+I started my career in customer insights consulting, doing research across industries like associations, private equity, and government, and turning messy qualitative and quantitative data into narratives that clients could act on.
+
+Outside of work, I build small web apps (more on that below), cycle on Zwift, and raise my toddler in Indianapolis with my husband.

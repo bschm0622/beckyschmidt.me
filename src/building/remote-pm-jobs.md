@@ -1,6 +1,6 @@
 ---
 title: "A job board that runs itself"
-tagline: "A remote PM job board: scraped, enriched by local LLMs, refreshed mostly without me."
+tagline: "An automated remote PM job board that scrapes listings, enriches them with local LLMs, and keeps itself up to date."
 order: 1
 links:
   - label: "remotepmjobs.com"
