@@ -34,31 +34,15 @@ const caseStudies = (await getCollection("building")).sort(
           <div class="py-4">
             <div class="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
               <a
-                href={`/building/${cs.id}`}
+                href={cs.data.links[0]?.href}
+                target="_blank"
+                rel="noopener noreferrer"
                 class="text-base font-medium text-foreground hover:underline decoration-1"
               >
-                {cs.data.title}
+                {cs.data.title} ↗
               </a>
-              <div class="flex shrink-0 items-center gap-3">
-                {cs.data.links.map((link) => (
-                  <a
-                    href={link.href}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    class="text-sm text-muted-foreground hover:text-foreground transition-colors"
-                  >
-                    {link.label} ↗
-                  </a>
-                ))}
-              </div>
             </div>
             <p class="text-sm text-muted-foreground mt-1 leading-snug">{cs.data.tagline}</p>
-            <a
-              href={`/building/${cs.id}`}
-              class="text-sm text-muted-foreground hover:text-foreground transition-colors mt-1.5 inline-block"
-            >
-              read the story →
-            </a>
           </div>
         ))}
       </div>

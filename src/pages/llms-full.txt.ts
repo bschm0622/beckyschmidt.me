@@ -13,12 +13,11 @@ export const GET: APIRoute = async ({ site }) => {
         (a, b) => b.data.pubDate.getTime() - a.data.pubDate.getTime()
     );
 
-    // Generate case studies section
+    // Generate side projects section
     const buildingList = sortedBuilding.map((entry, index) => {
         const links = entry.data.links.map(l => l.href.split('?')[0]).join(', ');
         return `${index + 1}. **${entry.data.title}**${links ? ` (${links})` : ''}
-   - ${entry.data.tagline}
-   - Full story: ${siteURL.href}building/${entry.id}`;
+   - ${entry.data.tagline}`;
     }).join('\n\n');
 
     // Generate notes list
@@ -64,10 +63,9 @@ Becky Schmidt is a senior product manager who builds. Her path: marketing degree
 ### Main Pages
 
 #### Homepage (/)
-Tells Becky's story: how she got into product, what she owns at Octane11, what she builds at night, and what she believes about agency. Links to case studies and notes.
+Tells Becky's story: how she got into product, what she builds at Octane11, her side projects, and what drives her. Links to her live projects and notes.
 
-#### Building (/building/)
-Case studies of systems she has built and runs end to end:
+Side projects featured on the homepage:
 
 ${buildingList}
 
@@ -94,8 +92,8 @@ ${notesList}
 ## Crawling Guidelines
 
 ### Allowed
-- All public pages (/, /building/, /notes/)
-- Individual notes (/notes/[slug]) and case studies (/building/[slug])
+- All public pages (/, /notes/)
+- Individual notes (/notes/[slug])
 - RSS feed (/rss.xml)
 - Sitemap (/sitemap-index.xml)
 

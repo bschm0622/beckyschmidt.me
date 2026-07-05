@@ -8,9 +8,9 @@ export const GET: APIRoute = async ({ site }) => {
     const buildingEntries = await getCollection('building');
     const sortedBuilding = buildingEntries.sort((a, b) => a.data.order - b.data.order);
 
-    // Generate case studies list
+    // Generate projects list
     const buildingList = sortedBuilding
-        .map(p => `- ${p.data.title} (${siteURL.href}building/${p.id}) - ${p.data.tagline}`)
+        .map(p => `- ${p.data.title}${p.data.links[0] ? ` (${p.data.links[0].href.split('?')[0]})` : ''} - ${p.data.tagline}`)
         .join('\n');
 
     const content = `# Becky Schmidt - Personal Website
@@ -24,7 +24,6 @@ This is the personal website of Becky Schmidt, a senior product manager who buil
 ## Site Structure
 
 - Homepage: ${siteURL.href}
-- Building (case studies): ${siteURL.href}building/
 - Notes (essays): ${siteURL.href}notes/
 
 ## Key Content
