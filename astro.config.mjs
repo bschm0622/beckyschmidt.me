@@ -1,5 +1,6 @@
 // @ts-check
 import { defineConfig, fontProviders, envField } from 'astro/config';
+import { unified } from '@astrojs/markdown-remark';
 import sitemap from "@astrojs/sitemap";
 import react from '@astrojs/react';
 import remarkToc from "remark-toc";
@@ -41,11 +42,11 @@ export default defineConfig({
       }),
       GITHUB_OWNER: envField.string({
         access: "public",
-        context: "client",
+        context: "server",
       }),
       GITHUB_REPO: envField.string({
-        access: "public", 
-        context: "client",
+        access: "public",
+        context: "server",
       }),
     },
   },
@@ -62,14 +63,16 @@ export default defineConfig({
       },
       wrap: true,
     },
-    remarkPlugins: [
-      [remarkToc, { tight: true }],
-      [remarkCollapse, { test: 'Table of contents' }],
-      remarkReadingTime,
-    ],
-    rehypePlugins: [
-      rehypeExternalLinks,
-    ],
+    processor: unified({
+      remarkPlugins: [
+        [remarkToc, { tight: true }],
+        [remarkCollapse, { test: 'Table of contents' }],
+        remarkReadingTime,
+      ],
+      rehypePlugins: [
+        rehypeExternalLinks,
+      ],
+    }),
   },
 
   fonts: [{
@@ -79,7 +82,5 @@ export default defineConfig({
     weights: ["400", "500", "600", "700"]
   }],
 
-  adapter: isDev ? undefined : netlify({
-    edgeMiddleware: false,
-  }),
+  adapter: isDev ? undefined : netlify(),
 });
