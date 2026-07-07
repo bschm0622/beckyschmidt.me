@@ -64,7 +64,16 @@ const uniqueId = `themeToggle-${crypto.randomUUID().slice(0, 8)}`;
         }
     };
 
-    // For View Transitions: Apply theme *immediately* after new DOM is swapped.
+    // For View Transitions: set the theme on the *incoming* document before it's
+    // swapped in, so the transition snapshot never captures the wrong theme (no flash).
+    document.addEventListener("astro:before-swap", (event) => {
+        const theme = localStorage.getItem("theme") === "dark" ? "dark" : "light";
+        const root = event.newDocument.documentElement;
+        root.classList.remove("light", "dark");
+        root.classList.add(theme);
+    });
+
+    // After swap, sync the theme-color meta tag (its element is replaced on swap).
     document.addEventListener("astro:after-swap", applyThemeFromLocalStorage);
 
     // For initial load and re-attaching button listener after page transitions:
