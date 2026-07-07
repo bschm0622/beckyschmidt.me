@@ -23,9 +23,9 @@ function readPage(relPath: string): string {
 }
 
 export const GET: APIRoute = async () => {
-    const posts = await getCollection("blog");
+    const posts = await getCollection("notes");
 
-    const blogItems = posts.map((post) => ({
+    const noteItems = posts.map((post) => ({
         title: post.data.title,
         description: post.data.description,
         tags: post.data.tags,
@@ -34,7 +34,7 @@ export const GET: APIRoute = async () => {
         body: stripMarkdown(post.body ?? ""),
     }));
 
-    const index = [...blogItems];
+    const index = [...noteItems];
 
     return new Response(JSON.stringify(index), {
         headers: { "Content-Type": "application/json" },

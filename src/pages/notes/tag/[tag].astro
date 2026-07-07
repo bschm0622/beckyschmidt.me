@@ -1,11 +1,11 @@
 ---
 import { getCollection } from "astro:content";
 import { slugifyAll, slugifyStr } from "@/utils/Slugify";
-import Layout from "@/layouts/Layout.astro";
-import BlogReel from "@/components/BlogReel.astro";
+import DefaultLayout from "@/layouts/DefaultLayout.astro";
+import NotesReel from "@/components/NotesReel.astro";
 
 export async function getStaticPaths() {
-    const allPosts = await getCollection("blog");
+    const allPosts = await getCollection("notes");
     const allTags = Array.from(
         new Set(allPosts.flatMap((post) => post.data.tags || [])),
     );
@@ -18,20 +18,20 @@ export async function getStaticPaths() {
 }
 
 const { tag } = Astro.params;
-const allPosts = await getCollection("blog");
+const allPosts = await getCollection("notes");
 
 const filteredPosts = allPosts.filter((post) =>
     slugifyAll(post.data.tags || []).includes(tag),
 );
 ---
 
-<Layout
+<DefaultLayout
     title={`Notes tagged with "${tag}"`}
     description={`Notes tagged with ${tag}`}
 >
     <div
         class="mx-auto w-full max-w-4xl space-y-10"
-        data-pagefind-ignore="all"
+
     >
         <div
             class="flex flex-wrap items-center gap-x-4 text-3xl text-foreground"
@@ -43,7 +43,7 @@ const filteredPosts = allPosts.filter((post) =>
             filteredPosts.length === 0 ? (
                 <p>No notes found with this tag.</p>
             ) : (
-                <BlogReel posts={filteredPosts} />
+                <NotesReel posts={filteredPosts} />
             )
         }
         <a
@@ -54,4 +54,4 @@ const filteredPosts = allPosts.filter((post) =>
             ← All notes
         </a>
     </div>
-</Layout>
+</DefaultLayout>

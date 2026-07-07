@@ -6,8 +6,8 @@ export const GET: APIRoute = async ({ site }) => {
     const siteURL = site ?? new URL('https://beckyschmidt.me');
 
     // Fetch collections
-    const blogEntries = await getCollection('blog');
-    const sortedBlog = blogEntries.sort(
+    const noteEntries = await getCollection('notes');
+    const sortedNotes = noteEntries.sort(
         (a, b) => b.data.pubDate.getTime() - a.data.pubDate.getTime()
     );
 
@@ -18,7 +18,7 @@ export const GET: APIRoute = async ({ site }) => {
     }).join('\n\n');
 
     // Generate notes list
-    const notesList = sortedBlog
+    const notesList = sortedNotes
         .map(post => `- "${post.data.title}" (${siteURL.href}notes/${post.data.slug})`)
         .join('\n');
 

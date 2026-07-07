@@ -1,11 +1,11 @@
 ---
-import Layout from "@/layouts/Layout.astro";
-import BlogReel from "@/components/BlogReel.astro";
+import DefaultLayout from "@/layouts/DefaultLayout.astro";
+import NotesReel from "@/components/NotesReel.astro";
 import { getCollection } from "astro:content";
-import BlogTag from "@/components/ui/BlogTag.astro";
+import NoteTag from "@/components/ui/NoteTag.astro";
 import { slugifyStr } from "@/utils/Slugify";
 
-const allPosts = await getCollection("blog");
+const allPosts = await getCollection("notes");
 
 // Step 1: Count how many posts per tag
 const tagCounts = allPosts.reduce(
@@ -24,7 +24,7 @@ const allTags = Object.keys(tagCounts).sort(
 );
 ---
 
-<Layout title="Notes" description="Becky's notes" data-pagefind-ignore>
+<DefaultLayout title="Notes" description="Becky's notes">
     <div class="mx-auto w-full space-y-10">
         <div class="space-y-6">
             <h1>Notes</h1>
@@ -33,17 +33,17 @@ const allTags = Object.keys(tagCounts).sort(
                 <span class="text-sm text-muted-foreground whitespace-nowrap">Filter by tag:</span>
                 {
                     allTags.map((tag) => (
-                        <BlogTag
+                        <NoteTag
                             href={`/notes/tag/${slugifyStr(tag)}/`}
                             key={tag}
                         >
                             {tag} ({tagCounts[tag]})
-                        </BlogTag>
+                        </NoteTag>
                     ))
                 }
             </div>
         </div>
 
-        <BlogReel posts={allPosts} />
+        <NotesReel posts={allPosts} />
     </div>
-</Layout>
+</DefaultLayout>

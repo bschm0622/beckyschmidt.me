@@ -16,7 +16,7 @@ interface FrontMatter {
   tags: string;
 }
 
-export default function BlogEditor() {
+export default function NoteEditor() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
@@ -78,8 +78,8 @@ export default function BlogEditor() {
       const src = token.attrs![srcIndex][1];
       const alt = altIndex >= 0 ? token.attrs![altIndex][1] : 'Image';
 
-      // Check if this is a pending image (starts with /blog-images/)
-      if (src.startsWith('/blog-images/')) {
+      // Check if this is a pending image (starts with /notes-images/)
+      if (src.startsWith('/notes-images/')) {
         // Return a placeholder for images that don't exist yet
         return `<div class="border border-dashed border-muted rounded p-4 text-center text-muted-foreground my-4">
           <svg class="inline-block w-8 h-8 mb-2 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -156,7 +156,7 @@ author: "Becky Schmidt"
 tags: ""
 ---
 
-<!-- Start writing your blog post content here -->
+<!-- Start writing your note content here -->
 `;
       
       parseMarkdownWithFrontMatter(newContent);
@@ -179,7 +179,7 @@ tags: ""
       }
       
       // Use the new individual file API endpoint with branch parameter
-      const apiUrl = `/api/github/file/src/blog/${filename}?branch=${encodeURIComponent(branch)}`;
+      const apiUrl = `/api/github/file/src/notes/${filename}?branch=${encodeURIComponent(branch)}`;
       
       
       const response = await fetch(apiUrl, {
@@ -220,7 +220,7 @@ slug: "${slugFromFilename}"
 pubDate: "${new Date().toISOString().split('T')[0]}"
 description: "Edit this description for ${titleFromFilename}"
 author: "Becky Schmidt"
-tags: "blog"
+tags: "notes"
 ---
 
 # ${titleFromFilename}
@@ -241,8 +241,8 @@ Start writing your content here...`;
         
         // Generic fallback content
         const fallbackContent = `---
-title: "New Blog Post"
-slug: "new-blog-post"
+title: "New Note"
+slug: "new-note"
 pubDate: "${new Date().toISOString().split('T')[0]}"
 description: "There was an error loading the original file content"
 author: "Becky Schmidt"
@@ -485,7 +485,7 @@ tags: ${frontMatter.tags}
       const timestamp = Date.now();
       const sanitizedName = file.name.replace(/[^a-zA-Z0-9.-]/g, '-');
       const filename = `${slug}-${timestamp}-${sanitizedName}`;
-      const imagePath = `/blog-images/${slug}/${filename}`;
+      const imagePath = `/notes-images/${slug}/${filename}`;
 
       // Add to pending images
       setPendingImages(prev => [...prev, {
@@ -559,17 +559,17 @@ tags: ${frontMatter.tags}
     try {
       const title = frontMatter.title 
         ? `Add/Update: ${frontMatter.title}`
-        : `Update blog post`;
+        : `Update note`;
 
       const body = `## Changes
 
-${currentFile ? 'Updated' : 'Created'} blog post: ${currentFile || 'new post'}
+${currentFile ? 'Updated' : 'Created'} note: ${currentFile || 'new post'}
 
 ### Summary
-${frontMatter.description || 'Blog post updates via CMS'}
+${frontMatter.description || 'Note updates via CMS'}
 
 ---
-*Created via blog CMS*`;
+*Created via notes CMS*`;
 
       const response = await fetch('/api/github/create-pr', {
         method: 'POST',
@@ -644,7 +644,7 @@ ${frontMatter.description || 'Blog post updates via CMS'}
             </button>
           </div>
           <h1 className="text-2xl">
-            {currentFile ? `Editing: ${currentFile}` : 'New Blog Post'}
+            {currentFile ? `Editing: ${currentFile}` : 'New Note'}
           </h1>
           <div className="text-md text-muted-foreground space-y-1">
             <div>Source: <span className="font-medium">{sourceBranch}</span></div>

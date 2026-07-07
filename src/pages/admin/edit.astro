@@ -1,12 +1,12 @@
 ---
 export const prerender = false
 import AdminLayout from '../../layouts/AdminLayout.astro';
-import BlogEditor from '../../components/BlogEditor.tsx';
+import NoteEditor from '../../components/NoteEditor.tsx';
 ---
 
-<AdminLayout title="Blog Editor - Becky Schmidt">
+<AdminLayout title="Note Editor - Becky Schmidt">
   <main class="container mx-auto px-4 py-8 max-w-7xl">
-    <BlogEditor client:load />
+    <NoteEditor client:load />
   </main>
 </AdminLayout>
 

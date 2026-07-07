@@ -1,6 +1,6 @@
 ---
 import FormattedDate from "./ui/FormattedDate.astro";
-import BlogTag from "./ui/BlogTag.astro";
+import NoteTag from "./ui/NoteTag.astro";
 import { slugifyStr } from "@/utils/Slugify";
 
 const { posts = null, preview = false } = Astro.props;
@@ -15,7 +15,7 @@ if (posts) {
     postsToShow = postsToShow.slice(0, 5);
   }
 } else {
-  const allPosts = await import("astro:content").then(mod => mod.getCollection("blog"));
+  const allPosts = await import("astro:content").then(mod => mod.getCollection("notes"));
   const sortedPosts = allPosts.sort(
     (a, b) => b.data.pubDate.getTime() - a.data.pubDate.getTime(),
   );
@@ -37,7 +37,7 @@ if (posts) {
           {post.data.tags && post.data.tags.length > 0 && (
             <div class="hidden md:flex flex-wrap gap-1.5">
               {post.data.tags.map((tag: any) => (
-                <BlogTag href={`/notes/tag/${slugifyStr(tag)}/`}>{tag}</BlogTag>
+                <NoteTag href={`/notes/tag/${slugifyStr(tag)}/`}>{tag}</NoteTag>
               ))}
             </div>
           )}
@@ -47,7 +47,7 @@ if (posts) {
       {post.data.tags && post.data.tags.length > 0 && (
         <div class="flex md:hidden flex-wrap gap-1.5 mt-2">
           {post.data.tags.map((tag: any) => (
-            <BlogTag href={`/notes/tag/${slugifyStr(tag)}/`}>{tag}</BlogTag>
+            <NoteTag href={`/notes/tag/${slugifyStr(tag)}/`}>{tag}</NoteTag>
           ))}
         </div>
       )}

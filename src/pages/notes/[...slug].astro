@@ -1,10 +1,10 @@
 ---
 import { getCollection, render } from "astro:content";
-import MarkdownPostLayout from "@/layouts/MarkdownPostLayout.astro";
+import NoteLayout from "@/layouts/NoteLayout.astro";
 import ReactionApp from "@/components/ReactionApp";
 
 export async function getStaticPaths() {
-    const posts = await getCollection("blog");
+    const posts = await getCollection("notes");
     return posts.map((post) => ({
         params: { slug: post.id },
         props: { post },
@@ -17,10 +17,10 @@ const minutesRead = remarkPluginFrontmatter?.minutesRead ?? "";
 const slug = post.data.slug;
 ---
 
-<MarkdownPostLayout minutesRead={minutesRead} frontmatter={post.data}>
+<NoteLayout minutesRead={minutesRead} frontmatter={post.data}>
     <Content />
-    <ReactionApp client:load postId={slug} />
+    <ReactionApp client:visible postId={slug} />
     <a href="/notes" class="text-sm text-muted-foreground hover:text-foreground transition-colors mt-8 inline-block">
         all notes
     </a>
-</MarkdownPostLayout>
+</NoteLayout>
