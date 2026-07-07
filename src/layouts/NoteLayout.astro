@@ -1,15 +1,12 @@
 ---
-import "@/styles/global.css";
-import BaseHead from "@/components/BaseHead.astro";
+import BaseLayout from "@/layouts/BaseLayout.astro";
 import Navbar from "@/components/Navbar.astro";
 import SearchModal from "@/components/SearchModal.astro";
 import FormattedDate from "@/components/ui/FormattedDate.astro";
-import BlogTag from "@/components/ui/BlogTag.astro";
+import NoteTag from "@/components/ui/NoteTag.astro";
 import { SITE } from "@/siteConfig";
 
 const {
-    title,
-    description,
     image,
     canonicalURL,
     frontmatter,
@@ -55,80 +52,56 @@ const blogPostingSchema = {
 };
 ---
 
-<!doctype html>
-<html lang="en" class="light h-full">
-    <head>
-        <BaseHead
-            title={frontmatter.title}
-            description={frontmatter.description}
-            image={image}
-            canonicalURL={canonicalURL}
-        />
-        <!-- BlogPosting Schema.org Structured Data -->
-        <script is:inline type="application/ld+json" set:html={JSON.stringify(blogPostingSchema)} />
-    </head>
-    <body
-        class="bg-background text-foreground transition-colors min-h-screen flex flex-col"
-    >
-        <div
-            id="scroll-progress"
-            class="fixed top-0 left-0 z-50 h-1 bg-primary"
-        >
-        </div>
-        <Navbar />
-        <main class="px-4 pb-16 mt-4 md:mt-6 flex-1 mx-auto w-full max-w-3xl typography">
-            <!-- Main Content -->
-            <h1 class="mt-0 mb-3">{frontmatter.title}</h1>
-            <div class="flex flex-wrap items-center gap-3 text-sm text-muted-foreground mb-8">
-                {frontmatter.pubDate && <FormattedDate date={frontmatter.pubDate} />}
-                {minutesRead && frontmatter.pubDate && <span>·</span>}
-                {minutesRead && <span>{minutesRead}</span>}
-                {tags && tags.length > 0 && (
-                    <div class="flex flex-wrap gap-1.5">
-                        {tags.map((tag: string) => (
-                            <BlogTag href={`/notes/tag/${tag}`}>{tag}</BlogTag>
-                        ))}
-                    </div>
-                )}
-            </div>
+<BaseLayout
+    title={frontmatter.title}
+    description={frontmatter.description}
+    image={image}
+    canonicalURL={canonicalURL}
+>
+    <!-- BlogPosting Schema.org Structured Data -->
+    <script slot="head" is:inline type="application/ld+json" set:html={JSON.stringify(blogPostingSchema)} />
 
-      <slot />
+    <div id="scroll-progress" class="fixed top-0 left-0 z-50 h-1 bg-primary"></div>
+    <Navbar />
+    <main class="px-4 pb-16 mt-4 md:mt-6 flex-1 mx-auto w-full max-w-3xl typography">
+        <!-- Main Content -->
+        <h1 class="mt-0 mb-3">{frontmatter.title}</h1>
+        <div class="flex flex-wrap items-center gap-3 text-sm text-muted-foreground mb-8">
+            {frontmatter.pubDate && <FormattedDate date={frontmatter.pubDate} />}
+            {minutesRead && frontmatter.pubDate && <span>·</span>}
+            {minutesRead && <span>{minutesRead}</span>}
+            {tags && tags.length > 0 && (
+                <div class="flex flex-wrap gap-1.5">
+                    {tags.map((tag: string) => (
+                        <NoteTag href={`/notes/tag/${tag}`}>{tag}</NoteTag>
+                    ))}
+                </div>
+            )}
+        </div>
+
+        <slot />
     </main>
 
     <SearchModal />
-  </body>
-</html>
-
-<style>
-  html,
-  body {
-    margin: 0;
-    width: 100%;
-    height: 100%;
-  }
-
-  /* Prevent flash of unstyled content */
-  html:not(.light):not(.dark) {
-    visibility: hidden;
-  }
-
-  html.light,
-  html.dark {
-    visibility: visible;
-  }
-</style>
+</BaseLayout>
 
 <script>
-    /** scroll progress bar */
-    window.addEventListener("scroll", function () {
+    /** scroll progress bar — throttled to one update per animation frame */
+    let ticking = false;
+    function updateScrollProgress() {
         const scrollableHeight =
             document.documentElement.scrollHeight - window.innerHeight;
-        const scrolled = window.scrollY;
         const progressBar = document.getElementById("scroll-progress");
-
         if (progressBar) {
-            const progress = (scrolled / scrollableHeight) * 100;
+            const progress = scrollableHeight > 0 ? (window.scrollY / scrollableHeight) * 100 : 0;
             progressBar.style.width = progress + "%";
+        }
+        ticking = false;
+    }
+    window.addEventListener("scroll", () => {
+        if (!ticking) {
+            ticking = true;
+            requestAnimationFrame(updateScrollProgress);
         }
     });
 
@@ -138,9 +111,9 @@ const blogPostingSchema = {
 
         const codeBlocks = Array.from(document.querySelectorAll("pre"));
 
-    for (const codeBlock of codeBlocks) {
-      const wrapper = document.createElement("div");
-      wrapper.style.position = "relative";
+        for (const codeBlock of codeBlocks) {
+            const wrapper = document.createElement("div");
+            wrapper.style.position = "relative";
 
             // Wrap <pre> with wrapper
             codeBlock.parentNode?.insertBefore(wrapper, codeBlock);

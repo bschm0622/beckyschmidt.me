@@ -1,7 +1,7 @@
 ---
 import BaseLayout from "@/layouts/BaseLayout.astro";
 import Navbar from "@/components/Navbar.astro";
-import Footer from "@/components/Footer.astro";
+import SearchModal from "@/components/SearchModal.astro";
 
 const { title, description, image, canonicalURL } = Astro.props;
 ---
@@ -13,8 +13,8 @@ const { title, description, image, canonicalURL } = Astro.props;
     canonicalURL={canonicalURL}
 >
     <Navbar />
-    <main class="px-4 flex-1 max-w-screen-4xl">
+    <main class="px-4 pb-16 mt-4 md:mt-6 flex-1 mx-auto w-full max-w-3xl type-standard">
         <slot />
     </main>
-    <Footer />
+    <SearchModal />
 </BaseLayout>
