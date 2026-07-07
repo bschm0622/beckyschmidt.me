@@ -18,7 +18,7 @@ interface Props {
 export default function FuseSearch({ autoFocus = false, maxHeight }: Props) {
     const [query, setQuery] = useState("");
     const [results, setResults] = useState<SearchItem[]>([]);
-    const [allItems, setAllItems] = useState<SearchItem[]>([]);
+    const [, setAllItems] = useState<SearchItem[]>([]);
     const [fuse, setFuse] = useState<Fuse<SearchItem> | null>(null);
     const [loading, setLoading] = useState(true);
     const inputRef = useRef<HTMLInputElement>(null);

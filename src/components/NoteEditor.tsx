@@ -65,7 +65,7 @@ export default function NoteEditor() {
   const mdParser = new MarkdownIt();
 
   // Configure markdown-it to handle missing images gracefully
-  const defaultRender = mdParser.renderer.rules.image || function(tokens, idx, options, env, self) {
+  const defaultRender = mdParser.renderer.rules.image || function(tokens, idx, options, _env, self) {
     return self.renderToken(tokens, idx, options);
   };
 

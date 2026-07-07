@@ -53,7 +53,7 @@ export default function BranchSelector({ selectedBranch, onBranchSelect }: Branc
     }
   };
 
-  const handleCreateBranch = async (e: React.FormEvent) => {
+  const handleCreateBranch = async (e: React.SyntheticEvent) => {
     e.preventDefault();
     if (!newBranchName.trim()) return;
 

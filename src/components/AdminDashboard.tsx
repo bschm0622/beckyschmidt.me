@@ -33,7 +33,7 @@ export default function AdminDashboard() {
     }
   }, [selectedBranch]);
 
-  const handleLogin = async (e: React.FormEvent) => {
+  const handleLogin = async (e: React.SyntheticEvent) => {
     e.preventDefault();
     setIsLoading(true);
     setError('');

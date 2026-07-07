@@ -7,6 +7,7 @@
     "dev": "npx convex dev & netlify dev",
     "build": "astro build",
     "preview": "astro preview",
+    "check": "astro check",
     "astro": "astro"
   },
   "dependencies": {
@@ -32,7 +33,10 @@
     "tailwindcss": "^4.1.10"
   },
   "devDependencies": {
-    "@types/lodash.kebabcase": "^4.1.9"
+    "@astrojs/check": "^0.9.9",
+    "@types/lodash.kebabcase": "^4.1.9",
+    "@types/markdown-it": "^14.1.2",
+    "typescript": "^6.0.3"
   },
   "overrides": {
     "esbuild": "^0.28.1"

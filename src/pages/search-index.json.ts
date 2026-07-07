@@ -1,7 +1,5 @@
 import type { APIRoute } from "astro";
 import { getCollection } from "astro:content";
-import fs from "node:fs";
-import path from "node:path";
 
 export const prerender = true;
 
@@ -16,10 +14,6 @@ function stripMarkdown(content: string): string {
         .replace(/^[-*]\s+/gm, "")           // list markers
         .replace(/\s+/g, " ")
         .trim();
-}
-
-function readPage(relPath: string): string {
-    return stripMarkdown(fs.readFileSync(path.resolve(relPath), "utf-8"));
 }
 
 export const GET: APIRoute = async () => {

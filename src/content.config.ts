@@ -1,7 +1,8 @@
 // Import the glob loader
 import { glob } from "astro/loaders";
 // Import utilities from `astro:content`
-import { z, defineCollection } from "astro:content";
+import { defineCollection } from "astro:content";
+import { z } from "astro/zod";
 
 // Notes collection
 const notes = defineCollection({
