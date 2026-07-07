@@ -10,7 +10,7 @@ html {
   --font-sans: var(--font-inter);
   --color-primary: #334155;
   --color-muted: #e2e8f0;
-  --color-muted-foreground: #64748b;
+  --color-muted-foreground: #475569;
   --color-surface: #ffffff;
   --color-accent: #6366f1;
   --color-secondary: #f8fafc;
@@ -22,7 +22,7 @@ html {
 .dark {
   --color-primary: #d4d4d8;
   --color-muted: #52525b;
-  --color-muted-foreground: #a1a1aa;
+  --color-muted-foreground: #c4c4cc;
   --color-surface: #27272a;
   --color-accent: #818cf8;
   --color-secondary: #3f3f46;
@@ -75,7 +75,7 @@ html {
 
   /* Blockquote */
   blockquote {
-    @apply border-l-2 border-accent pl-4 italic text-muted-foreground text-base leading-7 my-6;
+    @apply border-l-2 border-foreground/20 pl-4 italic text-muted-foreground text-base leading-7 my-6;
   }
 
   /* Misc */
@@ -93,10 +93,10 @@ html {
     @apply border border-muted px-4 py-2 text-[1rem] leading-relaxed;
   }
   strong {
-    @apply font-medium text-foreground;
+    @apply font-bold;
   }
   em {
-    @apply italic text-foreground/90;
+    @apply italic;
   }
   small {
     @apply text-sm text-muted-foreground;
@@ -148,7 +148,7 @@ html {
 
   /* Quotes, separators, tables, etc. */
   blockquote {
-    @apply border-l-2 border-accent pl-4 italic text-muted-foreground;
+    @apply border-l-2 border-foreground/20 pl-4 italic text-muted-foreground;
   }
   hr {
     @apply border-muted my-6;
@@ -164,10 +164,10 @@ html {
     @apply border border-muted px-4 py-2 text-base;
   }
   strong {
-    @apply font-medium text-foreground;
+    @apply font-bold;
   }
   em {
-    @apply italic text-foreground/90;
+    @apply italic;
   }
   small {
     @apply text-sm text-muted-foreground;
