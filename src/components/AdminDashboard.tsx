@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import BranchSelector from './BranchSelector';
 
-interface BlogPost {
+interface Note {
   filename: string;
   title: string;
   slug: string;
@@ -13,8 +13,8 @@ export default function AdminDashboard() {
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
-  const [blogPosts, setBlogPosts] = useState<BlogPost[]>([]);
-  const [loadingPosts, setLoadingPosts] = useState(false);
+  const [notes, setNotes] = useState<Note[]>([]);
+  const [loadingNotes, setLoadingNotes] = useState(false);
   const [selectedBranch, setSelectedBranch] = useState('master');
 
   // Check if already authenticated
@@ -22,14 +22,14 @@ export default function AdminDashboard() {
     const authenticated = localStorage.getItem('admin-authenticated');
     if (authenticated === 'true') {
       setIsAuthenticated(true);
-      loadBlogPosts();
+      loadNotes();
     }
   }, []);
 
   // Reload posts when branch changes
   useEffect(() => {
     if (isAuthenticated) {
-      loadBlogPosts();
+      loadNotes();
     }
   }, [selectedBranch]);
 
@@ -50,7 +50,7 @@ export default function AdminDashboard() {
       if (response.ok && data.success) {
         setIsAuthenticated(true);
         localStorage.setItem('admin-authenticated', 'true');
-        loadBlogPosts();
+        loadNotes();
       } else {
         setError(data.error || 'Invalid password');
       }
@@ -62,25 +62,35 @@ export default function AdminDashboard() {
   };
 
   const handleLogout = () => {
+    // Clear the server session cookie as well as the local UI flag.
+    fetch('/api/auth', { method: 'DELETE' }).catch(() => {});
     setIsAuthenticated(false);
     localStorage.removeItem('admin-authenticated');
     setPassword('');
-    setBlogPosts([]);
+    setNotes([]);
   };
 
-  const loadBlogPosts = async () => {
-    setLoadingPosts(true);
+  const loadNotes = async () => {
+    setLoadingNotes(true);
     setError('');
-    
+
     try {
       const response = await fetch(`/api/github/files?branch=${encodeURIComponent(selectedBranch)}`);
+
+      // Session expired or missing — drop back to the login form.
+      if (response.status === 401) {
+        setIsAuthenticated(false);
+        localStorage.removeItem('admin-authenticated');
+        return;
+      }
+
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || 'Failed to load blog posts');
+        throw new Error(data.error || 'Failed to load notes');
       }
 
-      const posts: BlogPost[] = data.files.map((file: any) => ({
+      const posts: Note[] = data.files.map((file: any) => ({
         filename: file.name,
         title: file.name.replace('.md', '').replace(/-/g, ' '),
         slug: file.name.replace('.md', ''),
@@ -90,11 +100,11 @@ export default function AdminDashboard() {
       // Sort posts by creation date descending (most recent first)
       posts.sort((a, b) => new Date(b.pubDate).getTime() - new Date(a.pubDate).getTime());
       
-      setBlogPosts(posts);
+      setNotes(posts);
     } catch (err: any) {
-      setError(err.message || 'Failed to load blog posts');
+      setError(err.message || 'Failed to load notes');
     } finally {
-      setLoadingPosts(false);
+      setLoadingNotes(false);
     }
   };
 
@@ -102,7 +112,7 @@ export default function AdminDashboard() {
     setSelectedBranch(branch);
   };
 
-  const handleEditPost = (filename: string) => {
+  const handleEditNote = (filename: string) => {
     window.location.href = `/admin/edit?file=${encodeURIComponent(filename)}&branch=${encodeURIComponent(selectedBranch)}`;
   };
 
@@ -156,7 +166,7 @@ export default function AdminDashboard() {
       {/* Header */}
       <div className="flex justify-between items-center">
           <h2>
-            Manage Blog Posts
+            Manage Notes
           </h2>
       <div className="flex items-center">
         <button
@@ -169,7 +179,7 @@ export default function AdminDashboard() {
           onClick={handleCreateNew}
           className="bg-primary text-white px-4 py-2 rounded-md hover:opacity-80 transition-opacity font-medium"
         >
-          New Post
+          New Note
         </button>
         </div>
       </div>
@@ -193,23 +203,23 @@ export default function AdminDashboard() {
         onBranchSelect={handleBranchSelect}
       />
 
-      {/* Existing Posts */}
+      {/* Existing Notes */}
       <div className="bg-surface border border-muted rounded-lg overflow-hidden">
         <div className="bg-secondary px-3 py-2 border-b border-muted">
-          <h3>Existing Posts</h3>
+          <h3>Existing Notes</h3>
         </div>
 
-        {loadingPosts ? (
+        {loadingNotes ? (
           <div className="text-center py-6 text-muted-foreground">
-            Loading posts...
+            Loading notes...
           </div>
-        ) : blogPosts.length === 0 ? (
+        ) : notes.length === 0 ? (
           <div className="text-center py-6 text-muted-foreground">
-            No blog posts found. Create your first post!
+            No notes found. Create your first note!
           </div>
         ) : (
           <div className="divide-y divide-muted">
-            {blogPosts.map((post) => (
+            {notes.map((post) => (
               <div 
                 key={post.filename}
                 className="p-3 hover:bg-background transition-colors"
@@ -224,7 +234,7 @@ export default function AdminDashboard() {
                     </div>
                   </div>
                   <button
-                    onClick={() => handleEditPost(post.filename)}
+                    onClick={() => handleEditNote(post.filename)}
                     className="bg-secondary text-foreground px-4 py-2 rounded-md hover:bg-muted transition-colors font-medium"
                   >
                     Edit

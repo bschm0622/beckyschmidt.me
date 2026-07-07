@@ -1,43 +1,27 @@
-import { Octokit } from '@octokit/rest';
 import type { APIRoute } from 'astro';
+import { getGithub, json } from '@/lib/github';
+import { requireAuth } from '@/lib/session';
 
 export const prerender = false;
 
 export const POST: APIRoute = async ({ request }) => {
+  const unauthorized = requireAuth(request);
+  if (unauthorized) return unauthorized;
+
+  const gh = getGithub();
+  if (!gh) return json({ error: 'GitHub token not configured' }, 500);
+  const { octokit, owner, repo } = gh;
+
   try {
-    const githubToken = process.env.GITHUB_TOKEN;
-    const owner = import.meta.env.GITHUB_OWNER;
-    const repo = import.meta.env.GITHUB_REPO;
-
-    if (!githubToken) {
-      return new Response(
-        JSON.stringify({ error: 'GitHub token not configured' }),
-        {
-          status: 500,
-          headers: { 'Content-Type': 'application/json' },
-        }
-      );
-    }
-
     const body = await request.json();
     const { content, filename, message, branch = 'master', sha } = body;
 
     if (!content || !filename || !message) {
-      return new Response(
-        JSON.stringify({ error: 'Missing required fields: content, filename, message' }),
-        {
-          status: 400,
-          headers: { 'Content-Type': 'application/json' },
-        }
-      );
+      return json({ error: 'Missing required fields: content, filename, message' }, 400);
     }
 
-    const octokit = new Octokit({
-      auth: githubToken,
-    });
+    const filePath = `src/notes/${filename}`;
 
-    const filePath = `src/blog/${filename}`;
-    
     // Create or update file
     const response = await octokit.rest.repos.createOrUpdateFileContents({
       owner,
@@ -49,25 +33,13 @@ export const POST: APIRoute = async ({ request }) => {
       ...(sha && { sha }), // Include SHA if updating existing file
     });
 
-    return new Response(JSON.stringify({ 
+    return json({
       success: true,
       commit: response.data.commit,
-      content: response.data.content 
-    }), {
-      status: 200,
-      headers: { 'Content-Type': 'application/json' },
+      content: response.data.content,
     });
   } catch (error: any) {
     console.error('Error committing file:', error);
-    return new Response(
-      JSON.stringify({ 
-        error: 'Failed to commit file',
-        details: error.message 
-      }),
-      {
-        status: 500,
-        headers: { 'Content-Type': 'application/json' },
-      }
-    );
+    return json({ error: 'Failed to commit file', details: error.message }, 500);
   }
 };

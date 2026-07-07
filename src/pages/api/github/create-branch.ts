@@ -1,40 +1,24 @@
-import { Octokit } from '@octokit/rest';
 import type { APIRoute } from 'astro';
+import { getGithub, json } from '@/lib/github';
+import { requireAuth } from '@/lib/session';
 
 export const prerender = false;
 
 export const POST: APIRoute = async ({ request }) => {
+  const unauthorized = requireAuth(request);
+  if (unauthorized) return unauthorized;
+
+  const gh = getGithub();
+  if (!gh) return json({ error: 'GitHub token not configured' }, 500);
+  const { octokit, owner, repo } = gh;
+
   try {
-    const githubToken = process.env.GITHUB_TOKEN;
-    const owner = import.meta.env.GITHUB_OWNER;
-    const repo = import.meta.env.GITHUB_REPO;
-
-    if (!githubToken) {
-      return new Response(
-        JSON.stringify({ error: 'GitHub token not configured' }),
-        {
-          status: 500,
-          headers: { 'Content-Type': 'application/json' },
-        }
-      );
-    }
-
     const body = await request.json();
     const { branchName, fromBranch = 'master' } = body;
 
     if (!branchName) {
-      return new Response(
-        JSON.stringify({ error: 'Missing required field: branchName' }),
-        {
-          status: 400,
-          headers: { 'Content-Type': 'application/json' },
-        }
-      );
+      return json({ error: 'Missing required field: branchName' }, 400);
     }
-
-    const octokit = new Octokit({
-      auth: githubToken,
-    });
 
     // Get the SHA of the source branch
     const { data: refData } = await octokit.rest.git.getRef({
@@ -53,43 +37,28 @@ export const POST: APIRoute = async ({ request }) => {
       sha,
     });
 
-    return new Response(JSON.stringify({ 
+    return json({
       success: true,
       branch: {
         name: branchName,
         sha: response.data.object.sha,
         ref: response.data.ref,
-      }
-    }), {
-      status: 200,
-      headers: { 'Content-Type': 'application/json' },
+      },
     });
   } catch (error: any) {
     console.error('Error creating branch:', error);
-    
+
     // Handle branch already exists error
     if (error.status === 422 && error.message.includes('already exists')) {
-      return new Response(
-        JSON.stringify({ 
-          error: 'Branch already exists',
-          details: `Branch '${error.request?.ref?.split('/').pop()}' already exists`
-        }),
+      return json(
         {
-          status: 409,
-          headers: { 'Content-Type': 'application/json' },
-        }
+          error: 'Branch already exists',
+          details: `Branch '${error.request?.ref?.split('/').pop()}' already exists`,
+        },
+        409
       );
     }
 
-    return new Response(
-      JSON.stringify({ 
-        error: 'Failed to create branch',
-        details: error.message 
-      }),
-      {
-        status: 500,
-        headers: { 'Content-Type': 'application/json' },
-      }
-    );
+    return json({ error: 'Failed to create branch', details: error.message }, 500);
   }
 };

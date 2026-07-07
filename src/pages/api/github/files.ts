@@ -1,30 +1,20 @@
-import { Octokit } from '@octokit/rest';
 import type { APIRoute } from 'astro';
+import { getGithub, json } from '@/lib/github';
+import { requireAuth } from '@/lib/session';
 
 export const prerender = false;
 
-export const GET: APIRoute = async ({ url }) => {
+export const GET: APIRoute = async ({ request, url }) => {
+  const unauthorized = requireAuth(request);
+  if (unauthorized) return unauthorized;
+
+  const gh = getGithub();
+  if (!gh) return json({ error: 'GitHub token not configured' }, 500);
+  const { octokit, owner, repo } = gh;
+
   try {
-    const githubToken = process.env.GITHUB_TOKEN;
-    const owner = import.meta.env.GITHUB_OWNER;
-    const repo = import.meta.env.GITHUB_REPO;
     const path = url.searchParams.get('path') || '';
     const branch = url.searchParams.get('branch') || 'master';
-
-    if (!githubToken) {
-      console.error('GitHub token is missing');
-      return new Response(
-        JSON.stringify({ error: 'GitHub token not configured' }),
-        {
-          status: 500,
-          headers: { 'Content-Type': 'application/json' },
-        }
-      );
-    }
-
-    const octokit = new Octokit({
-      auth: githubToken,
-    });
 
     // Get specific file content
     if (path) {
@@ -36,75 +26,55 @@ export const GET: APIRoute = async ({ url }) => {
           ref: branch,
         });
 
-
         if ('content' in data && data.content) {
           const content = Buffer.from(data.content, 'base64').toString('utf8');
-          
-          return new Response(JSON.stringify({ 
+
+          return json({
             content,
             sha: data.sha,
             path: data.path,
-            name: data.name 
-          }), {
-            status: 200,
-            headers: { 'Content-Type': 'application/json' },
+            name: data.name,
           });
-        } else {
-          console.error('File data issue - no content field:', { 
-            dataKeys: Object.keys(data),
-            type: Array.isArray(data) ? 'array' : ('type' in data ? data.type : 'unknown'),
-            hasContent: 'content' in data 
-          });
-          return new Response(
-            JSON.stringify({ 
-              error: 'File has no content or is not a file',
-              debug: {
-                type: Array.isArray(data) ? 'array' : ('type' in data ? data.type : 'unknown'),
-                hasContent: 'content' in data,
-                dataKeys: Object.keys(data)
-              }
-            }),
-            {
-              status: 400,
-              headers: { 'Content-Type': 'application/json' },
-            }
-          );
         }
+
+        console.error('File data issue - no content field:', {
+          dataKeys: Object.keys(data),
+          type: Array.isArray(data) ? 'array' : ('type' in data ? data.type : 'unknown'),
+          hasContent: 'content' in data,
+        });
+        return json(
+          {
+            error: 'File has no content or is not a file',
+            debug: {
+              type: Array.isArray(data) ? 'array' : ('type' in data ? data.type : 'unknown'),
+              hasContent: 'content' in data,
+              dataKeys: Object.keys(data),
+            },
+          },
+          400
+        );
       } catch (error: any) {
         console.error('GitHub API error:', error);
         if (error.status === 404) {
-          return new Response(
-            JSON.stringify({ error: 'File not found' }),
-            {
-              status: 404,
-              headers: { 'Content-Type': 'application/json' },
-            }
-          );
+          return json({ error: 'File not found' }, 404);
         }
-        return new Response(
-          JSON.stringify({ 
-            error: 'GitHub API error', 
-            details: error.message,
-            status: error.status 
-          }),
-          {
-            status: 500,
-            headers: { 'Content-Type': 'application/json' },
-          }
+        return json(
+          { error: 'GitHub API error', details: error.message, status: error.status },
+          500
         );
       }
     }
 
-    // List files in src/blog directory
+    // List files in src/notes directory
     const { data: files } = await octokit.rest.repos.getContent({
       owner,
       repo,
-      path: 'src/blog',
+      path: 'src/notes',
       ref: branch,
     });
 
     if (Array.isArray(files)) {
-      const blogFilesPromises = files
+      const noteFilesPromises = files
         .filter(file => file.type === 'file' && file.name.endsWith('.md'))
         .map(async (file) => {
           try {
@@ -119,7 +89,7 @@ export const GET: APIRoute = async ({ url }) => {
             let pubDate = null;
             if ('content' in fileContent && fileContent.content) {
               const content = Buffer.from(fileContent.content, 'base64').toString('utf8');
-              
+
               // Extract pubDate from frontmatter
               const frontmatterMatch = content.match(/^---\s*\n([\s\S]*?)\n---/);
               if (frontmatterMatch) {
@@ -148,29 +118,14 @@ export const GET: APIRoute = async ({ url }) => {
           }
         });
 
-      const blogFiles = await Promise.all(blogFilesPromises);
+      const noteFiles = await Promise.all(noteFilesPromises);
 
-      return new Response(JSON.stringify({ files: blogFiles }), {
-        status: 200,
-        headers: { 'Content-Type': 'application/json' },
-      });
+      return json({ files: noteFiles });
     }
 
-    return new Response(
-      JSON.stringify({ error: 'Invalid directory structure' }),
-      {
-        status: 500,
-        headers: { 'Content-Type': 'application/json' },
-      }
-    );
+    return json({ error: 'Invalid directory structure' }, 500);
   } catch (error) {
     console.error('Error with files API:', error);
-    return new Response(
-      JSON.stringify({ error: 'Failed to process request' }),
-      {
-        status: 500,
-        headers: { 'Content-Type': 'application/json' },
-      }
-    );
+    return json({ error: 'Failed to process request' }, 500);
   }
 };

@@ -1,28 +1,18 @@
-import { Octokit } from '@octokit/rest';
 import type { APIRoute } from 'astro';
+import { getGithub, json } from '@/lib/github';
+import { requireAuth } from '@/lib/session';
 
 export const prerender = false;
 
-export const GET: APIRoute = async () => {
+export const GET: APIRoute = async ({ request }) => {
+  const unauthorized = requireAuth(request);
+  if (unauthorized) return unauthorized;
+
+  const gh = getGithub();
+  if (!gh) return json({ error: 'GitHub token not configured' }, 500);
+  const { octokit, owner, repo } = gh;
+
   try {
-    const githubToken = process.env.GITHUB_TOKEN;
-    const owner = import.meta.env.GITHUB_OWNER;
-    const repo = import.meta.env.GITHUB_REPO;
-
-    if (!githubToken) {
-      return new Response(
-        JSON.stringify({ error: 'GitHub token not configured' }),
-        {
-          status: 500,
-          headers: { 'Content-Type': 'application/json' },
-        }
-      );
-    }
-
-    const octokit = new Octokit({
-      auth: githubToken,
-    });
-
     const { data: branches } = await octokit.rest.repos.listBranches({
       owner,
       repo,
@@ -34,18 +24,9 @@ export const GET: APIRoute = async () => {
       protected: branch.protected,
     }));
 
-    return new Response(JSON.stringify({ branches: branchData }), {
-      status: 200,
-      headers: { 'Content-Type': 'application/json' },
-    });
+    return json({ branches: branchData });
   } catch (error) {
     console.error('Error fetching branches:', error);
-    return new Response(
-      JSON.stringify({ error: 'Failed to fetch branches' }),
-      {
-        status: 500,
-        headers: { 'Content-Type': 'application/json' },
-      }
-    );
+    return json({ error: 'Failed to fetch branches' }, 500);
   }
 };

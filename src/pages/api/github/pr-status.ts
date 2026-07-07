@@ -1,40 +1,23 @@
-import { Octokit } from '@octokit/rest';
 import type { APIRoute } from 'astro';
+import { getGithub, json } from '@/lib/github';
+import { requireAuth } from '@/lib/session';
 
 export const prerender = false;
 
-export const GET: APIRoute = async ({ request }) => {
+export const GET: APIRoute = async ({ request, url }) => {
+  const unauthorized = requireAuth(request);
+  if (unauthorized) return unauthorized;
+
+  const gh = getGithub();
+  if (!gh) return json({ error: 'GitHub token not configured' }, 500);
+  const { octokit, owner, repo } = gh;
+
   try {
-    const githubToken = process.env.GITHUB_TOKEN;
-    const owner = import.meta.env.GITHUB_OWNER;
-    const repo = import.meta.env.GITHUB_REPO;
-
-    if (!githubToken) {
-      return new Response(
-        JSON.stringify({ error: 'GitHub token not configured' }),
-        {
-          status: 500,
-          headers: { 'Content-Type': 'application/json' },
-        }
-      );
-    }
-
-    const url = new URL(request.url);
     const branch = url.searchParams.get('branch');
 
     if (!branch) {
-      return new Response(
-        JSON.stringify({ error: 'Branch parameter is required' }),
-        {
-          status: 400,
-          headers: { 'Content-Type': 'application/json' },
-        }
-      );
+      return json({ error: 'Branch parameter is required' }, 400);
     }
-
-    const octokit = new Octokit({
-      auth: githubToken,
-    });
 
     // Check for existing PR from this branch
     const response = await octokit.rest.pulls.list({
@@ -46,30 +29,20 @@ export const GET: APIRoute = async ({ request }) => {
 
     const existingPR = response.data[0];
 
-    return new Response(JSON.stringify({ 
+    return json({
       success: true,
       hasPR: !!existingPR,
-      pullRequest: existingPR ? {
-        number: existingPR.number,
-        url: existingPR.html_url,
-        title: existingPR.title,
-        state: existingPR.state,
-      } : null
-    }), {
-      status: 200,
-      headers: { 'Content-Type': 'application/json' },
+      pullRequest: existingPR
+        ? {
+            number: existingPR.number,
+            url: existingPR.html_url,
+            title: existingPR.title,
+            state: existingPR.state,
+          }
+        : null,
     });
   } catch (error: any) {
     console.error('Error checking PR status:', error);
-    return new Response(
-      JSON.stringify({ 
-        error: 'Failed to check PR status',
-        details: error.message 
-      }),
-      {
-        status: 500,
-        headers: { 'Content-Type': 'application/json' },
-      }
-    );
+    return json({ error: 'Failed to check PR status', details: error.message }, 500);
   }
 };

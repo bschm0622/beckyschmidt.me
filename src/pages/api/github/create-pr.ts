@@ -1,46 +1,30 @@
-import { Octokit } from '@octokit/rest';
 import type { APIRoute } from 'astro';
+import { getGithub, json } from '@/lib/github';
+import { requireAuth } from '@/lib/session';
 
 export const prerender = false;
 
 export const POST: APIRoute = async ({ request }) => {
+  const unauthorized = requireAuth(request);
+  if (unauthorized) return unauthorized;
+
+  const gh = getGithub();
+  if (!gh) return json({ error: 'GitHub token not configured' }, 500);
+  const { octokit, owner, repo } = gh;
+
   try {
-    const githubToken = process.env.GITHUB_TOKEN;
-    const owner = import.meta.env.GITHUB_OWNER;
-    const repo = import.meta.env.GITHUB_REPO;
-
-    if (!githubToken) {
-      return new Response(
-        JSON.stringify({ error: 'GitHub token not configured' }),
-        {
-          status: 500,
-          headers: { 'Content-Type': 'application/json' },
-        }
-      );
-    }
-
     const body = await request.json();
-    const { 
-      title, 
-      body: prBody = '', 
-      head, 
+    const {
+      title,
+      body: prBody = '',
+      head,
       base = 'master',
-      draft = false 
+      draft = false,
     } = body;
 
     if (!title || !head) {
-      return new Response(
-        JSON.stringify({ error: 'Missing required fields: title, head' }),
-        {
-          status: 400,
-          headers: { 'Content-Type': 'application/json' },
-        }
-      );
+      return json({ error: 'Missing required fields: title, head' }, 400);
     }
-
-    const octokit = new Octokit({
-      auth: githubToken,
-    });
 
     // Create pull request
     const response = await octokit.rest.pulls.create({
@@ -53,29 +37,17 @@ export const POST: APIRoute = async ({ request }) => {
       draft,
     });
 
-    return new Response(JSON.stringify({ 
+    return json({
       success: true,
       pullRequest: {
         number: response.data.number,
         url: response.data.html_url,
         title: response.data.title,
         state: response.data.state,
-      }
-    }), {
-      status: 200,
-      headers: { 'Content-Type': 'application/json' },
+      },
     });
   } catch (error: any) {
     console.error('Error creating pull request:', error);
-    return new Response(
-      JSON.stringify({ 
-        error: 'Failed to create pull request',
-        details: error.message 
-      }),
-      {
-        status: 500,
-        headers: { 'Content-Type': 'application/json' },
-      }
-    );
+    return json({ error: 'Failed to create pull request', details: error.message }, 500);
   }
 };
