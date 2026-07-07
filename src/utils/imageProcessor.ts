@@ -102,12 +102,3 @@ export async function optimizeImage(file: File): Promise<File> {
     img.src = URL.createObjectURL(file);
   });
 }
-
-/**
- * Generates a unique filename for an image
- */
-export function generateImageFilename(originalName: string, slug: string): string {
-  const timestamp = Date.now();
-  const sanitized = originalName.replace(/[^a-zA-Z0-9.-]/g, '-');
-  return `${slug}-${timestamp}-${sanitized}`;
-}

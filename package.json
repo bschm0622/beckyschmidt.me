@@ -15,7 +15,6 @@
     "@astrojs/rss": "^4.0.18",
     "@astrojs/sitemap": "^3.7.2",
     "@codemirror/lang-markdown": "^6.2.4",
-    "@codemirror/theme-one-dark": "^6.1.2",
     "@octokit/rest": "^20.0.2",
     "@tailwindcss/vite": "^4.1.10",
     "@uiw/react-codemirror": "^4.21.24",
