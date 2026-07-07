@@ -22,7 +22,7 @@ import FuseSearch from "./FuseSearch";
                 <!-- Search UI -->
                 <div class="p-6">
                     <h2 id="search-modal-title" class="sr-only">Search</h2>
-                    <FuseSearch maxHeight="60vh" client:load />
+                    <FuseSearch maxHeight="60vh" client:visible />
                 </div>
 
                 <!-- Close hint - ESC key (desktop only) -->
@@ -53,8 +53,15 @@ import FuseSearch from "./FuseSearch";
 
         const elements = { backdrop, container, content };
 
+        // Remember what had focus before opening, so we can restore it on close.
+        let previouslyFocused: HTMLElement | null = null;
+
+        const FOCUSABLE = 'a[href], button:not([disabled]), input:not([disabled]), [tabindex]:not([tabindex="-1"])';
+
         function openModal() {
+            previouslyFocused = document.activeElement as HTMLElement | null;
             elements.backdrop.classList.remove("hidden");
+            elements.backdrop.setAttribute("aria-hidden", "false");
             void elements.backdrop.offsetHeight;
             elements.backdrop.classList.remove("opacity-0");
             elements.content.classList.remove("scale-95");
@@ -70,9 +77,33 @@ import FuseSearch from "./FuseSearch";
 
         function closeModal() {
             elements.backdrop.classList.add("opacity-0");
+            elements.backdrop.setAttribute("aria-hidden", "true");
             elements.content.classList.remove("scale-100");
             elements.content.classList.add("scale-95");
             setTimeout(() => elements.backdrop.classList.add("hidden"), ANIMATION_DURATION);
+            // Return focus to whatever triggered the modal (e.g. the search button).
+            previouslyFocused?.focus();
+        }
+
+        // Keep Tab focus inside the dialog while it's open.
+        function trapFocus(e: KeyboardEvent) {
+            if (e.key !== "Tab") return;
+            const focusable = Array.from(
+                elements.content.querySelectorAll<HTMLElement>(FOCUSABLE),
+            ).filter((el) => el.offsetParent !== null);
+            if (focusable.length === 0) return;
+
+            const first = focusable[0];
+            const last = focusable[focusable.length - 1];
+            const active = document.activeElement;
+
+            if (e.shiftKey && active === first) {
+                e.preventDefault();
+                last.focus();
+            } else if (!e.shiftKey && active === last) {
+                e.preventDefault();
+                first.focus();
+            }
         }
 
         window.openSearchModal = openModal;
@@ -90,6 +121,10 @@ import FuseSearch from "./FuseSearch";
 
             if (e.key === "Escape" && isModalOpen) {
                 closeModal();
+            }
+
+            if (isModalOpen) {
+                trapFocus(e);
             }
 
             if ((e.metaKey || e.ctrlKey) && e.key === "k") {
