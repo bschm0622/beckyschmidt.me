@@ -1,4 +1,4 @@
-# Hi, I'm Becky.
+# Hi, I'm Becky
 
 I'm a senior product manager at [Octane11](https://octane11.com), where I build AI and data products for B2B marketers.
 

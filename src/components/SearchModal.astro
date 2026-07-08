@@ -1,33 +1,49 @@
 ---
-import FuseSearch from "./FuseSearch";
+import CommandPalette from "./CommandPalette";
+
+const key =
+    "rounded-sm border border-muted bg-muted px-1.5 py-0.5 text-[0.7rem] font-medium leading-none text-muted-foreground";
 ---
 
 <!-- Modal Backdrop -->
 <div
     id="search-modal-backdrop"
-    class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden opacity-0 transition-opacity duration-200"
+    class="fixed inset-0 bg-foreground/20 backdrop-blur-sm z-50 hidden opacity-0 transition-opacity duration-200"
     aria-hidden="true"
 >
     <!-- Modal Container -->
     <div id="search-modal-container" class="fixed inset-0 overflow-y-auto">
-        <div class="flex min-h-full items-start justify-center p-4 pt-[10vh]">
+        <div class="flex min-h-full items-center justify-center p-4">
             <!-- Modal Content -->
             <div
                 id="search-modal-content"
-                class="relative w-full max-w-2xl bg-surface rounded-lg shadow-2xl transform scale-95 transition-transform duration-200"
+                class="relative w-full max-w-2xl bg-surface rounded-md border border-muted shadow-lg transform scale-95 transition-transform duration-200"
                 role="dialog"
                 aria-modal="true"
                 aria-labelledby="search-modal-title"
             >
-                <!-- Search UI -->
+                <!-- Command palette -->
                 <div class="p-6">
-                    <h2 id="search-modal-title" class="sr-only">Search</h2>
-                    <FuseSearch maxHeight="60vh" client:visible />
+                    <h2 id="search-modal-title" class="sr-only">Command palette</h2>
+                    <CommandPalette maxHeight="60vh" client:visible />
                 </div>
 
-                <!-- Close hint - ESC key (desktop only) -->
-                <div class="hidden md:block absolute top-4 right-4 text-xs text-muted-foreground">
-                    <kbd class="px-2 py-1 bg-muted rounded text-foreground">ESC</kbd>
+                <!-- Keyboard hints (desktop only) -->
+                <div class="hidden md:flex items-center justify-between border-t border-muted px-6 py-3 text-xs text-muted-foreground">
+                    <div class="flex items-center gap-4">
+                        <span class="flex items-center gap-1.5">
+                            <kbd class={key}>↑</kbd><kbd class={key}>↓</kbd>
+                            <span>navigate</span>
+                        </span>
+                        <span class="flex items-center gap-1.5">
+                            <kbd class={key}>↵</kbd>
+                            <span>select</span>
+                        </span>
+                    </div>
+                    <span class="flex items-center gap-1.5">
+                        <kbd class={key}>esc</kbd>
+                        <span>close</span>
+                    </span>
                 </div>
             </div>
         </div>
@@ -35,12 +51,6 @@ import FuseSearch from "./FuseSearch";
 </div>
 
 <script>
-    declare global {
-        interface Window {
-            openSearchModal: () => void;
-        }
-    }
-
     function initSearchModal() {
         const backdrop = document.getElementById("search-modal-backdrop");
         const container = document.getElementById("search-modal-container");
@@ -107,6 +117,7 @@ import FuseSearch from "./FuseSearch";
         }
 
         window.openSearchModal = openModal;
+        window.closeSearchModal = closeModal;
 
         elements.content.addEventListener("click", (e) => {
             e.stopPropagation();
