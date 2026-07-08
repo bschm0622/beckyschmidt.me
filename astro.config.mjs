@@ -11,9 +11,7 @@ import { rehypeExternalLinks } from './src/utils/rehype-external-links.mjs';
 
 import tailwindcss from '@tailwindcss/vite';
 
-import netlify from "@astrojs/netlify";
-
-const isDev = process.argv.includes('dev');
+import cloudflare from "@astrojs/cloudflare";
 
 // https://astro.build/config
 export default defineConfig({
@@ -82,5 +80,5 @@ export default defineConfig({
     weights: ["400", "500", "600", "700"]
   }],
 
-  adapter: isDev ? undefined : netlify(),
+  adapter: cloudflare(),
 });

@@ -1,0 +1,17 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "becky-schmidt-personal-site",
+  // Unified server entrypoint provided by @astrojs/cloudflare.
+  "main": "@astrojs/cloudflare/entrypoints/server",
+  "compatibility_date": "2025-11-01",
+  // Required for node:crypto + Buffer used by the cookie-signing in src/lib/session.ts.
+  "compatibility_flags": ["nodejs_compat"],
+  // Astro's build output; static files are served directly, SSR routes hit the Worker.
+  "assets": {
+    "binding": "ASSETS",
+    "directory": "./dist"
+  },
+  "observability": {
+    "enabled": true
+  }
+}

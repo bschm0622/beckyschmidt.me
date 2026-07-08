@@ -27,5 +27,9 @@ pnpm-debug.log*
 
 .env.local
 
-# Local Netlify folder
+# Cloudflare / Wrangler
+.wrangler/
+.dev.vars
+
+# Local Netlify folder (legacy — safe to delete)
 .netlify

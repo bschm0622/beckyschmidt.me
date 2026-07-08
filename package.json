@@ -4,14 +4,15 @@
   "version": "0.0.1",
   "scripts": {
     "astro-dev": "astro dev",
-    "dev": "npx convex dev & netlify dev",
+    "dev": "npx convex dev & astro dev",
     "build": "astro build",
-    "preview": "astro preview",
+    "preview": "astro build && wrangler dev",
     "check": "astro check",
+    "deploy": "astro build && wrangler deploy",
     "astro": "astro"
   },
   "dependencies": {
-    "@astrojs/netlify": "^7.0.6",
+    "@astrojs/cloudflare": "^13.7.0",
     "@astrojs/react": "^5.0.3",
     "@astrojs/rss": "^4.0.18",
     "@astrojs/sitemap": "^3.7.2",
@@ -36,7 +37,8 @@
     "@astrojs/check": "^0.9.9",
     "@types/lodash.kebabcase": "^4.1.9",
     "@types/markdown-it": "^14.1.2",
-    "typescript": "^6.0.3"
+    "typescript": "^6.0.3",
+    "wrangler": "^4.108.0"
   },
   "overrides": {
     "esbuild": "^0.28.1"
