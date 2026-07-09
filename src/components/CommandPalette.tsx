@@ -247,7 +247,7 @@ export default function CommandPalette({ maxHeight }: Props) {
 
     return (
         <div className="command-palette">
-            {/* Input */}
+            {/* Input — text-base (16px) on mobile stops iOS auto-zoom on focus; text-sm on desktop */}
             <div className="relative">
                 <input
                     ref={inputRef}
@@ -256,7 +256,7 @@ export default function CommandPalette({ maxHeight }: Props) {
                     onChange={(e) => setQuery(e.target.value)}
                     onKeyDown={handleKeyDown}
                     placeholder="Search or jump to…"
-                    className="w-full px-4 py-2.5 pr-10 rounded-md border border-muted bg-surface text-foreground text-sm font-normal placeholder:text-muted-foreground focus:outline-none focus:border-foreground/30 transition-colors"
+                    className="w-full px-4 py-2.5 pr-10 rounded-md border border-muted bg-surface text-foreground text-base md:text-sm font-normal placeholder:text-muted-foreground focus:outline-none focus:border-foreground/30 transition-colors"
                     aria-label="Search or run a command"
                     autoComplete="off"
                 />

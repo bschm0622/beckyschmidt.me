@@ -17,7 +17,7 @@ const key =
             <!-- Modal Content -->
             <div
                 id="search-modal-content"
-                class="relative w-full max-w-2xl bg-surface rounded-md border border-muted shadow-lg transform scale-95 transition-transform duration-200"
+                class="relative w-full max-w-2xl min-w-0 bg-surface rounded-md border border-muted shadow-lg transform scale-95 transition-transform duration-200"
                 role="dialog"
                 aria-modal="true"
                 aria-labelledby="search-modal-title"
@@ -25,6 +25,20 @@ const key =
                 <!-- Command palette -->
                 <div class="p-6">
                     <h2 id="search-modal-title" class="sr-only">Command palette</h2>
+                    <!-- Close (mobile only — phones have no Esc key) -->
+                    <div class="md:hidden flex justify-end -mt-2 -mr-2 mb-1">
+                        <button
+                            type="button"
+                            data-search-close
+                            aria-label="Close search"
+                            class="flex items-center justify-center w-8 h-8 rounded-md text-muted-foreground transition-colors hover:bg-foreground/13"
+                        >
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="18" y1="6" x2="6" y2="18" />
+                                <line x1="6" y1="6" x2="18" y2="18" />
+                            </svg>
+                        </button>
+                    </div>
                     <CommandPalette maxHeight="60vh" client:visible />
                 </div>
 
@@ -122,6 +136,10 @@ const key =
         elements.content.addEventListener("click", (e) => {
             e.stopPropagation();
         });
+
+        elements.content
+            .querySelector("[data-search-close]")
+            ?.addEventListener("click", () => closeModal());
 
         elements.container.addEventListener("click", () => {
             closeModal();
