@@ -293,15 +293,18 @@ html.dark code {
   outline-offset: 2px;
 }
 
-/* Respect the OS "reduce motion" setting — neutralize transitions/animations
-   (modal fade/scale, the link-arrow nudge, view transitions, etc.). */
+/* Respect the OS "reduce motion" setting. Reduce motion ≠ no animation: we
+   kill keyframe animations and smooth scroll, and limit transitions to
+   non-motion properties (opacity, color) so gentle cross-fades survive while
+   actual movement — transform-based rotate/scale/slide — snaps instantly. */
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
   *::after {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
+    transition-property: opacity, color, background-color, border-color,
+      text-decoration-color, fill, stroke !important;
   }
 }
