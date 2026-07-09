@@ -43,9 +43,9 @@ const mailTo = (email: string) => {
     closePalette();
     window.location.href = `mailto:${email}`;
 };
+// Copies only; the "Copied" confirmation + delayed close is handled in runItem.
 const copyLink = () => {
     navigator.clipboard?.writeText(window.location.href);
-    closePalette();
 };
 
 // Match the site's FormattedDate: ISO "YYYY-MM-DD" → "MMM D, YYYY".
@@ -78,6 +78,11 @@ const IconCopy = () => (
     <svg className={iconCls} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
         <path d="M9 15C9 12.1716 9 10.7574 9.87868 9.87868C10.7574 9 12.1716 9 15 9L16 9C18.8284 9 20.2426 9 21.1213 9.87868C22 10.7574 22 12.1716 22 15V16C22 18.8284 22 20.2426 21.1213 21.1213C20.2426 22 18.8284 22 16 22H15C12.1716 22 10.7574 22 9.87868 21.1213C9 20.2426 9 18.8284 9 16L9 15Z" />
         <path d="M16.9999 9C16.9975 6.04291 16.9528 4.51121 16.092 3.46243C15.9258 3.25989 15.7401 3.07418 15.5376 2.90796C14.4312 2 12.7875 2 9.5 2C6.21252 2 4.56878 2 3.46243 2.90796C3.25989 3.07417 3.07418 3.25989 2.90796 3.46243C2 4.56878 2 6.21252 2 9.5C2 12.7875 2 14.4312 2.90796 15.5376C3.07417 15.7401 3.25989 15.9258 3.46243 16.092C4.51121 16.9528 6.04291 16.9975 9 16.9999" />
+    </svg>
+);
+const IconCheck = () => (
+    <svg className={iconCls} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+        <path d="M20 6 9 17l-5-5" />
     </svg>
 );
 // External-link box — same glyph as prose links; trails outbound items.
@@ -146,6 +151,7 @@ export default function CommandPalette({ maxHeight }: Props) {
     const [notes, setNotes] = useState<SearchItem[]>([]);
     const [fuse, setFuse] = useState<Fuse<SearchItem> | null>(null);
     const [selected, setSelected] = useState(0);
+    const [copied, setCopied] = useState(false);
     const inputRef = useRef<HTMLInputElement>(null);
     const listRef = useRef<HTMLDivElement>(null);
 
@@ -231,6 +237,19 @@ export default function CommandPalette({ maxHeight }: Props) {
             ?.scrollIntoView({ block: "nearest" });
     }, [selected]);
 
+    // Run an item's action. "Copy link" is special-cased to flash a "Copied"
+    // confirmation before dismissing, rather than closing silently.
+    const runItem = (item: Command) => {
+        item.perform();
+        if (item.id === "action:copy") {
+            setCopied(true);
+            window.setTimeout(() => {
+                setCopied(false);
+                closePalette();
+            }, 1200);
+        }
+    };
+
     const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
         if (flat.length === 0) return;
         if (e.key === "ArrowDown") {
@@ -241,40 +260,52 @@ export default function CommandPalette({ maxHeight }: Props) {
             setSelected((i) => (i - 1 + flat.length) % flat.length);
         } else if (e.key === "Enter") {
             e.preventDefault();
-            flat[Math.min(selected, flat.length - 1)]?.perform();
+            const sel = flat[Math.min(selected, flat.length - 1)];
+            if (sel) runItem(sel);
         }
     };
 
     return (
         <div className="command-palette">
-            {/* Input — text-base (16px) on mobile stops iOS auto-zoom on focus; text-sm on desktop */}
-            <div className="relative">
-                <input
-                    ref={inputRef}
-                    type="text"
-                    value={query}
-                    onChange={(e) => setQuery(e.target.value)}
-                    onKeyDown={handleKeyDown}
-                    placeholder="Search or jump to…"
-                    className="w-full px-4 py-2.5 pr-10 rounded-md border border-muted bg-surface text-foreground text-base md:text-sm font-normal placeholder:text-muted-foreground focus:outline-none focus:border-foreground/30 transition-colors"
-                    aria-label="Search or run a command"
-                    autoComplete="off"
-                />
-                {query && (
-                    <button
-                        onClick={() => {
-                            setQuery("");
-                            inputRef.current?.focus();
-                        }}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
-                        aria-label="Clear"
-                    >
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <line x1="18" y1="6" x2="6" y2="18" />
-                            <line x1="6" y1="6" x2="18" y2="18" />
-                        </svg>
-                    </button>
-                )}
+            {/* Input — text-base (16px) on mobile stops iOS auto-zoom on focus; text-sm on desktop.
+                On mobile, an iOS-style "Close" beside the field dismisses the palette. */}
+            <div className="flex items-center gap-2">
+                <div className="relative flex-1 min-w-0">
+                    <input
+                        ref={inputRef}
+                        type="text"
+                        value={query}
+                        onChange={(e) => setQuery(e.target.value)}
+                        onKeyDown={handleKeyDown}
+                        placeholder="Search or jump to…"
+                        className="w-full px-4 py-2.5 pr-10 rounded-md border border-muted bg-surface text-foreground text-base md:text-sm font-normal placeholder:text-muted-foreground focus:outline-none focus:border-foreground/30 transition-colors"
+                        aria-label="Search or run a command"
+                        autoComplete="off"
+                    />
+                    {query && (
+                        <button
+                            onClick={() => {
+                                setQuery("");
+                                inputRef.current?.focus();
+                            }}
+                            className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                            aria-label="Clear"
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <line x1="18" y1="6" x2="6" y2="18" />
+                                <line x1="6" y1="6" x2="18" y2="18" />
+                            </svg>
+                        </button>
+                    )}
+                </div>
+                <button
+                    type="button"
+                    onClick={() => closePalette()}
+                    className="md:hidden shrink-0 pl-1 text-sm text-muted-foreground"
+                    aria-label="Close"
+                >
+                    Close
+                </button>
             </div>
 
             {/* Results — negative margin + padding keeps the scrollbar in the
@@ -297,24 +328,25 @@ export default function CommandPalette({ maxHeight }: Props) {
                             <ul>
                                 {group.items.map((item) => {
                                     const active = item.index === selected;
+                                    const justCopied = copied && item.id === "action:copy";
                                     return (
                                         <li key={item.id}>
                                             <button
                                                 data-index={item.index}
                                                 onMouseMove={() => setSelected(item.index)}
-                                                onClick={() => item.perform()}
+                                                onClick={() => runItem(item)}
                                                 className={`w-full flex items-center gap-3 px-2 py-2 rounded-md text-left transition-colors ${
                                                     active ? "bg-foreground/8" : ""
                                                 }`}
                                             >
                                                 {item.icon && (
                                                     <span className="text-muted-foreground shrink-0">
-                                                        {item.icon}
+                                                        {justCopied ? <IconCheck /> : item.icon}
                                                     </span>
                                                 )}
                                                 <span className="min-w-0 flex-1">
                                                     <span className="block text-sm text-foreground leading-snug truncate">
-                                                        {item.label}
+                                                        {justCopied ? "Copied" : item.label}
                                                     </span>
                                                     {item.sublabel && (
                                                         <span className="block text-xs text-muted-foreground leading-snug truncate">

@@ -285,3 +285,23 @@ code {
 html.dark code {
   @apply bg-secondary;
 }
+
+/* Consistent, on-brand keyboard focus ring. Elements with their own focus
+   styling (form inputs use focus:outline-none + a ring) opt out automatically. */
+:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+/* Respect the OS "reduce motion" setting — neutralize transitions/animations
+   (modal fade/scale, the link-arrow nudge, view transitions, etc.). */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
