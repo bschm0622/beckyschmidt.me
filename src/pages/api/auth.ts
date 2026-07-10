@@ -1,9 +1,18 @@
 import type { APIRoute } from 'astro';
 import crypto from 'node:crypto';
 import { getSecret } from 'astro:env/server';
-import { createSessionCookie, clearSessionCookie } from '@/lib/session';
+import { createSessionCookie, clearSessionCookie, isAuthenticated } from '@/lib/session';
 
 export const prerender = false;
+
+// Session check: the client uses this on load to confirm the cookie is still
+// valid, rather than trusting a stale localStorage flag.
+export const GET: APIRoute = async ({ request }) => {
+  return new Response(JSON.stringify({ authenticated: isAuthenticated(request) }), {
+    status: 200,
+    headers: { 'Content-Type': 'application/json' },
+  });
+};
 
 function timingSafeEqual(a: string, b: string): boolean {
   const ab = Buffer.from(a);

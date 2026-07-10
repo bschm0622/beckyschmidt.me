@@ -30,6 +30,18 @@ html:not(.light):not(.dark) {
   --color-foreground: #111827;
   --color-background: #ffffff;
   --color-link: #4f46e5;
+
+  /* Semantic status colors (used by admin banners). Each has a text color, a
+     subtle surface fill, and a border, so a banner is one class trio. */
+  --color-danger: #dc2626;
+  --color-danger-surface: #fef2f2;
+  --color-danger-border: #fecaca;
+  --color-success: #16a34a;
+  --color-success-surface: #f0fdf4;
+  --color-success-border: #bbf7d0;
+  --color-warning: #d97706;
+  --color-warning-surface: #fffbeb;
+  --color-warning-border: #fde68a;
 }
 
 .dark {
@@ -42,6 +54,64 @@ html:not(.light):not(.dark) {
   --color-foreground: #fafafa;
   --color-background: #18181b;
   --color-link: #a5b4fc;
+
+  /* Dark-mode status colors: brighter text, deep-tinted surfaces so banners
+     read correctly against the near-black background instead of glowing white. */
+  --color-danger: #f87171;
+  --color-danger-surface: #2b1414;
+  --color-danger-border: #7f1d1d;
+  --color-success: #4ade80;
+  --color-success-surface: #0f2417;
+  --color-success-border: #166534;
+  --color-warning: #fbbf24;
+  --color-warning-surface: #2a1e08;
+  --color-warning-border: #78350f;
+}
+
+/* Shared admin UI primitives. These codify the button / input / panel patterns
+   already used across the admin islands so the three components stay consistent
+   and theme-aware. Focus rings use the indigo accent to match the global
+   :focus-visible ring. */
+@layer components {
+  /* Admin primitives, kept deliberately minimal to match the homepage's
+     card-less look: no panels, no fills, borders only where an input needs
+     the affordance. */
+
+  /* The one solid action button (Publish). High-contrast foreground/background
+     inverse — crisp and quiet, like the rest of the site. */
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 rounded-md bg-foreground
+      text-background px-4 py-2 text-sm font-medium transition-opacity
+      hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed;
+  }
+  /* Everything else is a quiet text action (Back, Log out, Cancel, toggles). */
+  .btn-ghost {
+    @apply inline-flex items-center gap-1.5 text-sm text-muted-foreground
+      hover:text-foreground transition-colors disabled:opacity-40 disabled:cursor-not-allowed;
+  }
+
+  .field-label {
+    @apply block text-sm font-medium text-muted-foreground mb-1.5;
+  }
+  /* Matches the CommandPalette input idiom: border + border-on-focus, no ring.
+     Placeholders are italic + lighter so hint text is unmistakable from real,
+     typed-in values. */
+  .field-input {
+    @apply w-full px-3 py-2 rounded-md border border-muted bg-surface text-foreground
+      placeholder:text-muted-foreground/60 placeholder:italic
+      focus:outline-none focus:border-foreground/30 transition-colors;
+  }
+
+  /* Transient status text — a soft tinted pill, no border, so it stays flat. */
+  .status-error {
+    @apply rounded-md bg-danger-surface text-danger px-3 py-2 text-sm;
+  }
+  .status-success {
+    @apply rounded-md bg-success-surface text-success px-3 py-2 text-sm;
+  }
+  .status-warning {
+    @apply rounded-md bg-warning-surface text-warning px-3 py-2 text-sm;
+  }
 }
 
 .typography {
@@ -286,9 +356,11 @@ html.dark code {
   @apply bg-secondary;
 }
 
-/* Consistent, on-brand keyboard focus ring. Elements with their own focus
-   styling (form inputs use focus:outline-none + a ring) opt out automatically. */
-:focus-visible {
+/* Consistent, on-brand keyboard focus ring for interactive elements. Form
+   fields are excluded: they signal focus with their own border-color change
+   (see .field-input). This rule is unlayered, so without the :not() it would
+   override an input's layered outline:none and re-introduce the accent ring. */
+:focus-visible:not(input):not(textarea):not(select) {
   outline: 2px solid var(--color-accent);
   outline-offset: 2px;
 }

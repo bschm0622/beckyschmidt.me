@@ -87,17 +87,24 @@ export const GET: APIRoute = async ({ request, url }) => {
             });
 
             let pubDate = null;
+            let title = null;
+            let description = null;
             if ('content' in fileContent && fileContent.content) {
               const content = Buffer.from(fileContent.content, 'base64').toString('utf8');
 
-              // Extract pubDate from frontmatter
+              // Extract frontmatter fields (title/pubDate/description). Strip
+              // surrounding quotes so the dashboard shows the real title.
               const frontmatterMatch = content.match(/^---\s*\n([\s\S]*?)\n---/);
               if (frontmatterMatch) {
                 const frontmatter = frontmatterMatch[1];
-                const pubDateMatch = frontmatter.match(/pubDate:\s*([^\n\r]+)/);
-                if (pubDateMatch) {
-                  pubDate = pubDateMatch[1].trim();
-                }
+                const field = (name: string): string | null => {
+                  const m = frontmatter.match(new RegExp(`^${name}:\\s*(.+)$`, 'm'));
+                  if (!m) return null;
+                  return m[1].trim().replace(/^["']|["']$/g, '');
+                };
+                pubDate = field('pubDate');
+                title = field('title');
+                description = field('description');
               }
             }
 
@@ -106,6 +113,8 @@ export const GET: APIRoute = async ({ request, url }) => {
               path: file.path,
               sha: file.sha,
               pubDate: pubDate,
+              title: title || null,
+              description: description || null,
             };
           } catch (error) {
             console.error(`Error fetching content for ${file.name}:`, error);
@@ -114,6 +123,8 @@ export const GET: APIRoute = async ({ request, url }) => {
               path: file.path,
               sha: file.sha,
               pubDate: null,
+              title: null,
+              description: null,
             };
           }
         });

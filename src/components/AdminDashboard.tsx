@@ -1,52 +1,62 @@
 import React, { useState, useEffect } from 'react';
-import BranchSelector from './BranchSelector';
 
 interface Note {
   filename: string;
   title: string;
   slug: string;
   pubDate: string;
+  sha: string;
 }
+
+const JSON_HEADERS = { 'Content-Type': 'application/json' };
 
 export default function AdminDashboard() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
   const [notes, setNotes] = useState<Note[]>([]);
   const [loadingNotes, setLoadingNotes] = useState(false);
-  const [selectedBranch, setSelectedBranch] = useState('master');
+  const [confirmingDelete, setConfirmingDelete] = useState<string | null>(null);
+  const [deletingFile, setDeletingFile] = useState<string | null>(null);
 
-  // Check if already authenticated
+  const showSuccess = (text: string) => {
+    setSuccessMessage(text);
+    window.setTimeout(() => setSuccessMessage(''), 6000);
+  };
+
+  // Confirm the session with the server on load rather than trusting a stale
+  // localStorage flag.
   useEffect(() => {
-    const authenticated = localStorage.getItem('admin-authenticated');
-    if (authenticated === 'true') {
-      setIsAuthenticated(true);
-      loadNotes();
-    }
+    (async () => {
+      try {
+        const res = await fetch('/api/auth');
+        const data = await res.json();
+        if (data.authenticated) {
+          setIsAuthenticated(true);
+          localStorage.setItem('admin-authenticated', 'true');
+          loadNotes();
+        } else {
+          localStorage.removeItem('admin-authenticated');
+        }
+      } catch {
+        // Network error — leave the login form up.
+      }
+    })();
   }, []);
-
-  // Reload posts when branch changes
-  useEffect(() => {
-    if (isAuthenticated) {
-      loadNotes();
-    }
-  }, [selectedBranch]);
 
   const handleLogin = async (e: React.SyntheticEvent) => {
     e.preventDefault();
     setIsLoading(true);
     setError('');
-
     try {
       const response = await fetch('/api/auth', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: JSON_HEADERS,
         body: JSON.stringify({ password }),
       });
-
       const data = await response.json();
-
       if (response.ok && data.success) {
         setIsAuthenticated(true);
         localStorage.setItem('admin-authenticated', 'true');
@@ -54,7 +64,7 @@ export default function AdminDashboard() {
       } else {
         setError(data.error || 'Invalid password');
       }
-    } catch (err) {
+    } catch {
       setError('Authentication failed');
     } finally {
       setIsLoading(false);
@@ -62,7 +72,6 @@ export default function AdminDashboard() {
   };
 
   const handleLogout = () => {
-    // Clear the server session cookie as well as the local UI flag.
     fetch('/api/auth', { method: 'DELETE' }).catch(() => {});
     setIsAuthenticated(false);
     localStorage.removeItem('admin-authenticated');
@@ -73,33 +82,24 @@ export default function AdminDashboard() {
   const loadNotes = async () => {
     setLoadingNotes(true);
     setError('');
-
     try {
-      const response = await fetch(`/api/github/files?branch=${encodeURIComponent(selectedBranch)}`);
-
-      // Session expired or missing — drop back to the login form.
+      const response = await fetch('/api/github/files?branch=master');
       if (response.status === 401) {
         setIsAuthenticated(false);
         localStorage.removeItem('admin-authenticated');
         return;
       }
-
       const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to load notes');
-      }
+      if (!response.ok) throw new Error(data.error || 'Failed to load notes');
 
       const posts: Note[] = data.files.map((file: any) => ({
         filename: file.name,
-        title: file.name.replace('.md', '').replace(/-/g, ' '),
+        title: file.title || file.name.replace('.md', '').replace(/-/g, ' '),
         slug: file.name.replace('.md', ''),
-        pubDate: file.pubDate || new Date().toISOString().split('T')[0],
+        pubDate: file.pubDate || '',
+        sha: file.sha,
       }));
-      
-      // Sort posts by creation date descending (most recent first)
-      posts.sort((a, b) => new Date(b.pubDate).getTime() - new Date(a.pubDate).getTime());
-      
+      posts.sort((a, b) => (b.pubDate || '').localeCompare(a.pubDate || ''));
       setNotes(posts);
     } catch (err: any) {
       setError(err.message || 'Failed to load notes');
@@ -108,144 +108,165 @@ export default function AdminDashboard() {
     }
   };
 
-  const handleBranchSelect = (branch: string) => {
-    setSelectedBranch(branch);
-  };
-
   const handleEditNote = (filename: string) => {
-    window.location.href = `/admin/edit?file=${encodeURIComponent(filename)}&branch=${encodeURIComponent(selectedBranch)}`;
+    window.location.href = `/admin/edit?file=${encodeURIComponent(filename)}`;
   };
 
   const handleCreateNew = () => {
-    window.location.href = `/admin/edit?branch=${encodeURIComponent(selectedBranch)}`;
+    window.location.href = '/admin/edit';
   };
 
+  // Deletion follows the same one-click-PR flow as publishing: auto-branch off
+  // master, remove the file, open a PR. Master is untouched until it's merged,
+  // so the note stays in the list until then.
+  const handleDelete = async (note: Note) => {
+    setDeletingFile(note.filename);
+    setError('');
+    try {
+      const branch = `cms/delete-${note.slug}-${Date.now().toString(36)}`;
+
+      const br = await fetch('/api/github/create-branch', {
+        method: 'POST',
+        headers: JSON_HEADERS,
+        body: JSON.stringify({ branchName: branch, fromBranch: 'master' }),
+      });
+      if (!br.ok && br.status !== 409) {
+        throw new Error((await br.json()).error || 'Failed to create branch');
+      }
+
+      const dr = await fetch('/api/github/delete', {
+        method: 'POST',
+        headers: JSON_HEADERS,
+        body: JSON.stringify({
+          filename: note.filename,
+          sha: note.sha,
+          branch,
+          message: `Delete ${note.filename} via CMS`,
+        }),
+      });
+      const dd = await dr.json();
+      if (!dr.ok) throw new Error(dd.error || 'Failed to delete note');
+
+      const pr = await fetch('/api/github/create-pr', {
+        method: 'POST',
+        headers: JSON_HEADERS,
+        body: JSON.stringify({
+          title: `Delete: ${note.title}`,
+          body: 'Note deletion via CMS',
+          head: branch,
+          base: 'master',
+        }),
+      });
+      const pd = await pr.json();
+      if (!pr.ok) throw new Error(pd.error || 'Failed to open PR');
+
+      setConfirmingDelete(null);
+      showSuccess(`Opened PR #${pd.pullRequest.number} to delete "${note.title}". Merge it to remove the note.`);
+    } catch (err: any) {
+      setError(err.message || 'Failed to delete note');
+    } finally {
+      setDeletingFile(null);
+    }
+  };
+
+  // Login — a quiet, vertically-centered form. No card, in keeping with the
+  // rest of the site; presence comes from centering and spacing.
   if (!isAuthenticated) {
     return (
-      <div className="max-w-md mx-auto bg-surface border border-muted rounded-lg shadow-lg p-8">
-        <h2 className="text-2xl font-semibold text-foreground mb-6 text-center">
-          Admin Access
-        </h2>
-        
-        <form onSubmit={handleLogin} className="space-y-6">
-          <div>
-            <label htmlFor="password" className="block text-sm font-medium text-foreground mb-2">
-              Password
-            </label>
+      <div className="min-h-[60vh] flex items-center justify-center">
+        <div className="w-full max-w-xs space-y-8">
+          <div className="space-y-1.5 text-center">
+            <h1 className="text-2xl font-medium tracking-tight text-foreground">Admin</h1>
+            <p className="text-sm text-muted-foreground">Sign in to manage your notes.</p>
+          </div>
+          <form onSubmit={handleLogin} className="space-y-3">
             <input
               type="password"
-              id="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-4 py-3 bg-background border border-muted rounded-md text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
-              placeholder="Enter admin password"
+              className="field-input text-center"
+              placeholder="Password"
+              autoFocus
               required
             />
-          </div>
-          
-          {error && (
-            <div className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-md p-3">
-              {error}
-            </div>
-          )}
-          
-          <button
-            type="submit"
-            disabled={isLoading}
-            className="w-full bg-primary text-white py-3 px-4 rounded-md hover:opacity-80 disabled:opacity-50 transition-opacity font-medium"
-          >
-            {isLoading ? 'Authenticating...' : 'Access Admin'}
-          </button>
-        </form>
+            {error && <p className="text-sm text-danger text-center">{error}</p>}
+            <button type="submit" disabled={isLoading} className="btn-primary w-full">
+              {isLoading ? 'Signing in…' : 'Sign in'}
+            </button>
+          </form>
+        </div>
       </div>
     );
   }
 
   return (
     <div className="space-y-8">
-      {/* Header */}
-      <div className="flex justify-between items-center">
-          <h2>
-            Manage Notes
-          </h2>
-      <div className="flex items-center">
-        <button
-          onClick={handleLogout}
-          className="px-4 py-2 text-muted-foreground hover:text-foreground transition-colors"
-        >
-          Logout
-        </button>
-        <button
-          onClick={handleCreateNew}
-          className="bg-primary text-white px-4 py-2 rounded-md hover:opacity-80 transition-opacity font-medium"
-        >
-          New Note
-        </button>
-        </div>
-      </div>
-
-      {/* Error Display */}
-      {error && (
-        <div className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-md p-3">
-          {error}
-          <button 
-            onClick={() => setError('')}
-            className="ml-2 text-red-800 hover:text-red-600"
-          >
-            ×
+      <div className="flex items-baseline justify-between gap-6">
+        <h1 className="text-2xl font-medium leading-[1.3] tracking-tight text-foreground">Notes</h1>
+        <div className="flex items-center gap-5 text-sm shrink-0">
+          <button onClick={handleLogout} className="text-muted-foreground hover:text-foreground transition-colors">
+            Log out
+          </button>
+          <button onClick={handleCreateNew} className="text-muted-foreground hover:text-foreground transition-colors">
+            New note →
           </button>
         </div>
-      )}
-
-      {/* Branch Selector */}
-      <BranchSelector
-        selectedBranch={selectedBranch}
-        onBranchSelect={handleBranchSelect}
-      />
-
-      {/* Existing Notes */}
-      <div className="bg-surface border border-muted rounded-lg overflow-hidden">
-        <div className="bg-secondary px-3 py-2 border-b border-muted">
-          <h3>Existing Notes</h3>
-        </div>
-
-        {loadingNotes ? (
-          <div className="text-center py-6 text-muted-foreground">
-            Loading notes...
-          </div>
-        ) : notes.length === 0 ? (
-          <div className="text-center py-6 text-muted-foreground">
-            No notes found. Create your first note!
-          </div>
-        ) : (
-          <div className="divide-y divide-muted">
-            {notes.map((post) => (
-              <div 
-                key={post.filename}
-                className="p-3 hover:bg-background transition-colors"
-              >
-                <div className="flex items-center justify-between">
-                  <div className="flex-1">
-                    <div className="text-md font-semibold text-foreground mb-1">
-                      {post.title}
-                    </div>
-                    <div className="text-sm text-muted-foreground">
-                      <span>Published: {post.pubDate}</span>
-                    </div>
-                  </div>
-                  <button
-                    onClick={() => handleEditNote(post.filename)}
-                    className="bg-secondary text-foreground px-4 py-2 rounded-md hover:bg-muted transition-colors font-medium"
-                  >
-                    Edit
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
       </div>
 
+      {successMessage && <p className="status-success">{successMessage}</p>}
+      {error && <p className="status-error">{error}</p>}
+
+      {loadingNotes ? (
+        <p className="text-muted-foreground text-sm">Loading…</p>
+      ) : notes.length === 0 ? (
+        <p className="text-muted-foreground text-sm">No notes yet. Create your first one.</p>
+      ) : (
+        <div className="divide-y divide-muted">
+          {notes.map((post) => (
+            <div key={post.filename} className="group flex items-center justify-between gap-6 py-3.5">
+              <button
+                onClick={() => handleEditNote(post.filename)}
+                className="min-w-0 text-left"
+              >
+                <span className="block truncate text-base font-medium text-foreground leading-snug group-hover:underline decoration-1">
+                  {post.title}
+                </span>
+              </button>
+
+              <div className="flex items-center gap-4 shrink-0">
+                {post.pubDate && (
+                  <time className="text-sm text-muted-foreground tabular-nums">{post.pubDate}</time>
+                )}
+                {confirmingDelete === post.filename ? (
+                  <span className="text-sm">
+                    <button
+                      onClick={() => handleDelete(post)}
+                      disabled={deletingFile === post.filename}
+                      className="text-danger font-medium hover:opacity-80 disabled:opacity-50 transition-opacity"
+                    >
+                      {deletingFile === post.filename ? 'Deleting…' : 'Delete'}
+                    </button>
+                    <span className="text-muted-foreground"> · </span>
+                    <button
+                      onClick={() => setConfirmingDelete(null)}
+                      className="text-muted-foreground hover:text-foreground transition-colors"
+                    >
+                      cancel
+                    </button>
+                  </span>
+                ) : (
+                  <button
+                    onClick={() => setConfirmingDelete(post.filename)}
+                    className="text-sm text-muted-foreground opacity-0 group-hover:opacity-100 focus:opacity-100 hover:text-danger transition-all"
+                  >
+                    Delete
+                  </button>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

@@ -5,13 +5,7 @@ import NoteEditor from '../../components/NoteEditor.tsx';
 ---
 
 <AdminLayout title="Note Editor - Becky Schmidt">
-  <main class="container mx-auto px-4 py-8 max-w-7xl">
+  <div class="mx-auto w-full max-w-3xl py-8">
     <NoteEditor client:load />
-  </main>
+  </div>
 </AdminLayout>
-
-<style>
-  main {
-    min-height: calc(100vh - 200px);
-  }
-</style>
