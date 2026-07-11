@@ -37,6 +37,15 @@ const writingTheme = EditorView.theme({
 
 const WRITING_PLACEHOLDER = 'Write in Markdown — # heading, **bold**, [link](url)…';
 
+// CodeMirror defaults to a *code* editor and disables autocapitalize/autocorrect/
+// spellcheck on its content element. This is a prose surface, so turn them back on
+// — otherwise mobile keyboards won't capitalize sentences or fix typos.
+const proseInputBehavior = EditorView.contentAttributes.of({
+  autocapitalize: 'sentences',
+  autocorrect: 'on',
+  spellcheck: 'true',
+});
+
 // Tags are edited as a friendly comma list but stored as the array literal the
 // existing notes use (e.g. ["ai","product"]). These convert between the two.
 const parseTagsValue = (raw: string): string[] => {
@@ -175,13 +184,25 @@ export default function NoteEditor() {
       const urlParams = new URLSearchParams(window.location.search);
       const filename = urlParams.get('file');
       const hasFile = !!(filename && filename !== 'null' && filename !== 'undefined');
+      // When reopening a note that's still "In review", the dashboard passes the
+      // PR's branch (and number) so we load that version and resume the same PR.
+      const branchParam = urlParams.get('branch');
+      const prParam = urlParams.get('pr');
+      const branch = branchParam && branchParam !== 'master' ? branchParam : null;
       const key = `note-draft:${hasFile ? filename : 'new'}`;
       setDraftKey(key);
 
       if (hasFile) {
         setCurrentFile(filename);
         setSlugEdited(true); // existing note already has a slug
-        await loadFileContent(filename!);
+        if (branch) {
+          // Resume the existing PR: load from its branch and hydrate the
+          // session so publishing updates the same PR.
+          setSessionBranch(branch);
+          if (prParam) setPrNumber(Number(prParam));
+          hydratePrStatus(branch);
+        }
+        await loadFileContent(filename!, branch || 'master');
       } else {
         parseMarkdownWithFrontMatter(`---
 title: ""
@@ -290,10 +311,27 @@ tags: ""
     setPendingDraft(null);
   };
 
-  const loadFileContent = async (filename: string) => {
+  // Look up the open PR for a branch and hydrate the PR number/url so the top bar
+  // shows "Published · PR #n" and repeat publishes update it instead of opening a
+  // new one.
+  const hydratePrStatus = async (branch: string) => {
+    try {
+      const res = await fetch(`/api/github/pr-status?branch=${encodeURIComponent(branch)}`);
+      if (!res.ok) return;
+      const data = await res.json();
+      if (data.hasPR && data.pullRequest) {
+        setPrNumber(data.pullRequest.number);
+        setPrUrl(data.pullRequest.url);
+      }
+    } catch {
+      // best effort — the branch state alone still lets publish update the PR
+    }
+  };
+
+  const loadFileContent = async (filename: string, branch: string = 'master') => {
     try {
       setError('');
-      const response = await fetch(`/api/github/file/src/notes/${filename}?branch=master`, {
+      const response = await fetch(`/api/github/file/src/notes/${filename}?branch=${encodeURIComponent(branch)}`, {
         method: 'GET',
         headers: { ...JSON_HEADERS, 'Cache-Control': 'no-cache' },
       });
@@ -466,7 +504,7 @@ tags: ${tagsToLiteral(parseTagsValue(frontMatter.tags))}
   // images, commit, and open a PR. Repeat publishes reuse the same branch/PR.
   const handlePublish = async () => {
     if (!frontMatter.title.trim() && !markdownContent.trim()) {
-      setError('Nothing to publish yet — add a title or some content.');
+      setError('Nothing to save yet — add a title or some content.');
       return;
     }
 
@@ -542,7 +580,7 @@ tags: ${tagsToLiteral(parseTagsValue(frontMatter.tags))}
         if (!prRes.ok) throw new Error(prData.error || 'Failed to open PR');
         setPrNumber(prData.pullRequest.number);
         setPrUrl(prData.pullRequest.url);
-        showSuccess(`Published — opened PR #${prData.pullRequest.number}. Merge it to go live.`);
+        showSuccess(`Saved — opened PR #${prData.pullRequest.number}. Merge it to publish.`);
       } else {
         showSuccess(`Updated PR #${prNumber}.`);
       }
@@ -554,7 +592,7 @@ tags: ${tagsToLiteral(parseTagsValue(frontMatter.tags))}
         // ignore
       }
     } catch (err: any) {
-      setError(err.message || 'Publish failed');
+      setError(err.message || 'Save failed');
     } finally {
       setIsPublishing(false);
     }
@@ -624,11 +662,11 @@ tags: ${tagsToLiteral(parseTagsValue(frontMatter.tags))}
   if (!isAuthenticated) return null;
 
   const statusText = isPublishing
-    ? 'Publishing…'
+    ? 'Saving…'
     : hasUnsavedChanges
       ? 'Unsaved changes'
       : prNumber
-        ? `Published · PR #${prNumber}`
+        ? `Saved · PR #${prNumber}`
         : currentFile
           ? 'Saved'
           : 'Draft';
@@ -646,7 +684,7 @@ tags: ${tagsToLiteral(parseTagsValue(frontMatter.tags))}
             </a>
           )}
           <button onClick={handlePublish} disabled={isPublishing || !hasUnsavedChanges} className="btn-primary">
-            {isPublishing ? 'Publishing…' : 'Publish'}
+            {isPublishing ? 'Saving…' : 'Save'}
           </button>
         </div>
       </div>
@@ -756,23 +794,6 @@ tags: ${tagsToLiteral(parseTagsValue(frontMatter.tags))}
         )}
       </div>
 
-      {/* Write / Preview toggle */}
-      <div className="flex items-center gap-5 border-b border-muted text-sm">
-        <button
-          onClick={() => setTab('write')}
-          className={`-mb-px border-b-2 pb-2 transition-colors ${tab === 'write' ? 'border-foreground text-foreground font-medium' : 'border-transparent text-muted-foreground hover:text-foreground'}`}
-        >
-          Write
-        </button>
-        <button
-          onClick={() => setTab('preview')}
-          className={`-mb-px border-b-2 pb-2 transition-colors ${tab === 'preview' ? 'border-foreground text-foreground font-medium' : 'border-transparent text-muted-foreground hover:text-foreground'}`}
-        >
-          Preview
-        </button>
-      </div>
-
-      {/* Formatting toolbar — inserts the markdown for you (handy on mobile). */}
       <input
         ref={fileInputRef}
         type="file"
@@ -780,32 +801,55 @@ tags: ${tagsToLiteral(parseTagsValue(frontMatter.tags))}
         onChange={handleImageUpload}
         className="hidden"
       />
-      {tab === 'write' && (
-        <div className="-mt-2 flex flex-wrap items-center gap-0.5">
-          {formatActions.map((a) => (
-            <button
-              key={a.label}
-              type="button"
-              onClick={a.onClick}
-              title={a.title}
-              aria-label={a.title}
-              className={`min-w-8 rounded px-2 py-1.5 text-sm text-muted-foreground hover:text-foreground hover:bg-foreground/5 transition-colors ${a.className ?? ''}`}
-            >
-              {a.label}
-            </button>
-          ))}
-          <span className="mx-1.5 h-4 w-px bg-muted" aria-hidden="true" />
+
+      {/* Sticky editor bar: the Write/Preview toggle and formatting controls stay
+          pinned to the top so they're reachable while scrolling a long note. The
+          solid background lets the text scroll cleanly underneath. */}
+      <div className="sticky top-0 z-10 -mx-4 bg-background px-4 pt-2 pb-3 space-y-3">
+        {/* Write / Preview toggle */}
+        <div className="flex items-center gap-5 border-b border-muted text-sm">
           <button
-            type="button"
-            onClick={() => fileInputRef.current?.click()}
-            disabled={isUploadingImage}
-            title="Add image"
-            className="rounded px-2 py-1.5 text-sm text-muted-foreground hover:text-foreground hover:bg-foreground/5 transition-colors disabled:opacity-40"
+            onClick={() => setTab('write')}
+            className={`-mb-px border-b-2 pb-2 transition-colors ${tab === 'write' ? 'border-foreground text-foreground font-medium' : 'border-transparent text-muted-foreground hover:text-foreground'}`}
           >
-            {isUploadingImage ? 'Processing…' : `Image${pendingImages.length > 0 ? ` (${pendingImages.length})` : ''}`}
+            Write
+          </button>
+          <button
+            onClick={() => setTab('preview')}
+            className={`-mb-px border-b-2 pb-2 transition-colors ${tab === 'preview' ? 'border-foreground text-foreground font-medium' : 'border-transparent text-muted-foreground hover:text-foreground'}`}
+          >
+            Preview
           </button>
         </div>
-      )}
+
+        {/* Formatting toolbar — inserts the markdown for you (handy on mobile). */}
+        {tab === 'write' && (
+          <div className="flex flex-wrap items-center gap-0.5">
+            {formatActions.map((a) => (
+              <button
+                key={a.label}
+                type="button"
+                onClick={a.onClick}
+                title={a.title}
+                aria-label={a.title}
+                className={`min-w-8 rounded px-2 py-1.5 text-sm text-muted-foreground hover:text-foreground hover:bg-foreground/5 transition-colors ${a.className ?? ''}`}
+              >
+                {a.label}
+              </button>
+            ))}
+            <span className="mx-1.5 h-4 w-px bg-muted" aria-hidden="true" />
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              disabled={isUploadingImage}
+              title="Add image"
+              className="rounded px-2 py-1.5 text-sm text-muted-foreground hover:text-foreground hover:bg-foreground/5 transition-colors disabled:opacity-40"
+            >
+              {isUploadingImage ? 'Processing…' : `Image${pendingImages.length > 0 ? ` (${pendingImages.length})` : ''}`}
+            </button>
+          </div>
+        )}
+      </div>
 
       {uploadMessage && (
         <p className={`text-sm ${uploadMessage.type === 'error' ? 'text-danger' : 'text-success'}`}>{uploadMessage.text}</p>
@@ -817,7 +861,7 @@ tags: ${tagsToLiteral(parseTagsValue(frontMatter.tags))}
           <CodeMirror
             value={markdownContent}
             onChange={handleMarkdownChange}
-            extensions={[markdown(), EditorView.lineWrapping, writingTheme, placeholder(WRITING_PLACEHOLDER)]}
+            extensions={[markdown(), EditorView.lineWrapping, writingTheme, placeholder(WRITING_PLACEHOLDER), proseInputBehavior]}
             theme={editorTheme}
             onCreateEditor={(view) => {
               editorViewRef.current = view;

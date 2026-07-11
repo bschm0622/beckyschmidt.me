@@ -8,6 +8,16 @@ interface Note {
   sha: string;
 }
 
+interface PendingPR {
+  number: number;
+  url: string;
+  title: string;
+  branch: string;
+  updatedAt: string;
+  filename: string | null;
+  isDelete: boolean;
+}
+
 const JSON_HEADERS = { 'Content-Type': 'application/json' };
 
 export default function AdminDashboard() {
@@ -17,6 +27,7 @@ export default function AdminDashboard() {
   const [error, setError] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
   const [notes, setNotes] = useState<Note[]>([]);
+  const [pending, setPending] = useState<PendingPR[]>([]);
   const [loadingNotes, setLoadingNotes] = useState(false);
   const [confirmingDelete, setConfirmingDelete] = useState<string | null>(null);
   const [deletingFile, setDeletingFile] = useState<string | null>(null);
@@ -77,6 +88,7 @@ export default function AdminDashboard() {
     localStorage.removeItem('admin-authenticated');
     setPassword('');
     setNotes([]);
+    setPending([]);
   };
 
   const loadNotes = async () => {
@@ -106,6 +118,30 @@ export default function AdminDashboard() {
     } finally {
       setLoadingNotes(false);
     }
+
+    // Surface published-but-unmerged notes so they can be reopened and re-edited.
+    // Best-effort: a failure here shouldn't block the main list.
+    try {
+      const res = await fetch('/api/github/pending');
+      if (res.ok) {
+        const data = await res.json();
+        setPending(data.pending || []);
+      }
+    } catch {
+      // ignore — the "In review" section just won't show
+    }
+  };
+
+  // A pending PR reopens in the editor pointed at its branch so re-publishing
+  // updates the same PR instead of opening a new one.
+  const handleEditPending = (pr: PendingPR) => {
+    if (!pr.filename) return;
+    const params = new URLSearchParams({
+      file: pr.filename,
+      branch: pr.branch,
+      pr: String(pr.number),
+    });
+    window.location.href = `/admin/edit?${params.toString()}`;
   };
 
   const handleEditNote = (filename: string) => {
@@ -184,7 +220,7 @@ export default function AdminDashboard() {
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="field-input text-center"
+              className="field-input"
               placeholder="Password"
               autoFocus
               required
@@ -216,12 +252,50 @@ export default function AdminDashboard() {
       {successMessage && <p className="status-success">{successMessage}</p>}
       {error && <p className="status-error">{error}</p>}
 
+      {pending.length > 0 && (
+        <section className="space-y-3">
+          <h2 className="text-sm font-medium text-muted-foreground">In review</h2>
+          <div className="divide-y divide-muted">
+            {pending.map((pr) => (
+              <div key={pr.number} className="group flex items-center justify-between gap-6 py-3.5">
+                {pr.filename && !pr.isDelete ? (
+                  <button onClick={() => handleEditPending(pr)} className="min-w-0 text-left">
+                    <span className="block truncate text-base font-medium text-foreground leading-snug hover:underline decoration-1">
+                      {pr.title}
+                    </span>
+                  </button>
+                ) : (
+                  <span className="min-w-0 truncate text-base font-medium text-foreground leading-snug">
+                    {pr.isDelete ? '🗑 ' : ''}{pr.title}
+                  </span>
+                )}
+                <div className="flex items-center gap-4 shrink-0 text-sm">
+                  <a
+                    href={pr.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-muted-foreground hover:text-link transition-colors"
+                  >
+                    PR #{pr.number}
+                  </a>
+                  {/* Invisible placeholder matching the Published rows' hover-only
+                      Delete button, so PR #n aligns to the date column. */}
+                  <span aria-hidden="true" className="invisible">Delete</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
       {loadingNotes ? (
         <p className="text-muted-foreground text-sm">Loading…</p>
       ) : notes.length === 0 ? (
         <p className="text-muted-foreground text-sm">No notes yet. Create your first one.</p>
       ) : (
-        <div className="divide-y divide-muted">
+        <section className="space-y-3">
+          <h2 className="text-sm font-medium text-muted-foreground">Published</h2>
+          <div className="divide-y divide-muted">
           {notes.map((post) => (
             <div key={post.filename} className="group flex items-center justify-between gap-6 py-3.5">
               <button
@@ -265,7 +339,8 @@ export default function AdminDashboard() {
               </div>
             </div>
           ))}
-        </div>
+          </div>
+        </section>
       )}
     </div>
   );
