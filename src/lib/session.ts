@@ -4,6 +4,12 @@ import { getSecret } from 'astro:env/server';
 const COOKIE_NAME = 'admin_session';
 const MAX_AGE = 60 * 60 * 12; // 12 hours, in seconds
 
+// `Secure` cookies are dropped over plain HTTP (except on localhost), which
+// breaks testing the dev server from another device over the LAN. Production
+// runs on HTTPS behind Cloudflare, so keep it strict there and relax it only
+// in dev.
+const SECURE = import.meta.env.PROD ? ' Secure;' : '';
+
 /**
  * Session tokens are `<expiry>.<hmac>`, signed with ADMIN_PASSWORD as the key.
  * No database needed: the signature both authenticates the session and is
@@ -19,12 +25,12 @@ export function createSessionCookie(): string | null {
   if (!secret) return null;
   const exp = String(Date.now() + MAX_AGE * 1000);
   const token = `${exp}.${sign(exp, secret)}`;
-  return `${COOKIE_NAME}=${encodeURIComponent(token)}; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=${MAX_AGE}`;
+  return `${COOKIE_NAME}=${encodeURIComponent(token)}; HttpOnly;${SECURE} SameSite=Strict; Path=/; Max-Age=${MAX_AGE}`;
 }
 
 /** Set-Cookie value that clears the session (for logout). */
 export function clearSessionCookie(): string {
-  return `${COOKIE_NAME}=; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=0`;
+  return `${COOKIE_NAME}=; HttpOnly;${SECURE} SameSite=Strict; Path=/; Max-Age=0`;
 }
 
 export function isAuthenticated(request: Request): boolean {
