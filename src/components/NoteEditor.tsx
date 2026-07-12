@@ -494,13 +494,24 @@ tags: ${tagsToLiteral(parseTagsValue(frontMatter.tags))}
     if (barFloating) positionBar();
   }, [barFloating, positionBar]);
 
+  // On mobile, suppress CodeMirror's own "scroll caret into view" and let iOS
+  // handle keeping the caret visible. CM scrolls the window on every keystroke;
+  // on iOS that fights Safari's native caret scrolling and the two oscillate —
+  // the view jumps over and over while typing a long paragraph. Returning true
+  // from the scroll handler tells CM it's handled, so it does nothing, leaving a
+  // single (native) scroller. Desktop keeps CM's scrolling. Read isMobile through
+  // a ref so the facet stays stable.
+  const isMobileRef = useRef(false);
+  isMobileRef.current = isMobile;
+  const suppressCmScroll = useMemo(() => EditorView.scrollHandler.of(() => isMobileRef.current), []);
+
   // Build the editor config ONCE. Rebuilding these inline on every render makes
   // react-codemirror reconfigure the editor, which can trigger a scroll-into-view
   // that fires a scroll event, re-renders us, and loops — the "jumping" on long
   // paragraphs. Memoizing keeps the editor stable across re-renders.
   const editorExtensions = useMemo(
-    () => [markdown(), EditorView.lineWrapping, writingTheme, placeholder(WRITING_PLACEHOLDER), proseInputBehavior],
-    [],
+    () => [markdown(), EditorView.lineWrapping, writingTheme, placeholder(WRITING_PLACEHOLDER), proseInputBehavior, suppressCmScroll],
+    [suppressCmScroll],
   );
   const editorBasicSetup = useMemo(
     () => ({
