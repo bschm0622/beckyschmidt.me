@@ -116,12 +116,11 @@ export default function NoteEditor() {
   // bottom (just above the keyboard), so a top bar never overlaps it.
   const [isMobile, setIsMobile] = useState(false);
   const [editorFocused, setEditorFocused] = useState(false);
-  // The bar's `top` (layout-viewport coords): the top of the visible area, but
-  // never above the editor's own top — so at the top of a note it rests on the
-  // editor instead of floating up over the Details panel.
-  const [barTop, setBarTop] = useState(0);
-  const [toolbarHeight, setToolbarHeight] = useState(44);
-  const toolbarRef = useRef<HTMLDivElement | null>(null);
+  // The floating bar is positioned by writing its `top` directly to the DOM (see
+  // positionBar) rather than through React state — so scrolling never triggers a
+  // re-render, which is what could feed back into CodeMirror and cause a scroll
+  // loop. Refs, not state, for exactly that reason.
+  const barRef = useRef<HTMLDivElement | null>(null);
   const editorBoxRef = useRef<HTMLDivElement | null>(null);
   const blurTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -188,36 +187,41 @@ export default function NoteEditor() {
     return () => mq.removeEventListener('change', update);
   }, []);
 
-  // Position the bar at the top of the visible area (visual viewport offset),
-  // clamped to the editor's own top so it never rides up over the details. Listen
-  // to visual-viewport resize + scroll (iOS fires these as the keyboard animates)
-  // and window scroll (the editor's top moves as the page scrolls).
+  // Put the bar at the top of the visible area (visual-viewport offset), clamped
+  // to the editor's own top so it never rides up over the details. Writes `top`
+  // straight to the DOM — no React state, so scrolling can't re-render us.
+  const positionBar = useCallback(() => {
+    const vv = window.visualViewport;
+    const bar = barRef.current;
+    if (!vv || !bar) return;
+    const top = vv.offsetTop;
+    const editorTop = editorBoxRef.current?.getBoundingClientRect().top ?? top;
+    bar.style.top = `${Math.round(Math.max(top, editorTop))}px`;
+  }, []);
+
+  // Reposition on visual-viewport resize + scroll (iOS fires these as the
+  // keyboard animates) and window scroll (the editor's top moves as the page
+  // scrolls), coalesced to one measurement per frame.
   useEffect(() => {
     const vv = window.visualViewport;
     if (!vv) return;
     let raf = 0;
-    const compute = () => {
-      raf = 0;
-      const top = vv.offsetTop;
-      const editorTop = editorBoxRef.current?.getBoundingClientRect().top ?? top;
-      // Round so sub-pixel scroll jitter doesn't churn the value each frame.
-      setBarTop(Math.round(Math.max(top, editorTop)));
+    const onScroll = () => {
+      if (!raf) raf = requestAnimationFrame(() => {
+        raf = 0;
+        positionBar();
+      });
     };
-    // Coalesce bursts of scroll/resize events into one measurement per frame.
-    const update = () => {
-      if (!raf) raf = requestAnimationFrame(compute);
-    };
-    compute();
-    vv.addEventListener('resize', update);
-    vv.addEventListener('scroll', update);
-    window.addEventListener('scroll', update, { passive: true });
+    vv.addEventListener('resize', onScroll);
+    vv.addEventListener('scroll', onScroll);
+    window.addEventListener('scroll', onScroll, { passive: true });
     return () => {
       if (raf) cancelAnimationFrame(raf);
-      vv.removeEventListener('resize', update);
-      vv.removeEventListener('scroll', update);
-      window.removeEventListener('scroll', update);
+      vv.removeEventListener('resize', onScroll);
+      vv.removeEventListener('scroll', onScroll);
+      window.removeEventListener('scroll', onScroll);
     };
-  }, []);
+  }, [positionBar]);
 
   // Confirm the session with the server, then load content.
   useEffect(() => {
@@ -485,26 +489,33 @@ tags: ${tagsToLiteral(parseTagsValue(frontMatter.tags))}
   // Float the formatting bar above the keyboard only on a focused phone editor.
   const barFloating = isMobile && editorFocused && tab === 'write';
 
-  // Keep the floating bar's measured height, used to (a) reserve editor padding
-  // so the caret clears it and (b) size CodeMirror's scroll margin.
+  // Position it the moment it appears (on focus), before the first paint jump.
   useEffect(() => {
-    if (!toolbarRef.current) return;
-    const el = toolbarRef.current;
-    const measure = () => setToolbarHeight(el.offsetHeight);
-    measure();
-    const ro = new ResizeObserver(measure);
-    ro.observe(el);
-    return () => ro.disconnect();
-  }, [barFloating]);
+    if (barFloating) positionBar();
+  }, [barFloating, positionBar]);
 
-  // Keep the caret a bar's-height below the TOP of the visible area when it
-  // scrolls into view, so editing near the top of a note doesn't tuck the cursor
-  // under the floating bar. Read through a ref so the facet stays stable and
-  // always sees the latest value.
-  const scrollTopMarginRef = useRef(0);
-  scrollTopMarginRef.current = barFloating ? toolbarHeight + 8 : 0;
-  const scrollMarginExtension = useMemo(
-    () => EditorView.scrollMargins.of(() => ({ top: scrollTopMarginRef.current })),
+  // Build the editor config ONCE. Rebuilding these inline on every render makes
+  // react-codemirror reconfigure the editor, which can trigger a scroll-into-view
+  // that fires a scroll event, re-renders us, and loops — the "jumping" on long
+  // paragraphs. Memoizing keeps the editor stable across re-renders.
+  const editorExtensions = useMemo(
+    () => [markdown(), EditorView.lineWrapping, writingTheme, placeholder(WRITING_PLACEHOLDER), proseInputBehavior],
+    [],
+  );
+  const editorBasicSetup = useMemo(
+    () => ({
+      lineNumbers: false,
+      foldGutter: false,
+      highlightActiveLine: false,
+      highlightActiveLineGutter: false,
+      dropCursor: false,
+      allowMultipleSelections: false,
+      indentOnInput: true,
+      bracketMatching: false,
+      closeBrackets: false,
+      autocompletion: false,
+      highlightSelectionMatches: false,
+    }),
     [],
   );
 
@@ -963,26 +974,14 @@ tags: ${tagsToLiteral(parseTagsValue(frontMatter.tags))}
           <CodeMirror
             value={markdownContent}
             onChange={handleMarkdownChange}
-            extensions={[markdown(), EditorView.lineWrapping, writingTheme, placeholder(WRITING_PLACEHOLDER), proseInputBehavior, scrollMarginExtension]}
+            extensions={editorExtensions}
             theme={editorTheme}
             onFocus={handleEditorFocus}
             onBlur={handleEditorBlur}
             onCreateEditor={(view) => {
               editorViewRef.current = view;
             }}
-            basicSetup={{
-              lineNumbers: false,
-              foldGutter: false,
-              highlightActiveLine: false,
-              highlightActiveLineGutter: false,
-              dropCursor: false,
-              allowMultipleSelections: false,
-              indentOnInput: true,
-              bracketMatching: false,
-              closeBrackets: false,
-              autocompletion: false,
-              highlightSelectionMatches: false,
-            }}
+            basicSetup={editorBasicSetup}
           />
         </div>
       ) : (
@@ -994,15 +993,11 @@ tags: ${tagsToLiteral(parseTagsValue(frontMatter.tags))}
           chrome; the caret stays at the bottom above the keyboard, clear of it. */}
       {barFloating && (
         <div
-          ref={toolbarRef}
+          ref={barRef}
           // Keep the editor focused (keyboard open) when a button is tapped, so
           // tapping a control doesn't dismiss the keyboard and drop the bar.
           onMouseDown={(e) => e.preventDefault()}
           className="fixed inset-x-0 top-0 z-30 flex flex-wrap items-center gap-0.5 border-b border-muted bg-background px-4 py-2"
-          // Position via transform (not `top`) and promote to its own layer, so
-          // the bar is composited rather than repainted on every scroll frame —
-          // which is what removes the iOS flicker as you move through the doc.
-          style={{ transform: `translate3d(0, ${barTop}px, 0)`, willChange: 'transform' }}
         >
           {formatToolbarButtons}
         </div>
