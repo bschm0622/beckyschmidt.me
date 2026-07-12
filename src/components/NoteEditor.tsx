@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import CodeMirror from '@uiw/react-codemirror';
 import { markdown } from '@codemirror/lang-markdown';
 import { EditorView, placeholder } from '@codemirror/view';
@@ -109,6 +109,22 @@ export default function NoteEditor() {
   const [pendingImages, setPendingImages] = useState<Array<{ file: File; placeholder: string; filename: string }>>([]);
   const [editorTheme, setEditorTheme] = useState<'light' | 'dark'>('light');
 
+  // Mobile formatting bar. On phones, page-level `sticky top-0` fights the caret
+  // scroll + keyboard resize on iOS and flickers. Instead we keep a SINGLE scroll
+  // area (the page) and, while the editor is focused, float the bar at the TOP of
+  // the visible area by tracking the visual viewport. The caret sits at the
+  // bottom (just above the keyboard), so a top bar never overlaps it.
+  const [isMobile, setIsMobile] = useState(false);
+  const [editorFocused, setEditorFocused] = useState(false);
+  // The bar's `top` (layout-viewport coords): the top of the visible area, but
+  // never above the editor's own top — so at the top of a note it rests on the
+  // editor instead of floating up over the Details panel.
+  const [barTop, setBarTop] = useState(0);
+  const [toolbarHeight, setToolbarHeight] = useState(44);
+  const toolbarRef = useRef<HTMLDivElement | null>(null);
+  const editorBoxRef = useRef<HTMLDivElement | null>(null);
+  const blurTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
   // Draft-safety state
   const [confirmingLeave, setConfirmingLeave] = useState(false);
   const [draftKey, setDraftKey] = useState('');
@@ -161,6 +177,46 @@ export default function NoteEditor() {
     const observer = new MutationObserver(updateTheme);
     observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
     return () => observer.disconnect();
+  }, []);
+
+  // Track whether we're on a phone-width screen (drives the bottom-pinned bar).
+  useEffect(() => {
+    const mq = window.matchMedia('(max-width: 639px)');
+    const update = () => setIsMobile(mq.matches);
+    update();
+    mq.addEventListener('change', update);
+    return () => mq.removeEventListener('change', update);
+  }, []);
+
+  // Position the bar at the top of the visible area (visual viewport offset),
+  // clamped to the editor's own top so it never rides up over the details. Listen
+  // to visual-viewport resize + scroll (iOS fires these as the keyboard animates)
+  // and window scroll (the editor's top moves as the page scrolls).
+  useEffect(() => {
+    const vv = window.visualViewport;
+    if (!vv) return;
+    let raf = 0;
+    const compute = () => {
+      raf = 0;
+      const top = vv.offsetTop;
+      const editorTop = editorBoxRef.current?.getBoundingClientRect().top ?? top;
+      // Round so sub-pixel scroll jitter doesn't churn the value each frame.
+      setBarTop(Math.round(Math.max(top, editorTop)));
+    };
+    // Coalesce bursts of scroll/resize events into one measurement per frame.
+    const update = () => {
+      if (!raf) raf = requestAnimationFrame(compute);
+    };
+    compute();
+    vv.addEventListener('resize', update);
+    vv.addEventListener('scroll', update);
+    window.addEventListener('scroll', update, { passive: true });
+    return () => {
+      if (raf) cancelAnimationFrame(raf);
+      vv.removeEventListener('resize', update);
+      vv.removeEventListener('scroll', update);
+      window.removeEventListener('scroll', update);
+    };
   }, []);
 
   // Confirm the session with the server, then load content.
@@ -414,6 +470,43 @@ tags: ${tagsToLiteral(parseTagsValue(frontMatter.tags))}
     setMarkdownContent(value);
     setHasUnsavedChanges(true);
   }, []);
+
+  // Focus tracking for the bottom bar. Delay the blur so tapping a toolbar
+  // button (which briefly steals focus) doesn't drop and re-pin the bar.
+  const handleEditorFocus = useCallback(() => {
+    if (blurTimerRef.current) clearTimeout(blurTimerRef.current);
+    setEditorFocused(true);
+  }, []);
+  const handleEditorBlur = useCallback(() => {
+    if (blurTimerRef.current) clearTimeout(blurTimerRef.current);
+    blurTimerRef.current = setTimeout(() => setEditorFocused(false), 150);
+  }, []);
+
+  // Float the formatting bar above the keyboard only on a focused phone editor.
+  const barFloating = isMobile && editorFocused && tab === 'write';
+
+  // Keep the floating bar's measured height, used to (a) reserve editor padding
+  // so the caret clears it and (b) size CodeMirror's scroll margin.
+  useEffect(() => {
+    if (!toolbarRef.current) return;
+    const el = toolbarRef.current;
+    const measure = () => setToolbarHeight(el.offsetHeight);
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [barFloating]);
+
+  // Keep the caret a bar's-height below the TOP of the visible area when it
+  // scrolls into view, so editing near the top of a note doesn't tuck the cursor
+  // under the floating bar. Read through a ref so the facet stays stable and
+  // always sees the latest value.
+  const scrollTopMarginRef = useRef(0);
+  scrollTopMarginRef.current = barFloating ? toolbarHeight + 8 : 0;
+  const scrollMarginExtension = useMemo(
+    () => EditorView.scrollMargins.of(() => ({ top: scrollTopMarginRef.current })),
+    [],
+  );
 
   // --- Tags chips ---
   const selectedTags = parseTagsValue(frontMatter.tags);
@@ -671,6 +764,35 @@ tags: ${tagsToLiteral(parseTagsValue(frontMatter.tags))}
           ? 'Saved'
           : 'Draft';
 
+  // The formatting buttons, shared between the inline bar (desktop / unfocused
+  // mobile) and the docked bar in full-screen mobile writing mode.
+  const formatToolbarButtons = (
+    <>
+      {formatActions.map((a) => (
+        <button
+          key={a.label}
+          type="button"
+          onClick={a.onClick}
+          title={a.title}
+          aria-label={a.title}
+          className={`min-w-8 rounded px-2 py-1.5 text-sm text-muted-foreground hover:text-foreground hover:bg-foreground/5 transition-colors ${a.className ?? ''}`}
+        >
+          {a.label}
+        </button>
+      ))}
+      <span className="mx-1.5 h-4 w-px bg-muted" aria-hidden="true" />
+      <button
+        type="button"
+        onClick={() => fileInputRef.current?.click()}
+        disabled={isUploadingImage}
+        title="Add image"
+        className="rounded px-2 py-1.5 text-sm text-muted-foreground hover:text-foreground hover:bg-foreground/5 transition-colors disabled:opacity-40"
+      >
+        {isUploadingImage ? 'Processing…' : `Image${pendingImages.length > 0 ? ` (${pendingImages.length})` : ''}`}
+      </button>
+    </>
+  );
+
   return (
     <div className="space-y-6">
       {/* Top bar */}
@@ -802,10 +924,11 @@ tags: ${tagsToLiteral(parseTagsValue(frontMatter.tags))}
         className="hidden"
       />
 
-      {/* Sticky editor bar: the Write/Preview toggle and formatting controls stay
-          pinned to the top so they're reachable while scrolling a long note. The
-          solid background lets the text scroll cleanly underneath. */}
-      <div className="sticky top-0 z-10 -mx-4 bg-background px-4 pt-2 pb-3 space-y-3">
+      {/* Editor bar. On desktop the toggle + formatting controls stay pinned to
+          the top of the page while you scroll a long note. On a phone this bar is
+          static (no sticky = no iOS flicker); once you tap into the editor the
+          formatting controls move to a bar floating above the keyboard. */}
+      <div className="sm:sticky sm:top-0 z-10 -mx-4 bg-background px-4 pt-2 pb-3 space-y-3">
         {/* Write / Preview toggle */}
         <div className="flex items-center gap-5 border-b border-muted text-sm">
           <button
@@ -822,32 +945,9 @@ tags: ${tagsToLiteral(parseTagsValue(frontMatter.tags))}
           </button>
         </div>
 
-        {/* Formatting toolbar — inserts the markdown for you (handy on mobile). */}
-        {tab === 'write' && (
-          <div className="flex flex-wrap items-center gap-0.5">
-            {formatActions.map((a) => (
-              <button
-                key={a.label}
-                type="button"
-                onClick={a.onClick}
-                title={a.title}
-                aria-label={a.title}
-                className={`min-w-8 rounded px-2 py-1.5 text-sm text-muted-foreground hover:text-foreground hover:bg-foreground/5 transition-colors ${a.className ?? ''}`}
-              >
-                {a.label}
-              </button>
-            ))}
-            <span className="mx-1.5 h-4 w-px bg-muted" aria-hidden="true" />
-            <button
-              type="button"
-              onClick={() => fileInputRef.current?.click()}
-              disabled={isUploadingImage}
-              title="Add image"
-              className="rounded px-2 py-1.5 text-sm text-muted-foreground hover:text-foreground hover:bg-foreground/5 transition-colors disabled:opacity-40"
-            >
-              {isUploadingImage ? 'Processing…' : `Image${pendingImages.length > 0 ? ` (${pendingImages.length})` : ''}`}
-            </button>
-          </div>
+        {/* Inline formatting toolbar (desktop, or a phone before you tap in). */}
+        {tab === 'write' && !barFloating && (
+          <div className="flex flex-wrap items-center gap-0.5">{formatToolbarButtons}</div>
         )}
       </div>
 
@@ -855,14 +955,18 @@ tags: ${tagsToLiteral(parseTagsValue(frontMatter.tags))}
         <p className={`text-sm ${uploadMessage.type === 'error' ? 'text-danger' : 'text-success'}`}>{uploadMessage.text}</p>
       )}
 
-      {/* Writing surface / preview */}
+      {/* Writing surface / preview. The page is the only scroll container. The
+          floating bar sits at the top of the visible area, and the caret sits at
+          the bottom above the keyboard, so they never overlap. */}
       {tab === 'write' ? (
-        <div className="min-h-[60vh]">
+        <div ref={editorBoxRef} className="min-h-[60vh]">
           <CodeMirror
             value={markdownContent}
             onChange={handleMarkdownChange}
-            extensions={[markdown(), EditorView.lineWrapping, writingTheme, placeholder(WRITING_PLACEHOLDER), proseInputBehavior]}
+            extensions={[markdown(), EditorView.lineWrapping, writingTheme, placeholder(WRITING_PLACEHOLDER), proseInputBehavior, scrollMarginExtension]}
             theme={editorTheme}
+            onFocus={handleEditorFocus}
+            onBlur={handleEditorBlur}
             onCreateEditor={(view) => {
               editorViewRef.current = view;
             }}
@@ -883,6 +987,25 @@ tags: ${tagsToLiteral(parseTagsValue(frontMatter.tags))}
         </div>
       ) : (
         <div className="min-h-[60vh] typography" dangerouslySetInnerHTML={{ __html: previewHtml }} />
+      )}
+
+      {/* Formatting bar pinned to the TOP of the visible area (mobile, focused).
+          `top` tracks the visual viewport so it rides just under the browser
+          chrome; the caret stays at the bottom above the keyboard, clear of it. */}
+      {barFloating && (
+        <div
+          ref={toolbarRef}
+          // Keep the editor focused (keyboard open) when a button is tapped, so
+          // tapping a control doesn't dismiss the keyboard and drop the bar.
+          onMouseDown={(e) => e.preventDefault()}
+          className="fixed inset-x-0 top-0 z-30 flex flex-wrap items-center gap-0.5 border-b border-muted bg-background px-4 py-2"
+          // Position via transform (not `top`) and promote to its own layer, so
+          // the bar is composited rather than repainted on every scroll frame —
+          // which is what removes the iOS flicker as you move through the doc.
+          style={{ transform: `translate3d(0, ${barTop}px, 0)`, willChange: 'transform' }}
+        >
+          {formatToolbarButtons}
+        </div>
       )}
     </div>
   );
