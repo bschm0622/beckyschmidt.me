@@ -7,24 +7,35 @@ description: ""
 tags: ["product-management","day-job"]
 ---
 
-Prototyping is one of my favorite parts of the product manager job. It's the best bridge between engineering and non-technical stakeholders (customer success, CEO, etc.) and is effectively dream building - an idea turning into something you can actually touch and feel (metaphorically...I imagine this feeling is even more powerful in physical product prototyping).
+Prototyping is one of my favorite parts of the product manager job. It's the bridge between ideas & reality, and gives everyone in the room something to feel, touch, and react to. Just a few years ago prototyping took quite a bit of time and effort, but now anyone can send a prompt to their favorite AI chatbot and get a really polished artifact to share around. So if everyone can create prototypes, it begs the question - what is the specific value that a product manager brings to prototyping? 
 
-Prototyping has always been a part of the PM job, but fidelity expectations have changed. The product I work on has both data & UI components, and each have different surfaces. Before AI, a good data prototype for me was a limited SQL query output in a Google Sheet, maybe even with a pivot table or a graph. A decent UI prototype was either a wireframe or a Frankensteined Miro board of various screenshots of our existing app & borrowed features from other platforms I liked.
+I'm convinced that PMs still have great value when it comes to prototyping. AI hasn't reduced the value of a PM prototype, but rather shifted the leverage point.
 
-With AI, that's all changed. Of course that's still possible, but the bar has raised significantly, I believe for the better.
+## Better prototypes create better conversations
 
-What is the goal of prototyping? My definition would distill it down to this:
+A prototype exists to create understanding and invite feedback, not to be production-ready.
 
-** *A good prototype takes an idea and quickly turns it into something you can feel, touch, and react to. It is not a final product, but rather an artifact that you can produce in a small amount of time to represent what a final product could look like, to get closer to an agreed upon final specification.* **
+Before AI, I was building wireframes in Miro, data concepts in Google Sheets, and it required quite a bit of imagination. "There would be a button here, ignore the stuff I copied from another site's UI, this data isn't real but this is what it would be like", etc. But today, with AI, you can create very high-fidelity mockups, data prototypes, and artifacts, very quickly. My favorite workflow is sharing screenshots of our existing UI, explaining what I want to prototype, giving access to the BigQuery MCP for real data, and letting it rip on a clickable HTML.
 
-Given that framework, the starting point is the idea. Half-baked ideas warrant half-baked prototypes. One of the worst versions of prototyping is when you've prototyped in completely the wrong direction. As the idea hardens, so can the prototype, and the end result is an agreed upon artifact that can then be hardened into a production-level product or feature.
+Now when I get into those stakeholder meetings where we're reviewing an initial prototype, the conversations are much richer. Rather than spending half of the time nitpicking frankensteined screenshots or synthetic data, we can review the actual value of the idea.
 
-Today with AI, prototyping speed has decreased from weeks or days to hours. Since prototyping is so fast now, I've found myself falling into the trap I described above of taking a half-baked idea and turning it into a polished prototype, just for all of us to realize that the time would've been better spent fleshing out the idea. Even though it may only take half a day, it's still a waste of time if you didn't understand the assignment.
+This is where the PM's leverage moved.
 
-The surface has also changed. I've started moving more of my prototyping to HTML. I was using v0 and other "app builders" for prototyping initially, but I dont need a backend database or a Next.js app so it just became overkill. My favorite way to start is by sketching out my idea literally or just conceptually with Claude Code, sharing screenshots, and then starting with a clickable HTML. Now with the BigQuery MCP I am able to put real, static data into the file so demos feel real. 
+The best prototypes come from:
+- Deep background knowledge of the business
+- Understanding of the problem at hand, the technical constraints, and the desired solution
+- Understanding of the stakeholder groups
 
-Maybe surprisingly, once the prototype passes the HTML test, the UI will still move back to Figma for multi-player review. I hope this will be solved soon, but it's much easier to share, iterate, and give feedback in Figma right now than on static HTML files. The whole Claude artifact system isn't working well for this use case.
+Conversely, one of the worst versions of prototyping is when you've prototyped in completely the wrong direction. As the idea hardens, so can the prototype, and the end result is an agreed upon artifact that can then be hardened into a production-level product or feature. This is the whole job of the product manager - understand customer needs, synthesize stakeholder perspectives, balance engineering reality, explore multiple directions, keep the product surface unified, and ship working software. 
 
-Most recently we've been prototyping Media Mix Modeling. With AI, I've been able to take real data, run it through a real MMM, and produce HTML files that stylistically are close enough to our design style to make it feel extremely high fidelity. This idea has existed for a few years so there was plenty of source material to pull from, and Claude Fable effectively oneshot the first prototype. From there, the challenge was no longer pixel pushing, but turning all these overwhelming data points into a concise, cohesive story.
+And if you think about it like that, the job was never to create the prototype, but to create clarity. A prototype is just the fastest way to get there.
 
-I used to love prototyping and I still do. Before AI, I spent the majority of my time fighting with software to get something semi-presentable together. Today, the focus has shifted from simply creating something to steering. Every good prototype has an idea behind it, and now those clarity of the ideas matter more than just presenting something. AI can pump out 10 prototypes in the time I could've made one, but now good prototypers are having to iterate faster on the underlying idea and final positioning, rather than focusing on dragging elements around.
+## Working towards clarity
+
+I used to spend about half of the prototyping time fighting with the tools to come up with something decent to demo. Now, in half that time with AI, I'm able to come up with 5-10 ideas. At the beginning of all of this, I was falling into the trap of actually presenting a bunch of different directions just because that door had opened. Even if people *think* they want the buffet, truth is, what they want is the tasting menu. Two to (maybe) four curated options with tight, defensible reasoning.
+
+We've had a dream of doing marketing mix modeling (MMM) within our product for a few years now, but never had the resources or bandwidth to do so. With the release of Anthropic's Fable model, we decided to take it for a swing. I was kind of shocked that Fable actually one-shot an MMM prototype, and gave me an HTML mockup to react to with real spend curves and projections, using real client data.
+
+From there, the challenge was no longer "is this possible?", but turning all these overwhelming data points into a concise, cohesive story. Fable quickly created something we'd been wanting for years, but it produced a massive file that was too overwhelming to share out of the gate. I still needed to comb through the outputs and think through what our customers would do with all this data - the "so what" and "what now" of the data. With an actual model and real client data I was able to have better conversations with stakeholders about the outputs.
+
+Product managers who are leveraging AI are uniquely positioned to move the business forward faster through prototyping. I've already found it much more fulfilling and fun to steer an agent rather than push screenshots or fight with Google Sheets, and I'm able to spend my time asking the "why" which is the real value of the product job all along.
