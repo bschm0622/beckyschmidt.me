@@ -39,7 +39,7 @@ const shouldLoadAnalytics = import.meta.env.PROD;
 ---
 
 <!-- Theme color meta must come before the init script so the script can find it -->
-<meta id="theme-color-meta" name="theme-color" content="#ffffff" />
+<meta id="theme-color-meta" name="theme-color" content="#faf9f6" />
 
 <!-- Theme mode initialization -->
 <script is:inline>
@@ -59,7 +59,7 @@ const shouldLoadAnalytics = import.meta.env.PROD;
         document.documentElement.classList.remove("light", "dark");
         document.documentElement.classList.add(theme);
         var meta = document.getElementById("theme-color-meta");
-        if (meta) meta.setAttribute("content", theme === "dark" ? "#18181b" : "#ffffff");
+        if (meta) meta.setAttribute("content", theme === "dark" ? "#18181b" : "#faf9f6");
     })();
 </script>
 

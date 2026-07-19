@@ -66,7 +66,7 @@ function ReactionButton({ postId }: ReactionButtonProps) {
                         return (
                             <div
                                 key={reaction}
-                                className="w-16 h-8 rounded bg-gray-300 dark:bg-gray-700 animate-pulse"
+                                className="w-16 h-8 rounded bg-muted animate-pulse"
                             />
                         );
                     }
