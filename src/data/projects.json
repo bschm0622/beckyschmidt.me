@@ -2,16 +2,16 @@
   {
     "name": "BiblePlan",
     "href": "https://bibleplan.app",
-    "description": "Next.js + Supabase webapp helping Christians create flexible Bible reading plans using a chapter & verse-balancing algorithm. Driving traffic through SEO, 160+ lifetime users and 200+ plans created."
+    "description": "Flexible Bible reading plan app with 160+ users and 200+ plans created."
   },
   {
     "name": "remotepmjobs.com",
     "href": "https://remotepmjobs.com",
-    "description": "Next.js + Turso remote product manager job board. Every night a process runs to scrape job boards, and filter for product manager jobs. Using Gemma 4 on my Mac Mini to read, summarize, and categorize the listings, and refresh the site daily."
+    "description": "Remote product manager job board, fully automated using local AI models & nightly ATS scraping."
   },
   {
     "name": "editor.beckyschmidt.me",
     "href": "https://editor.beckyschmidt.me",
-    "description": "Next.js markdown reader & writer. Built to help review AI-created plans and send text to AI in a friendly format. Also has a comparison git-style block to help with finding changes that AI made to different versions of the file."
+    "description": "Minimal markdown reader for writing with AI, and diffing changes across versions."
   }
 ]
