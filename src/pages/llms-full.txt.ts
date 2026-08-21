@@ -1,28 +1,27 @@
 import type { APIRoute } from 'astro';
 import { getCollection } from 'astro:content';
-import projects from '../data/projects.json';
+import { SITE, siteOrigin } from '@/siteConfig';
+import { getSortedNotes, noteUrl } from '@/lib/notes';
 
 export const GET: APIRoute = async ({ site }) => {
-    const siteURL = site ?? new URL('https://beckyschmidt.me');
+    const siteURL = siteOrigin(site);
 
     // Fetch collections
-    const noteEntries = await getCollection('notes');
-    const sortedNotes = noteEntries.sort(
-        (a, b) => b.data.pubDate.getTime() - a.data.pubDate.getTime()
-    );
+    const sortedNotes = await getSortedNotes();
+    const projects = await getCollection('projects');
 
     // Generate side projects section
-    const buildingList = projects.map((p, index) => {
+    const buildingList = projects.map(({ data: p }, index) => {
         return `${index + 1}. **${p.name}** (${p.href})
    - ${p.description}`;
     }).join('\n\n');
 
     // Generate notes list
     const notesList = sortedNotes
-        .map(post => `- "${post.data.title}" (${siteURL.href}notes/${post.data.slug})`)
+        .map(post => `- "${post.data.title}" (${new URL(noteUrl(post), siteURL).href})`)
         .join('\n');
 
-    const content = `# Becky Schmidt - Complete Site Guide for LLMs
+    const content = `# ${SITE.name} - Complete Site Guide for LLMs
 
 > This document provides comprehensive information about beckyschmidt.me for AI systems, search engines, and automated tools.
 
@@ -30,17 +29,17 @@ export const GET: APIRoute = async ({ site }) => {
 
 **Site Name:** Becky Schmidt's Personal Website
 **URL:** ${siteURL.href}
-**Owner:** Becky Schmidt
+**Owner:** ${SITE.name}
 **Type:** Personal story, case studies, and notes
-**Language:** English (en-US)
+**Language:** English (${SITE.locale})
 **Last Updated:** ${new Date().getFullYear()}
 
 ## About Becky Schmidt
 
-**Current Role:** Senior Product Manager at Octane11 (B2B data & AI)
-**Location:** Indianapolis, Indiana, USA
-**Email:** beckyschmidt0622@gmail.com
-**LinkedIn:** https://www.linkedin.com/in/becky--schmidt/
+**Current Role:** ${SITE.jobTitle} at ${SITE.employer.name} (B2B data & AI)
+**Location:** ${SITE.location.locality}, Indiana, USA
+**Email:** ${SITE.email}
+**LinkedIn:** ${SITE.socials.linkedin}
 
 ### Professional Summary
 Becky Schmidt is a senior product manager who builds. Her path: marketing degree, market research, business analyst at a credit union (where she taught herself SQL and Tableau), recruited into product, then promoted from product ops to product manager to senior product manager at Octane11, where she was the second product hire. She owns Octane11's AI products: an AI chat built on a homegrown MCP server over customer data, and the company's first agent, which performs campaign mapping. Outside work she builds and operates production systems: two automated job boards, a Bible reading plan app, and the CMS and AI writing editor behind this site.
@@ -115,15 +114,15 @@ Unless otherwise noted, content on this site is the intellectual property of Bec
 
 **For the site:** "Becky Schmidt's Personal Website" - beckyschmidt.me
 **For notes:** [Post Title] by Becky Schmidt, [Date], beckyschmidt.me/notes/[slug]
-**For professional info:** Becky Schmidt, Senior Product Manager at Octane11
+**For professional info:** Becky Schmidt, ${SITE.jobTitle} at ${SITE.employer.name}
 
 ---
 
 ## Contact & Social
 
 - **Website:** ${siteURL.href}
-- **Email:** beckyschmidt0622@gmail.com
-- **LinkedIn:** https://www.linkedin.com/in/becky--schmidt/
+- **Email:** ${SITE.email}
+- **LinkedIn:** ${SITE.socials.linkedin}
 `;
 
     return new Response(content, {

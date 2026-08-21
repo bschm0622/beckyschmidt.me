@@ -1,20 +1,20 @@
-// convex/functions/reactions.ts
-import { query, mutation } from "./_generated/server";
+// convex/reactions.ts
+import { query, mutation, type MutationCtx } from "./_generated/server";
 import { ConvexError, v } from "convex/values";
 
 const RATE_LIMIT_WINDOW_MS = 60 * 1000; // 1 minute window
 const RATE_LIMIT_MAX_REQUESTS = 10;
 
-async function checkRateLimit(ctx : any, clientId: string) {
+async function checkRateLimit(ctx: MutationCtx, clientId: string) {
     const now = Date.now();
     const windowStart = now - RATE_LIMIT_WINDOW_MS;
 
     const recentLogs = await ctx.db
         .query("reactionLogs")
-        .withIndex("by_clientId", (q : any) => q.eq("clientId", clientId))
+        .withIndex("by_clientId", (q) => q.eq("clientId", clientId))
         .collect();
 
-    const recentCount = recentLogs.filter((log : any) => log.timestamp > windowStart).length;
+    const recentCount = recentLogs.filter((log) => log.timestamp > windowStart).length;
 
         if (recentCount >= RATE_LIMIT_MAX_REQUESTS) {
         throw new ConvexError({

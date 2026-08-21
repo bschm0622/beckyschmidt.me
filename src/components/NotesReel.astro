@@ -1,56 +1,48 @@
 ---
-import FormattedDate from "./ui/FormattedDate.astro";
-import NoteTag from "./ui/NoteTag.astro";
-import { slugifyStr } from "@/utils/Slugify";
+import FormattedDate from "@/components/FormattedDate.astro";
+import TagList from "@/components/TagList.astro";
+import { getSortedNotes, noteUrl, type Note } from "@/lib/notes";
 
-const { posts = null, preview = false } = Astro.props;
-
-let postsToShow;
-
-if (posts) {
-  postsToShow = posts.sort(
-    (a: any, b: any) => b.data.pubDate.getTime() - a.data.pubDate.getTime(),
-  );
-  if (preview) {
-    postsToShow = postsToShow.slice(0, 5);
-  }
-} else {
-  const allPosts = await import("astro:content").then(mod => mod.getCollection("notes"));
-  const sortedPosts = allPosts.sort(
-    (a, b) => b.data.pubDate.getTime() - a.data.pubDate.getTime(),
-  );
-  postsToShow = preview ? sortedPosts.slice(0, 5) : sortedPosts;
+interface Props {
+    /** Notes to render, newest first (e.g. from getSortedNotes()). Defaults to all notes. */
+    posts?: Note[];
+    /** Show only the 5 most recent notes. */
+    preview?: boolean;
 }
+
+const { posts, preview = false } = Astro.props;
+
+const allPosts = posts ?? (await getSortedNotes());
+const postsToShow = preview ? allPosts.slice(0, 5) : allPosts;
 ---
 
+{postsToShow.length === 0 && (
+  <div class="rounded-md border border-dashed border-muted p-6">
+    <p class="text-base text-muted-foreground">
+      Notes coming soon. In the meantime, check out my <a href="/#projects" class="underline decoration-1 hover:text-foreground">projects</a>.
+    </p>
+  </div>
+)}
 <div class="divide-y divide-muted">
-  {postsToShow.map((post: any) => (
+  {postsToShow.map((post) => (
     <div class="py-3">
       <div class="flex items-baseline justify-between gap-6">
         <div class="flex items-baseline gap-2 flex-wrap min-w-0">
           <a
-            href={`/notes/${post.id}/`}
+            href={noteUrl(post)}
             class="text-base font-medium leading-snug min-w-0"
           >
             {post.data.title}
           </a>
-          {post.data.tags && post.data.tags.length > 0 && (
-            <div class="hidden md:flex flex-wrap gap-1.5">
-              {post.data.tags.map((tag: any) => (
-                <NoteTag href={`/notes/tag/${slugifyStr(tag)}/`}>{tag}</NoteTag>
-              ))}
-            </div>
+          {post.data.tags && (
+            <TagList
+              tags={post.data.tags}
+              class="flex flex-wrap gap-1.5 max-md:basis-full max-md:mt-2"
+            />
           )}
         </div>
         <FormattedDate date={post.data.pubDate} class="text-base text-muted-foreground shrink-0" />
       </div>
-      {post.data.tags && post.data.tags.length > 0 && (
-        <div class="flex md:hidden flex-wrap gap-1.5 mt-2">
-          {post.data.tags.map((tag: any) => (
-            <NoteTag href={`/notes/tag/${slugifyStr(tag)}/`}>{tag}</NoteTag>
-          ))}
-        </div>
-      )}
     </div>
   ))}
 </div>

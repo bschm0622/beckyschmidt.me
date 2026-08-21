@@ -1,4 +1,6 @@
 ---
+import { SITE } from "@/siteConfig";
+
 const uniqueId = `themeToggle-${crypto.randomUUID().slice(0, 8)}`;
 ---
 
@@ -20,12 +22,10 @@ const uniqueId = `themeToggle-${crypto.randomUUID().slice(0, 8)}`;
     <span class="sr-only">Toggle theme</span>
 </button>
 
-<script is:inline define:vars={{ buttonId: uniqueId }}>
-    const THEME_COLORS = { dark: "#18181b", light: "#faf9f6" };
-
+<script is:inline define:vars={{ buttonId: uniqueId, themeColors: SITE.themeColors }}>
     const updateThemeColor = (isDark) => {
         const meta = document.getElementById("theme-color-meta");
-        if (meta) meta.setAttribute("content", isDark ? THEME_COLORS.dark : THEME_COLORS.light);
+        if (meta) meta.setAttribute("content", isDark ? themeColors.dark : themeColors.light);
     };
 
     const applyThemeFromLocalStorage = () => {

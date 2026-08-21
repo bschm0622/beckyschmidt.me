@@ -1,10 +1,8 @@
 ---
-import BaseLayout from "@/layouts/BaseLayout.astro";
-import Navbar from "@/components/Navbar.astro";
-import SearchModal from "@/components/SearchModal.astro";
-import FormattedDate from "@/components/ui/FormattedDate.astro";
-import NoteTag from "@/components/ui/NoteTag.astro";
-import { SITE } from "@/siteConfig";
+import DefaultLayout from "@/layouts/DefaultLayout.astro";
+import FormattedDate from "@/components/FormattedDate.astro";
+import TagList from "@/components/TagList.astro";
+import { SITE, siteOrigin } from "@/siteConfig";
 
 const {
     image,
@@ -15,14 +13,9 @@ const {
 } = Astro.props;
 const { tags } = frontmatter as { tags?: string[] };
 
-const siteOrigin = Astro.site ?? SITE.href;
-const articleUrl = new URL(`/notes/${slug}`, siteOrigin).toString();
-const imageUrl = image ? new URL(image, siteOrigin).toString() : new URL("/og.png", siteOrigin).toString();
-
-// Format date for schema.org
-const pubDate = frontmatter.pubDate instanceof Date
-    ? frontmatter.pubDate.toISOString()
-    : new Date(frontmatter.pubDate).toISOString();
+const origin = siteOrigin(Astro.site);
+const articleUrl = new URL(`/notes/${slug}`, origin).toString();
+const imageUrl = image ? new URL(image, origin).toString() : new URL(SITE.ogImage, origin).toString();
 
 const blogPostingSchema = {
     "@context": "https://schema.org",
@@ -31,17 +24,17 @@ const blogPostingSchema = {
     "description": frontmatter.description,
     "image": imageUrl,
     "url": articleUrl,
-    "datePublished": pubDate,
+    "datePublished": frontmatter.pubDate.toISOString(),
     "author": {
         "@type": "Person",
-        "name": "Becky Schmidt",
-        "url": siteOrigin,
-        "jobTitle": "Senior Product Manager"
+        "name": SITE.author,
+        "url": origin.toString(),
+        "jobTitle": SITE.jobTitle
     },
     "publisher": {
         "@type": "Person",
-        "name": "Becky Schmidt",
-        "url": siteOrigin
+        "name": SITE.author,
+        "url": origin.toString()
     },
     "mainEntityOfPage": {
         "@type": "WebPage",
@@ -52,38 +45,29 @@ const blogPostingSchema = {
 };
 ---
 
-<BaseLayout
+<DefaultLayout
     title={frontmatter.title}
     description={frontmatter.description}
     image={image}
     canonicalURL={canonicalURL}
+    proseClass="typography"
 >
     <!-- BlogPosting Schema.org Structured Data -->
     <script slot="head" is:inline type="application/ld+json" set:html={JSON.stringify(blogPostingSchema)} />
 
-    <div id="scroll-progress" class="fixed top-0 left-0 z-50 h-1 bg-primary"></div>
-    <Navbar />
-    <main class="px-4 pb-16 mt-4 md:mt-6 flex-1 mx-auto w-full max-w-3xl typography">
-        <!-- Main Content -->
-        <h1 class="mt-0 mb-3">{frontmatter.title}</h1>
-        <div class="flex flex-wrap items-center gap-3 text-sm text-muted-foreground mb-8">
-            {frontmatter.pubDate && <FormattedDate date={frontmatter.pubDate} />}
-            {minutesRead && frontmatter.pubDate && <span>·</span>}
-            {minutesRead && <span>{minutesRead}</span>}
-            {tags && tags.length > 0 && (
-                <div class="flex flex-wrap gap-1.5">
-                    {tags.map((tag: string) => (
-                        <NoteTag href={`/notes/tag/${tag}`}>{tag}</NoteTag>
-                    ))}
-                </div>
-            )}
-        </div>
+    <div slot="before-nav" id="scroll-progress" class="fixed top-0 left-0 z-50 h-1 bg-primary"></div>
 
-        <slot />
-    </main>
+    <!-- Main Content -->
+    <h1 class="mt-0 mb-3">{frontmatter.title}</h1>
+    <div class="flex flex-wrap items-center gap-3 text-sm text-muted-foreground mb-8">
+        {frontmatter.pubDate && <FormattedDate date={frontmatter.pubDate} />}
+        {minutesRead && frontmatter.pubDate && <span>·</span>}
+        {minutesRead && <span>{minutesRead}</span>}
+        {tags && <TagList tags={tags} />}
+    </div>
 
-    <SearchModal />
-</BaseLayout>
+    <slot />
+</DefaultLayout>
 
 <script>
     /** scroll progress bar — throttled to one update per animation frame */

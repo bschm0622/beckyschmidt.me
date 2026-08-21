@@ -30,6 +30,3 @@ pnpm-debug.log*
 # Cloudflare / Wrangler
 .wrangler/
 .dev.vars
-
-# Local Netlify folder (legacy — safe to delete)
-.netlify

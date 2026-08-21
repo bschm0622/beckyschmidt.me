@@ -1,11 +1,11 @@
 ---
 export const prerender = false
-import AdminLayout from '../../layouts/AdminLayout.astro';
-import NoteEditor from '../../components/NoteEditor.tsx';
+import DefaultLayout from '@/layouts/DefaultLayout.astro';
+import NoteEditor from '@/components/NoteEditor.tsx';
 ---
 
-<AdminLayout title="Note Editor - Becky Schmidt">
+<DefaultLayout title="Note Editor - Becky Schmidt" fullWidth noSearch>
   <div class="mx-auto w-full max-w-3xl py-8">
     <NoteEditor client:load />
   </div>
-</AdminLayout>
+</DefaultLayout>

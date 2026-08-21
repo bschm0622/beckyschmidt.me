@@ -2,6 +2,10 @@ import React, { useState, useEffect, useRef, useMemo } from "react";
 import Fuse from "fuse.js";
 import { navigate } from "astro:transitions/client";
 import { SITE } from "@/siteConfig";
+// Client component: import formatDate from the client-safe module
+// (@/lib/notes pulls in the server-only astro:content), and the projects
+// JSON directly (content collections aren't available client-side).
+import { formatDate } from "@/lib/slugify";
 import projects from "@/data/projects.json";
 
 interface SearchItem {
@@ -47,14 +51,6 @@ const mailTo = (email: string) => {
 const copyLink = () => {
     navigator.clipboard?.writeText(window.location.href);
 };
-
-// Match the site's FormattedDate: ISO "YYYY-MM-DD" → "MMM D, YYYY".
-const formatDate = (iso: string) =>
-    new Date(`${iso}T00:00:00`).toLocaleDateString("en-US", {
-        year: "numeric",
-        month: "short",
-        day: "numeric",
-    });
 
 // Icons — hugeicons (stroke-rounded) on the left of Actions rows, plus the
 // external-link box (same glyph as prose links) trailing outbound items.
@@ -115,27 +111,23 @@ const STATIC_COMMANDS: Command[] = [
         keywords: "project external site app",
         perform: () => goExternal(p.href),
     })),
-    ...(SITE.socials?.email
-        ? [{
-              id: "action:email",
-              label: "Email me",
-              sublabel: SITE.socials.email,
-              icon: <IconMail />,
-              group: "Actions",
-              keywords: "contact mail message reach",
-              perform: () => mailTo(SITE.socials!.email!),
-          }]
-        : []),
-    ...(SITE.socials?.linkedin
-        ? [{
-              id: "action:linkedin",
-              label: "Go to my LinkedIn",
-              icon: <IconLinkedIn />,
-              group: "Actions",
-              keywords: "social profile connect",
-              perform: () => goExternal(SITE.socials!.linkedin!),
-          }]
-        : []),
+    {
+        id: "action:email",
+        label: "Email me",
+        sublabel: SITE.email,
+        icon: <IconMail />,
+        group: "Actions",
+        keywords: "contact mail message reach",
+        perform: () => mailTo(SITE.email),
+    },
+    {
+        id: "action:linkedin",
+        label: "Go to my LinkedIn",
+        icon: <IconLinkedIn />,
+        group: "Actions",
+        keywords: "social profile connect",
+        perform: () => goExternal(SITE.socials.linkedin),
+    },
     {
         id: "action:copy",
         label: "Copy link",

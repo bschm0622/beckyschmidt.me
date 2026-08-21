@@ -7,16 +7,9 @@ interface Props {
     description?: string;
     image?: URL | string;
     canonicalURL?: URL | string;
-    bodyClass?: string;
 }
 
-const {
-    title,
-    description,
-    image,
-    canonicalURL,
-    bodyClass = "bg-background text-foreground transition-colors min-h-screen flex flex-col",
-} = Astro.props;
+const { title, description, image, canonicalURL } = Astro.props;
 ---
 
 <!doctype html>
@@ -30,7 +23,7 @@ const {
         />
         <slot name="head" />
     </head>
-    <body class={bodyClass}>
+    <body class="bg-background text-foreground transition-colors min-h-screen flex flex-col">
         <slot />
     </body>
 </html>

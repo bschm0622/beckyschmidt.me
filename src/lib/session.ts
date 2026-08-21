@@ -1,5 +1,6 @@
 import crypto from 'node:crypto';
 import { getSecret } from 'astro:env/server';
+import { json } from '@/lib/http';
 
 const COOKIE_NAME = 'admin_session';
 const MAX_AGE = 60 * 60 * 12; // 12 hours, in seconds
@@ -44,12 +45,17 @@ export function isAuthenticated(request: Request): boolean {
   const [exp, sig] = decodeURIComponent(match[1]).split('.');
   if (!exp || !sig) return false;
 
-  const expected = sign(exp, secret);
-  const a = Buffer.from(sig);
-  const b = Buffer.from(expected);
-  if (a.length !== b.length || !crypto.timingSafeEqual(a, b)) return false;
+  if (!timingSafeEqual(sig, sign(exp, secret))) return false;
 
   return Number(exp) > Date.now();
+}
+
+/** Constant-time string comparison, safe for secrets of unequal length. */
+export function timingSafeEqual(a: string, b: string): boolean {
+  const ab = Buffer.from(a);
+  const bb = Buffer.from(b);
+  if (ab.length !== bb.length) return false;
+  return crypto.timingSafeEqual(ab, bb);
 }
 
 /**
@@ -58,8 +64,5 @@ export function isAuthenticated(request: Request): boolean {
  */
 export function requireAuth(request: Request): Response | null {
   if (isAuthenticated(request)) return null;
-  return new Response(JSON.stringify({ error: 'Unauthorized' }), {
-    status: 401,
-    headers: { 'Content-Type': 'application/json' },
-  });
+  return json({ error: 'Unauthorized' }, 401);
 }

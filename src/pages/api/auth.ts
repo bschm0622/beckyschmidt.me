@@ -1,25 +1,20 @@
 import type { APIRoute } from 'astro';
-import crypto from 'node:crypto';
 import { getSecret } from 'astro:env/server';
-import { createSessionCookie, clearSessionCookie, isAuthenticated } from '@/lib/session';
+import { json } from '@/lib/http';
+import {
+  createSessionCookie,
+  clearSessionCookie,
+  isAuthenticated,
+  timingSafeEqual,
+} from '@/lib/session';
 
 export const prerender = false;
 
 // Session check: the client uses this on load to confirm the cookie is still
 // valid, rather than trusting a stale localStorage flag.
 export const GET: APIRoute = async ({ request }) => {
-  return new Response(JSON.stringify({ authenticated: isAuthenticated(request) }), {
-    status: 200,
-    headers: { 'Content-Type': 'application/json' },
-  });
+  return json({ authenticated: isAuthenticated(request) });
 };
-
-function timingSafeEqual(a: string, b: string): boolean {
-  const ab = Buffer.from(a);
-  const bb = Buffer.from(b);
-  if (ab.length !== bb.length) return false;
-  return crypto.timingSafeEqual(ab, bb);
-}
 
 export const POST: APIRoute = async ({ request }) => {
   try {
@@ -27,10 +22,7 @@ export const POST: APIRoute = async ({ request }) => {
     const adminPassword = getSecret('ADMIN_PASSWORD');
 
     if (!adminPassword) {
-      return new Response(
-        JSON.stringify({ error: 'Admin password not configured on server' }),
-        { status: 500, headers: { 'Content-Type': 'application/json' } }
-      );
+      return json({ error: 'Admin password not configured on server' }, 500);
     }
 
     if (typeof password === 'string' && timingSafeEqual(password, adminPassword)) {
@@ -44,15 +36,9 @@ export const POST: APIRoute = async ({ request }) => {
       });
     }
 
-    return new Response(JSON.stringify({ error: 'Invalid password' }), {
-      status: 401,
-      headers: { 'Content-Type': 'application/json' },
-    });
+    return json({ error: 'Invalid password' }, 401);
   } catch {
-    return new Response(JSON.stringify({ error: 'Authentication failed' }), {
-      status: 500,
-      headers: { 'Content-Type': 'application/json' },
-    });
+    return json({ error: 'Authentication failed' }, 500);
   }
 };
 

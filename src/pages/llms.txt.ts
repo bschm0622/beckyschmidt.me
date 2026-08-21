@@ -1,17 +1,19 @@
 import type { APIRoute } from 'astro';
-import projects from '../data/projects.json';
+import { getCollection } from 'astro:content';
+import { SITE, siteOrigin } from '@/siteConfig';
 
 export const GET: APIRoute = async ({ site }) => {
-    const siteURL = site ?? new URL('https://beckyschmidt.me');
+    const siteURL = siteOrigin(site);
 
     // Generate projects list
+    const projects = await getCollection('projects');
     const buildingList = projects
-        .map(p => `- ${p.name} (${p.href}) - ${p.description}`)
+        .map(({ data: p }) => `- ${p.name} (${p.href}) - ${p.description}`)
         .join('\n');
 
-    const content = `# Becky Schmidt - Personal Website
+    const content = `# ${SITE.name} - Personal Website
 
-> Senior Product Manager at Octane11 | AI & data products | Indianapolis, IN
+> ${SITE.jobTitle} at ${SITE.employer.name} | AI & data products | ${SITE.location.locality}, ${SITE.location.region}
 
 ## About This Site
 
@@ -35,8 +37,8 @@ Essays on product management, AI, agency, and building in public. Flagship essay
 
 ## Contact
 
-- Email: beckyschmidt0622@gmail.com
-- LinkedIn: https://www.linkedin.com/in/becky--schmidt/
+- Email: ${SITE.email}
+- LinkedIn: ${SITE.socials.linkedin}
 
 ## For More Details
 

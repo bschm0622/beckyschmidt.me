@@ -1,48 +1,46 @@
 ---
-import { SITE } from "@/siteConfig";
+import { SITE, siteOrigin } from "@/siteConfig";
 import { ClientRouter } from "astro:transitions";
 import Favicons from "@/components/Favicons.astro";
 import { Font } from "astro:assets";
 
 interface Props {
     title?: string;
-    name?: string;
     description?: string;
     image?: URL | string;
     canonicalURL?: URL | string;
 }
 
 const {
-    title = SITE.title,
-    name = SITE.name,
+    title = "",
     description = SITE.description,
     image,
     canonicalURL,
 } = Astro.props;
 
-const siteOrigin = Astro.site ?? SITE.href;
+const origin = siteOrigin(Astro.site);
 
 const fullTitle = title ? `${SITE.name} | ${title}` : SITE.name;
 
 const imageUrl =
     typeof image === "string"
         ? image
-        : (image?.toString() ?? new URL("/og.png", siteOrigin).toString());
+        : (image?.toString() ?? new URL(SITE.ogImage, origin).toString());
 
 const canonicalStr =
     typeof canonicalURL === "string"
         ? canonicalURL
         : (canonicalURL?.toString() ??
-          new URL(Astro.url.pathname, siteOrigin).toString());
+          new URL(Astro.url.pathname, origin).toString());
 
 const shouldLoadAnalytics = import.meta.env.PROD;
 ---
 
 <!-- Theme color meta must come before the init script so the script can find it -->
-<meta id="theme-color-meta" name="theme-color" content="#faf9f6" />
+<meta id="theme-color-meta" name="theme-color" content={SITE.themeColors.light} />
 
 <!-- Theme mode initialization -->
-<script is:inline>
+<script is:inline define:vars={{ themeColors: SITE.themeColors }}>
     (function () {
         let theme = localStorage.getItem("theme");
         if (!theme) {
@@ -59,7 +57,7 @@ const shouldLoadAnalytics = import.meta.env.PROD;
         document.documentElement.classList.remove("light", "dark");
         document.documentElement.classList.add(theme);
         var meta = document.getElementById("theme-color-meta");
-        if (meta) meta.setAttribute("content", theme === "dark" ? "#18181b" : "#faf9f6");
+        if (meta) meta.setAttribute("content", theme === "dark" ? themeColors.dark : themeColors.light);
     })();
 </script>
 
@@ -78,7 +76,6 @@ const shouldLoadAnalytics = import.meta.env.PROD;
 <!-- Primary Meta Tags -->
 <title>{fullTitle}</title>
 <meta name="title" content={fullTitle} />
-<meta name="name" content={name} />
 <meta name="description" content={description} />
 <meta name="robots" content="index, follow" />
 <meta name="author" content={SITE.author} />
@@ -106,35 +103,35 @@ const shouldLoadAnalytics = import.meta.env.PROD;
     "@graph": [
         {
             "@type": "WebSite",
-            "@id": `${siteOrigin}#website`,
-            "url": siteOrigin,
-            "name": "Becky Schmidt",
+            "@id": `${origin}#website`,
+            "url": origin.toString(),
+            "name": SITE.name,
             "description": SITE.description,
             "inLanguage": SITE.locale,
             "publisher": {
-                "@id": `${siteOrigin}#person`
+                "@id": `${origin}#person`
             }
         },
         {
             "@type": "Person",
-            "@id": `${siteOrigin}#person`,
-            "name": "Becky Schmidt",
-            "url": siteOrigin,
-            "email": "beckyschmidt0622@gmail.com",
-            "jobTitle": "Senior Product Manager",
+            "@id": `${origin}#person`,
+            "name": SITE.name,
+            "url": origin.toString(),
+            "email": SITE.email,
+            "jobTitle": SITE.jobTitle,
             "worksFor": {
                 "@type": "Organization",
-                "name": "Octane11",
-                "url": "https://octane11.com"
+                "name": SITE.employer.name,
+                "url": SITE.employer.url
             },
             "address": {
                 "@type": "PostalAddress",
-                "addressLocality": "Indianapolis",
-                "addressRegion": "IN",
-                "addressCountry": "US"
+                "addressLocality": SITE.location.locality,
+                "addressRegion": SITE.location.region,
+                "addressCountry": SITE.location.country
             },
             "sameAs": [
-                "https://www.linkedin.com/in/becky--schmidt/"
+                SITE.socials.linkedin
             ]
         },
         {
@@ -144,15 +141,14 @@ const shouldLoadAnalytics = import.meta.env.PROD;
             "name": fullTitle,
             "description": description,
             "isPartOf": {
-                "@id": `${siteOrigin}#website`
+                "@id": `${origin}#website`
             },
             "inLanguage": SITE.locale
         }
     ]
 })} />
 
-<!-- Manifest + Sitemap -->
-<link rel="manifest" href="/site.webmanifest" />
+<!-- Sitemap (manifest link lives in Favicons.astro) -->
 <link rel="sitemap" href="/sitemap-index.xml" />
 
 <Font cssVariable="--font-inter" preload />
@@ -162,14 +158,13 @@ const shouldLoadAnalytics = import.meta.env.PROD;
 <!-- Umami Analytics (only loaded in production) -->
 {shouldLoadAnalytics && (
   <script>
+    import { SITE } from "@/siteConfig";
     if (document.cookie.indexOf('umami.disabled=true') === -1) {
       const s = document.createElement('script');
       s.src = 'https://cloud.umami.is/script.js';
-      s.setAttribute('data-website-id', '2d238baf-947c-468a-aac9-1ac81b265110');
+      s.setAttribute('data-website-id', SITE.analytics.umamiWebsiteId);
       s.defer = true;
       document.head.appendChild(s);
-    } else {
     }
   </script>
 )}
-

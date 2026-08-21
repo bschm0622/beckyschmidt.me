@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import * as api from '@/lib/cms-api';
+import { ApiError, type PendingPR } from '@/lib/cms-api';
 
 interface Note {
   filename: string;
@@ -7,18 +9,6 @@ interface Note {
   pubDate: string;
   sha: string;
 }
-
-interface PendingPR {
-  number: number;
-  url: string;
-  title: string;
-  branch: string;
-  updatedAt: string;
-  filename: string | null;
-  isDelete: boolean;
-}
-
-const JSON_HEADERS = { 'Content-Type': 'application/json' };
 
 export default function AdminDashboard() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -37,19 +27,14 @@ export default function AdminDashboard() {
     window.setTimeout(() => setSuccessMessage(''), 6000);
   };
 
-  // Confirm the session with the server on load rather than trusting a stale
-  // localStorage flag.
+  // Confirm the session with the server on load.
   useEffect(() => {
     (async () => {
       try {
-        const res = await fetch('/api/auth');
-        const data = await res.json();
+        const data = await api.checkSession();
         if (data.authenticated) {
           setIsAuthenticated(true);
-          localStorage.setItem('admin-authenticated', 'true');
           loadNotes();
-        } else {
-          localStorage.removeItem('admin-authenticated');
         }
       } catch {
         // Network error — leave the login form up.
@@ -62,30 +47,19 @@ export default function AdminDashboard() {
     setIsLoading(true);
     setError('');
     try {
-      const response = await fetch('/api/auth', {
-        method: 'POST',
-        headers: JSON_HEADERS,
-        body: JSON.stringify({ password }),
-      });
-      const data = await response.json();
-      if (response.ok && data.success) {
-        setIsAuthenticated(true);
-        localStorage.setItem('admin-authenticated', 'true');
-        loadNotes();
-      } else {
-        setError(data.error || 'Invalid password');
-      }
-    } catch {
-      setError('Authentication failed');
+      await api.login(password);
+      setIsAuthenticated(true);
+      loadNotes();
+    } catch (err: any) {
+      setError(err instanceof ApiError ? err.message : 'Authentication failed');
     } finally {
       setIsLoading(false);
     }
   };
 
   const handleLogout = () => {
-    fetch('/api/auth', { method: 'DELETE' }).catch(() => {});
+    api.logout().catch(() => {});
     setIsAuthenticated(false);
-    localStorage.removeItem('admin-authenticated');
     setPassword('');
     setNotes([]);
     setPending([]);
@@ -95,16 +69,8 @@ export default function AdminDashboard() {
     setLoadingNotes(true);
     setError('');
     try {
-      const response = await fetch('/api/github/files?branch=master');
-      if (response.status === 401) {
-        setIsAuthenticated(false);
-        localStorage.removeItem('admin-authenticated');
-        return;
-      }
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.error || 'Failed to load notes');
-
-      const posts: Note[] = data.files.map((file: any) => ({
+      const data = await api.listNotes();
+      const posts: Note[] = data.files.map((file) => ({
         filename: file.name,
         title: file.title || file.name.replace('.md', '').replace(/-/g, ' '),
         slug: file.name.replace('.md', ''),
@@ -114,6 +80,11 @@ export default function AdminDashboard() {
       posts.sort((a, b) => (b.pubDate || '').localeCompare(a.pubDate || ''));
       setNotes(posts);
     } catch (err: any) {
+      if (err instanceof ApiError && err.status === 401) {
+        setIsAuthenticated(false);
+        setLoadingNotes(false);
+        return;
+      }
       setError(err.message || 'Failed to load notes');
     } finally {
       setLoadingNotes(false);
@@ -122,11 +93,8 @@ export default function AdminDashboard() {
     // Surface published-but-unmerged notes so they can be reopened and re-edited.
     // Best-effort: a failure here shouldn't block the main list.
     try {
-      const res = await fetch('/api/github/pending');
-      if (res.ok) {
-        const data = await res.json();
-        setPending(data.pending || []);
-      }
+      const data = await api.pending();
+      setPending(data.pending || []);
     } catch {
       // ignore — the "In review" section just won't show
     }
@@ -159,45 +127,15 @@ export default function AdminDashboard() {
     setDeletingFile(note.filename);
     setError('');
     try {
-      const branch = `cms/delete-${note.slug}-${Date.now().toString(36)}`;
-
-      const br = await fetch('/api/github/create-branch', {
-        method: 'POST',
-        headers: JSON_HEADERS,
-        body: JSON.stringify({ branchName: branch, fromBranch: 'master' }),
+      const pr = await api.deleteNotePipeline({
+        filename: note.filename,
+        sha: note.sha,
+        slug: note.slug,
+        title: note.title,
       });
-      if (!br.ok && br.status !== 409) {
-        throw new Error((await br.json()).error || 'Failed to create branch');
-      }
-
-      const dr = await fetch('/api/github/delete', {
-        method: 'POST',
-        headers: JSON_HEADERS,
-        body: JSON.stringify({
-          filename: note.filename,
-          sha: note.sha,
-          branch,
-          message: `Delete ${note.filename} via CMS`,
-        }),
-      });
-      const dd = await dr.json();
-      if (!dr.ok) throw new Error(dd.error || 'Failed to delete note');
-
-      const pr = await fetch('/api/github/create-pr', {
-        method: 'POST',
-        headers: JSON_HEADERS,
-        body: JSON.stringify({
-          title: `Delete: ${note.title}`,
-          body: 'Note deletion via CMS',
-          head: branch,
-          base: 'master',
-        }),
-      });
-      const pd = await pr.json();
-      if (!pr.ok) throw new Error(pd.error || 'Failed to open PR');
 
       setConfirmingDelete(null);
-      showSuccess(`Opened PR #${pd.pullRequest.number} to delete "${note.title}". Merge it to remove the note.`);
+      showSuccess(`Opened PR #${pr.number} to delete "${note.title}". Merge it to remove the note.`);
     } catch (err: any) {
       setError(err.message || 'Failed to delete note');
     } finally {

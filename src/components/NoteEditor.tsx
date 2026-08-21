@@ -4,8 +4,13 @@ import { markdown } from '@codemirror/lang-markdown';
 import { EditorView, placeholder } from '@codemirror/view';
 import type { EditorView as EditorViewType } from '@codemirror/view';
 import MarkdownIt from 'markdown-it';
-import { slugifyStr } from '../utils/Slugify';
-import { validateImage, optimizeImage } from '../utils/imageProcessor';
+import { slugifyStr } from '@/lib/slugify';
+import { validateImage, optimizeImage } from '@/lib/images';
+import { parseFrontmatter, parseTagsValue, serializeFrontmatter } from '@/lib/frontmatter';
+import { DEFAULT_BRANCH } from '@/lib/constants';
+import { checkSession, getNote, prStatus, publishNote } from '@/lib/cms-api';
+import { useMobileFormattingBar } from './hooks/useMobileFormattingBar';
+import { useDraftSafety } from './hooks/useDraftSafety';
 
 interface FrontMatter {
   title: string;
@@ -15,8 +20,6 @@ interface FrontMatter {
   author: string;
   tags: string;
 }
-
-const JSON_HEADERS = { 'Content-Type': 'application/json' };
 
 // A writing surface, not a code IDE: no gutters, prose font, comfortable
 // leading, and a transparent background so it sits flat on the page.
@@ -45,26 +48,6 @@ const proseInputBehavior = EditorView.contentAttributes.of({
   autocorrect: 'on',
   spellcheck: 'true',
 });
-
-// Tags are edited as a friendly comma list but stored as the array literal the
-// existing notes use (e.g. ["ai","product"]). These convert between the two.
-const parseTagsValue = (raw: string): string[] => {
-  if (!raw) return [];
-  let s = raw.trim();
-  if (s.startsWith('[') && s.endsWith(']')) {
-    try {
-      const arr = JSON.parse(s);
-      if (Array.isArray(arr)) return arr.map((x) => String(x).trim()).filter(Boolean);
-    } catch {
-      s = s.slice(1, -1);
-    }
-  }
-  return s
-    .split(',')
-    .map((t) => t.trim().replace(/^["']|["']$/g, ''))
-    .filter(Boolean);
-};
-const tagsToLiteral = (tags: string[]) => `[${tags.map((t) => `"${t.replace(/"/g, '')}"`).join(',')}]`;
 
 export default function NoteEditor() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -109,30 +92,30 @@ export default function NoteEditor() {
   const [pendingImages, setPendingImages] = useState<Array<{ file: File; placeholder: string; filename: string }>>([]);
   const [editorTheme, setEditorTheme] = useState<'light' | 'dark'>('light');
 
-  // Mobile formatting bar. On phones, page-level `sticky top-0` fights the caret
-  // scroll + keyboard resize on iOS and flickers. Instead we keep a SINGLE scroll
-  // area (the page) and, while the editor is focused, float the bar at the TOP of
-  // the visible area by tracking the visual viewport. The caret sits at the
-  // bottom (just above the keyboard), so a top bar never overlaps it.
-  const [isMobile, setIsMobile] = useState(false);
-  const [editorFocused, setEditorFocused] = useState(false);
-  // The floating bar is positioned by writing its `top` directly to the DOM (see
-  // positionBar) rather than through React state — so scrolling never triggers a
-  // re-render, which is what could feed back into CodeMirror and cause a scroll
-  // loop. Refs, not state, for exactly that reason.
-  const barRef = useRef<HTMLDivElement | null>(null);
-  const editorBoxRef = useRef<HTMLDivElement | null>(null);
-  const blurTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // Mobile formatting bar — the delicate visual-viewport tracking lives in the
+  // hook; see its comments for why it writes to the DOM instead of state.
+  const { barRef, editorBoxRef, barFloating, handleEditorFocus, handleEditorBlur, suppressCmScroll } =
+    useMobileFormattingBar(tab === 'write');
 
   // Draft-safety state
   const [confirmingLeave, setConfirmingLeave] = useState(false);
   const [draftKey, setDraftKey] = useState('');
-  const [pendingDraft, setPendingDraft] = useState<{ frontMatter: FrontMatter; markdownContent: string } | null>(null);
-  const draftTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  // Always-current snapshot so the unload flush persists the latest edit
-  // (the debounced autosave can otherwise lose the last <800ms of typing).
-  const latestDraftRef = useRef({ frontMatter, markdownContent, draftKey, hasUnsavedChanges });
-  latestDraftRef.current = { frontMatter, markdownContent, draftKey, hasUnsavedChanges };
+  // Memoized so unrelated re-renders don't reset the hook's autosave debounce.
+  const draftSnapshot = useMemo(
+    () => ({ frontMatter, markdownContent }),
+    [frontMatter, markdownContent],
+  );
+  const { pendingDraft, restoreDraft, discardDraft, clearDraft } = useDraftSafety({
+    draftKey,
+    snapshot: draftSnapshot,
+    hasUnsavedChanges,
+    onRestore: (draft) => {
+      setFrontMatter(draft.frontMatter);
+      setMarkdownContent(draft.markdownContent);
+      setSlugEdited(true);
+      setHasUnsavedChanges(true);
+    },
+  });
 
   const showSuccess = (text: string) => {
     setSuccessMessage(text);
@@ -178,59 +161,12 @@ export default function NoteEditor() {
     return () => observer.disconnect();
   }, []);
 
-  // Track whether we're on a phone-width screen (drives the bottom-pinned bar).
-  useEffect(() => {
-    const mq = window.matchMedia('(max-width: 639px)');
-    const update = () => setIsMobile(mq.matches);
-    update();
-    mq.addEventListener('change', update);
-    return () => mq.removeEventListener('change', update);
-  }, []);
-
-  // Put the bar at the top of the visible area (visual-viewport offset), clamped
-  // to the editor's own top so it never rides up over the details. Writes `top`
-  // straight to the DOM — no React state, so scrolling can't re-render us.
-  const positionBar = useCallback(() => {
-    const vv = window.visualViewport;
-    const bar = barRef.current;
-    if (!vv || !bar) return;
-    const top = vv.offsetTop;
-    const editorTop = editorBoxRef.current?.getBoundingClientRect().top ?? top;
-    bar.style.top = `${Math.round(Math.max(top, editorTop))}px`;
-  }, []);
-
-  // Reposition on visual-viewport resize + scroll (iOS fires these as the
-  // keyboard animates) and window scroll (the editor's top moves as the page
-  // scrolls), coalesced to one measurement per frame.
-  useEffect(() => {
-    const vv = window.visualViewport;
-    if (!vv) return;
-    let raf = 0;
-    const onScroll = () => {
-      if (!raf) raf = requestAnimationFrame(() => {
-        raf = 0;
-        positionBar();
-      });
-    };
-    vv.addEventListener('resize', onScroll);
-    vv.addEventListener('scroll', onScroll);
-    window.addEventListener('scroll', onScroll, { passive: true });
-    return () => {
-      if (raf) cancelAnimationFrame(raf);
-      vv.removeEventListener('resize', onScroll);
-      vv.removeEventListener('scroll', onScroll);
-      window.removeEventListener('scroll', onScroll);
-    };
-  }, [positionBar]);
-
   // Confirm the session with the server, then load content.
   useEffect(() => {
     (async () => {
       try {
-        const res = await fetch('/api/auth');
-        const data = await res.json();
+        const data = await checkSession();
         if (!data.authenticated) {
-          localStorage.removeItem('admin-authenticated');
           window.location.href = '/admin';
           return;
         }
@@ -248,13 +184,12 @@ export default function NoteEditor() {
       // PR's branch (and number) so we load that version and resume the same PR.
       const branchParam = urlParams.get('branch');
       const prParam = urlParams.get('pr');
-      const branch = branchParam && branchParam !== 'master' ? branchParam : null;
-      const key = `note-draft:${hasFile ? filename : 'new'}`;
-      setDraftKey(key);
+      const branch = branchParam && branchParam !== DEFAULT_BRANCH ? branchParam : null;
+      setDraftKey(`note-draft:${hasFile ? filename : 'new'}`);
 
       if (hasFile) {
         setCurrentFile(filename);
-        setSlugEdited(true); // existing note already has a slug
+        setSlugEdited(true); // existing note already has a slug (its filename)
         if (branch) {
           // Resume the existing PR: load from its branch and hydrate the
           // session so publishing updates the same PR.
@@ -262,25 +197,7 @@ export default function NoteEditor() {
           if (prParam) setPrNumber(Number(prParam));
           hydratePrStatus(branch);
         }
-        await loadFileContent(filename!, branch || 'master');
-      } else {
-        parseMarkdownWithFrontMatter(`---
-title: ""
-slug: ""
-pubDate: "${new Date().toISOString().split('T')[0]}"
-description: ""
-author: "Becky Schmidt"
-tags: ""
----
-
-`);
-      }
-
-      try {
-        const saved = localStorage.getItem(key);
-        if (saved) setPendingDraft(JSON.parse(saved));
-      } catch {
-        // corrupt draft — ignore
+        await loadFileContent(filename!, branch || DEFAULT_BRANCH);
       }
 
       setIsLoading(false);
@@ -308,77 +225,12 @@ tags: ""
     })();
   }, []);
 
-  // Debounced local autosave so a tab close/crash never loses work.
-  useEffect(() => {
-    if (!draftKey || !hasUnsavedChanges) return;
-    if (draftTimerRef.current) clearTimeout(draftTimerRef.current);
-    draftTimerRef.current = setTimeout(() => {
-      try {
-        localStorage.setItem(draftKey, JSON.stringify({ frontMatter, markdownContent }));
-      } catch {
-        // storage unavailable — best effort
-      }
-    }, 800);
-    return () => {
-      if (draftTimerRef.current) clearTimeout(draftTimerRef.current);
-    };
-  }, [frontMatter, markdownContent, hasUnsavedChanges, draftKey]);
-
-  // Flush the current draft synchronously before the page goes away, and warn
-  // on unsaved changes. Reads from the ref so it always sees the latest edit;
-  // `pagehide` covers mobile Safari, which often skips `beforeunload`.
-  useEffect(() => {
-    const flush = () => {
-      const { frontMatter: fm, markdownContent: md, draftKey: key, hasUnsavedChanges: dirty } = latestDraftRef.current;
-      if (dirty && key) {
-        try {
-          localStorage.setItem(key, JSON.stringify({ frontMatter: fm, markdownContent: md }));
-        } catch {
-          // best effort
-        }
-      }
-    };
-    const onBeforeUnload = (e: BeforeUnloadEvent) => {
-      flush();
-      if (latestDraftRef.current.hasUnsavedChanges) {
-        e.preventDefault();
-        e.returnValue = '';
-      }
-    };
-    window.addEventListener('beforeunload', onBeforeUnload);
-    window.addEventListener('pagehide', flush);
-    return () => {
-      window.removeEventListener('beforeunload', onBeforeUnload);
-      window.removeEventListener('pagehide', flush);
-    };
-  }, []);
-
-  const restoreDraft = () => {
-    if (pendingDraft) {
-      setFrontMatter(pendingDraft.frontMatter);
-      setMarkdownContent(pendingDraft.markdownContent);
-      setSlugEdited(true);
-      setHasUnsavedChanges(true);
-    }
-    setPendingDraft(null);
-  };
-  const discardDraft = () => {
-    try {
-      if (draftKey) localStorage.removeItem(draftKey);
-    } catch {
-      // ignore
-    }
-    setPendingDraft(null);
-  };
-
   // Look up the open PR for a branch and hydrate the PR number/url so the top bar
   // shows "Published · PR #n" and repeat publishes update it instead of opening a
   // new one.
   const hydratePrStatus = async (branch: string) => {
     try {
-      const res = await fetch(`/api/github/pr-status?branch=${encodeURIComponent(branch)}`);
-      if (!res.ok) return;
-      const data = await res.json();
+      const data = await prStatus(branch);
       if (data.hasPR && data.pullRequest) {
         setPrNumber(data.pullRequest.number);
         setPrUrl(data.pullRequest.url);
@@ -388,72 +240,52 @@ tags: ""
     }
   };
 
-  const loadFileContent = async (filename: string, branch: string = 'master') => {
+  const loadFileContent = async (filename: string, branch: string = DEFAULT_BRANCH) => {
     try {
       setError('');
-      const response = await fetch(`/api/github/file/src/notes/${filename}?branch=${encodeURIComponent(branch)}`, {
-        method: 'GET',
-        headers: { ...JSON_HEADERS, 'Cache-Control': 'no-cache' },
-      });
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
-        throw new Error(errorData.error || `HTTP ${response.status}: Failed to load file`);
-      }
-      const data = await response.json();
+      const data = await getNote(filename, branch);
       if (!data || !data.content) throw new Error('File content is empty or missing');
       setCurrentFileSha(data.sha);
-      parseMarkdownWithFrontMatter(data.content);
+      applyMarkdownDocument(data.content, filename.replace(/\.md$/, ''));
     } catch (err: any) {
       setError(`Failed to load ${filename}: ${err.message}`);
     }
   };
 
-  const parseMarkdownWithFrontMatter = (content: string) => {
+  // Hydrate the editor from a raw markdown document. The schema no longer has
+  // a `slug` field (the filename is the slug), so notes without one fall back
+  // to `fallbackSlug`; legacy notes that still carry `slug:` keep it.
+  const applyMarkdownDocument = (content: string, fallbackSlug: string) => {
     if (!content || typeof content !== 'string') {
       setError('Invalid file content received');
       return;
     }
-    const frontMatterRegex = /^---\s*\r?\n([\s\S]*?)\r?\n---\s*\r?\n?([\s\S]*)$/;
-    const match = content.match(frontMatterRegex);
-    if (match) {
-      const [, frontMatterStr, contentStr] = match;
-      const parsed = { ...frontMatter };
-      if (frontMatterStr) {
-        frontMatterStr.split('\n').forEach((line) => {
-          const colonIndex = line.indexOf(':');
-          if (colonIndex > 0) {
-            const key = line.substring(0, colonIndex).trim();
-            let value = line.substring(colonIndex + 1).trim();
-            if (
-              (value.startsWith('"') && value.endsWith('"')) ||
-              (value.startsWith("'") && value.endsWith("'"))
-            ) {
-              value = value.slice(1, -1);
-            }
-            if (key in parsed) (parsed as any)[key] = value;
-          }
-        });
+    const { data, body } = parseFrontmatter(content);
+    setFrontMatter((prev) => {
+      const parsed = { ...prev };
+      for (const key of Object.keys(parsed) as Array<keyof FrontMatter>) {
+        const value = data[key];
+        if (value !== undefined) parsed[key] = Array.isArray(value) ? value.join(', ') : value;
       }
       // Store tags as a friendly comma list for the input.
-      parsed.tags = parseTagsValue(parsed.tags).join(', ');
-      setFrontMatter(parsed);
-      setMarkdownContent(contentStr ? contentStr.trim() : '');
-    } else {
-      setMarkdownContent(content.trim());
-    }
+      parsed.tags = parseTagsValue(data.tags ?? []).join(', ');
+      if (!parsed.slug) parsed.slug = fallbackSlug;
+      return parsed;
+    });
+    setMarkdownContent(body.trim());
   };
 
-  const generateFullMarkdown = () => {
-    const fm = `---
-title: "${frontMatter.title}"
-slug: "${frontMatter.slug}"
-pubDate: "${frontMatter.pubDate}"
-author: "${frontMatter.author}"
-description: "${frontMatter.description}"
-tags: ${tagsToLiteral(parseTagsValue(frontMatter.tags))}
----`;
-    return `${fm}\n\n${markdownContent}\n`;
-  };
+  const generateFullMarkdown = () =>
+    serializeFrontmatter(
+      {
+        title: frontMatter.title,
+        pubDate: frontMatter.pubDate,
+        description: frontMatter.description,
+        author: frontMatter.author,
+        tags: parseTagsValue(frontMatter.tags),
+      },
+      markdownContent,
+    );
 
   const handleTitleChange = (value: string) => {
     setFrontMatter((prev) => ({
@@ -474,36 +306,6 @@ tags: ${tagsToLiteral(parseTagsValue(frontMatter.tags))}
     setMarkdownContent(value);
     setHasUnsavedChanges(true);
   }, []);
-
-  // Focus tracking for the bottom bar. Delay the blur so tapping a toolbar
-  // button (which briefly steals focus) doesn't drop and re-pin the bar.
-  const handleEditorFocus = useCallback(() => {
-    if (blurTimerRef.current) clearTimeout(blurTimerRef.current);
-    setEditorFocused(true);
-  }, []);
-  const handleEditorBlur = useCallback(() => {
-    if (blurTimerRef.current) clearTimeout(blurTimerRef.current);
-    blurTimerRef.current = setTimeout(() => setEditorFocused(false), 150);
-  }, []);
-
-  // Float the formatting bar above the keyboard only on a focused phone editor.
-  const barFloating = isMobile && editorFocused && tab === 'write';
-
-  // Position it the moment it appears (on focus), before the first paint jump.
-  useEffect(() => {
-    if (barFloating) positionBar();
-  }, [barFloating, positionBar]);
-
-  // On mobile, suppress CodeMirror's own "scroll caret into view" and let iOS
-  // handle keeping the caret visible. CM scrolls the window on every keystroke;
-  // on iOS that fights Safari's native caret scrolling and the two oscillate —
-  // the view jumps over and over while typing a long paragraph. Returning true
-  // from the scroll handler tells CM it's handled, so it does nothing, leaving a
-  // single (native) scroller. Desktop keeps CM's scrolling. Read isMobile through
-  // a ref so the facet stays stable.
-  const isMobileRef = useRef(false);
-  isMobileRef.current = isMobile;
-  const suppressCmScroll = useMemo(() => EditorView.scrollHandler.of(() => isMobileRef.current), []);
 
   // Build the editor config ONCE. Rebuilding these inline on every render makes
   // react-codemirror reconfigure the editor, which can trigger a scroll-into-view
@@ -631,81 +433,34 @@ tags: ${tagsToLiteral(parseTagsValue(frontMatter.tags))}
       if (!frontMatter.slug) setFrontMatter((prev) => ({ ...prev, slug }));
       const filename = currentFile || `${slug}.md`;
 
-      // 1. Branch (once per session).
-      let branch = sessionBranch;
-      if (!branch) {
-        branch = `cms/${slug}-${Date.now().toString(36)}`;
-        const br = await fetch('/api/github/create-branch', {
-          method: 'POST',
-          headers: JSON_HEADERS,
-          body: JSON.stringify({ branchName: branch, fromBranch: 'master' }),
-        });
-        if (!br.ok && br.status !== 409) {
-          throw new Error((await br.json()).error || 'Failed to create branch');
-        }
-        setSessionBranch(branch);
-      }
-
-      // 2. Upload any staged images to the branch.
-      for (const img of pendingImages) {
-        const formData = new FormData();
-        formData.append('file', img.file);
-        formData.append('slug', slug);
-        formData.append('branch', branch);
-        formData.append('filename', img.filename);
-        formData.append('message', `Add image for ${slug}`);
-        const imgRes = await fetch('/api/github/upload-image', { method: 'POST', body: formData });
-        if (!imgRes.ok) {
-          throw new Error(`Failed to upload image ${img.filename}: ${(await imgRes.json()).error}`);
-        }
-      }
-      setPendingImages([]);
-
-      // 3. Commit the note.
-      const sha = sessionSha || currentFileSha;
-      const commitRes = await fetch('/api/github/commit', {
-        method: 'POST',
-        headers: JSON_HEADERS,
-        body: JSON.stringify({
-          content: generateFullMarkdown(),
-          filename,
-          message: currentFile ? `Update ${filename} via CMS` : `Create ${filename} via CMS`,
-          branch,
-          ...(sha ? { sha } : {}),
-        }),
+      const result = await publishNote({
+        slug,
+        filename,
+        content: generateFullMarkdown(),
+        title: frontMatter.title,
+        description: frontMatter.description,
+        isUpdate: !!currentFile,
+        branch: sessionBranch,
+        sha: sessionSha || currentFileSha,
+        prNumber,
+        images: pendingImages,
       });
-      const commitData = await commitRes.json();
-      if (!commitRes.ok) throw new Error(commitData.error || 'Failed to save');
-      setCurrentFile(filename);
-      setSessionSha(commitData.content?.sha || null);
 
-      // 4. Open the PR (once).
-      if (!prNumber) {
-        const prRes = await fetch('/api/github/create-pr', {
-          method: 'POST',
-          headers: JSON_HEADERS,
-          body: JSON.stringify({
-            title: `Add/Update: ${frontMatter.title || filename}`,
-            body: frontMatter.description || 'Note updates via CMS',
-            head: branch,
-            base: 'master',
-          }),
-        });
-        const prData = await prRes.json();
-        if (!prRes.ok) throw new Error(prData.error || 'Failed to open PR');
-        setPrNumber(prData.pullRequest.number);
-        setPrUrl(prData.pullRequest.url);
-        showSuccess(`Saved — opened PR #${prData.pullRequest.number}. Merge it to publish.`);
+      setSessionBranch(result.branch);
+      setPendingImages([]);
+      setCurrentFile(filename);
+      setSessionSha(result.sha);
+
+      if (result.createdPr && result.pullRequest) {
+        setPrNumber(result.pullRequest.number);
+        setPrUrl(result.pullRequest.url);
+        showSuccess(`Saved — opened PR #${result.pullRequest.number}. Merge it to publish.`);
       } else {
         showSuccess(`Updated PR #${prNumber}.`);
       }
 
       setHasUnsavedChanges(false);
-      try {
-        if (draftKey) localStorage.removeItem(draftKey);
-      } catch {
-        // ignore
-      }
+      clearDraft();
     } catch (err: any) {
       setError(err.message || 'Save failed');
     } finally {

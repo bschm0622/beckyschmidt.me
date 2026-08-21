@@ -1,11 +1,10 @@
 ---
 import DefaultLayout from "@/layouts/DefaultLayout.astro";
 import NotesReel from "@/components/NotesReel.astro";
-import { getCollection } from "astro:content";
-import NoteTag from "@/components/ui/NoteTag.astro";
-import { slugifyStr } from "@/utils/Slugify";
+import TagList from "@/components/TagList.astro";
+import { getSortedNotes } from "@/lib/notes";
 
-const allPosts = await getCollection("notes");
+const allPosts = await getSortedNotes();
 
 // Step 1: Count how many posts per tag
 const tagCounts = allPosts.reduce(
@@ -29,19 +28,12 @@ const allTags = Object.keys(tagCounts).sort(
         <div class="space-y-6">
             <h1>Notes</h1>
 
-            <div class="flex flex-wrap items-center gap-2">
-                <span class="text-sm text-muted-foreground whitespace-nowrap">Filter by tag:</span>
-                {
-                    allTags.map((tag) => (
-                        <NoteTag
-                            href={`/notes/tag/${slugifyStr(tag)}/`}
-                            key={tag}
-                        >
-                            {tag} ({tagCounts[tag]})
-                        </NoteTag>
-                    ))
-                }
-            </div>
+            {allTags.length > 0 && (
+                <div class="flex flex-wrap items-center gap-2">
+                    <span class="text-sm text-muted-foreground whitespace-nowrap">Filter by tag:</span>
+                    <TagList tags={allTags} counts={tagCounts} class="contents" />
+                </div>
+            )}
         </div>
 
         <NotesReel posts={allPosts} />

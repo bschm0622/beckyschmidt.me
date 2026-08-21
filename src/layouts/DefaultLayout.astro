@@ -1,9 +1,41 @@
 ---
+/**
+ * Standard page shell: Navbar + centered <main> + search modal.
+ * Variants:
+ * - `proseClass`: typography class applied to <main> (default "type-standard";
+ *   NoteLayout passes "typography").
+ * - `fullWidth`: drop the max-width/prose styling (admin pages).
+ * - `noSearch`: omit the search modal (admin pages).
+ * Slots: default (main content), "head" (extra <head> tags),
+ * "before-nav" (e.g. the note scroll-progress bar).
+ */
 import BaseLayout from "@/layouts/BaseLayout.astro";
 import Navbar from "@/components/Navbar.astro";
 import SearchModal from "@/components/SearchModal.astro";
 
-const { title, description, image, canonicalURL } = Astro.props;
+interface Props {
+    title?: string;
+    description?: string;
+    image?: URL | string;
+    canonicalURL?: URL | string;
+    proseClass?: string;
+    fullWidth?: boolean;
+    noSearch?: boolean;
+}
+
+const {
+    title,
+    description,
+    image,
+    canonicalURL,
+    proseClass = "type-standard",
+    fullWidth = false,
+    noSearch = false,
+} = Astro.props;
+
+const mainClass = fullWidth
+    ? "px-4 flex-1"
+    : `px-4 pb-16 mt-4 md:mt-6 flex-1 mx-auto w-full max-w-3xl ${proseClass}`;
 ---
 
 <BaseLayout
@@ -12,9 +44,11 @@ const { title, description, image, canonicalURL } = Astro.props;
     image={image}
     canonicalURL={canonicalURL}
 >
+    <slot name="head" slot="head" />
+    <slot name="before-nav" />
     <Navbar />
-    <main class="px-4 pb-16 mt-4 md:mt-6 flex-1 mx-auto w-full max-w-3xl type-standard">
+    <main class={mainClass}>
         <slot />
     </main>
-    <SearchModal />
+    {!noSearch && <SearchModal />}
 </BaseLayout>

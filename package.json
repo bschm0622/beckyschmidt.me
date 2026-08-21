@@ -1,5 +1,5 @@
 {
-  "name": "astro-tailwind-boilerplate",
+  "name": "beckyschmidt.me",
   "type": "module",
   "version": "0.0.1",
   "scripts": {
@@ -17,25 +17,23 @@
     "@astrojs/rss": "^4.0.18",
     "@astrojs/sitemap": "^3.7.2",
     "@codemirror/lang-markdown": "^6.2.4",
+    "@codemirror/view": "^6.36.0",
     "@octokit/rest": "^20.0.2",
     "@tailwindcss/vite": "^4.1.10",
     "@uiw/react-codemirror": "^4.21.24",
     "astro": "^6.1.4",
     "convex": "^1.25.4",
     "fuse.js": "^7.1.0",
-    "lodash.kebabcase": "^4.1.1",
     "markdown-it": "^14.1.0",
     "mdast-util-to-string": "^4.0.0",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
     "reading-time": "^1.5.0",
-    "remark-collapse": "^0.1.2",
-    "remark-toc": "^9.0.0",
+    "rehype-external-links": "^3.0.0",
     "tailwindcss": "^4.1.10"
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.9",
-    "@types/lodash.kebabcase": "^4.1.9",
     "@types/markdown-it": "^14.1.2",
     "typescript": "^6.0.3",
     "wrangler": "^4.108.0"

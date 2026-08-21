@@ -1,4 +1,5 @@
 import type { APIRoute } from 'astro';
+import { siteOrigin } from '@/siteConfig';
 
 const getRobotsTxt = (siteURL: URL) => `\
 User-agent: *
@@ -13,6 +14,5 @@ LLMs-Full-Txt: ${new URL('llms-full.txt', siteURL).href}
 `;
 
 export const GET: APIRoute = ({ site }) => {
-    const siteURL = site ?? new URL('https://beckyschmidt.me');
-    return new Response(getRobotsTxt(siteURL));
+    return new Response(getRobotsTxt(siteOrigin(site)));
 };

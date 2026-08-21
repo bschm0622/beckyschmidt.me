@@ -1,7 +1,11 @@
+// Client-safe image validation and optimization, plus the upload constraints
+// shared with the /api/github/upload-image route.
+
 const MAX_WIDTH = 1200;
-const MAX_FILE_SIZE = 2 * 1024 * 1024; // 2MB
-const ALLOWED_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif'];
 const JPEG_QUALITY = 0.85;
+
+export const MAX_FILE_SIZE = 2 * 1024 * 1024; // 2MB
+export const ALLOWED_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif'];
 
 export interface ImageValidation {
   valid: boolean;

@@ -1,11 +1,11 @@
 import type { APIRoute } from "astro";
-import { getCollection } from "astro:content";
+import { getSortedNotes, noteUrl } from "@/lib/notes";
+import { parseFrontmatter } from "@/lib/frontmatter";
 
 export const prerender = true;
 
 function stripMarkdown(content: string): string {
-    return content
-        .replace(/^---[\s\S]*?---\n/, "")   // frontmatter
+    return parseFrontmatter(content).body
         .replace(/^#{1,6}\s+/gm, "")         // headings
         .replace(/\*{1,3}([^*]+)\*{1,3}/g, "$1") // bold/italic
         .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1")  // links → label only
@@ -17,13 +17,13 @@ function stripMarkdown(content: string): string {
 }
 
 export const GET: APIRoute = async () => {
-    const posts = await getCollection("notes");
+    const posts = await getSortedNotes();
 
     const noteItems = posts.map((post) => ({
         title: post.data.title,
         description: post.data.description,
         tags: post.data.tags,
-        url: `/notes/${post.id}/`,
+        url: noteUrl(post),
         pubDate: post.data.pubDate.toISOString().split("T")[0],
         body: stripMarkdown(post.body ?? ""),
     }));

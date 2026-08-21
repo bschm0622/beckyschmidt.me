@@ -1,0 +1,30 @@
+---
+/**
+ * Pill list of note tags, linking to /notes/tag/<slug>/.
+ * Optional `counts` renders "tag (n)" labels (notes index page).
+ * Pass `class` to control the wrapper layout; use "contents" to let the
+ * pills participate directly in a parent flex container.
+ */
+import { slugifyStr } from "@/lib/slugify";
+
+interface Props {
+    tags: string[];
+    counts?: Record<string, number>;
+    class?: string;
+}
+
+const { tags, counts, class: className = "flex flex-wrap gap-1.5" } = Astro.props;
+---
+
+{tags.length > 0 && (
+    <div class={className}>
+        {tags.map((tag) => (
+            <a
+                href={`/notes/tag/${slugifyStr(tag)}/`}
+                class="px-2 py-0.5 border border-muted rounded text-sm text-muted-foreground! no-underline! hover:border-foreground/30 transition-colors"
+            >
+                {counts ? `${tag} (${counts[tag]})` : tag}
+            </a>
+        ))}
+    </div>
+)}

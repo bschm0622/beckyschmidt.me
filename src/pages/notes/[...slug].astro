@@ -14,12 +14,11 @@ export async function getStaticPaths() {
 const { post } = Astro.props;
 const { Content, remarkPluginFrontmatter } = await render(post);
 const minutesRead = remarkPluginFrontmatter?.minutesRead ?? "";
-const slug = post.data.slug;
 ---
 
-<NoteLayout minutesRead={minutesRead} frontmatter={post.data}>
+<NoteLayout minutesRead={minutesRead} frontmatter={post.data} slug={post.id}>
     <Content />
-    <ReactionApp client:visible postId={slug} />
+    <ReactionApp client:visible postId={post.id} />
     <a href="/notes" class="text-sm text-muted-foreground hover:text-foreground transition-colors mt-8 inline-block">
         all notes
     </a>

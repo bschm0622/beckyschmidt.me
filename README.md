@@ -6,16 +6,16 @@ Live at [beckyschmidt.me](https://beckyschmidt.me).
 
 ## Stack
 
-- **Astro 6** — content site with server endpoints (Netlify adapter)
+- **Astro 6** — content site with server endpoints (`@astrojs/cloudflare` adapter)
 - **React** — interactive islands (search, reactions, admin editor)
 - **Tailwind CSS 4** — styling (via `@tailwindcss/vite`, no config file)
 - **Convex** — real-time reactions on notes
-- **Netlify** — hosting + serverless functions
+- **Cloudflare Workers** — hosting + server endpoints (deployed via `wrangler`)
 - **GitHub API** — headless CMS: the `/admin` editor commits Markdown to this repo
 
 ## Features
 
-- Custom admin at `/admin` — write notes, upload images, manage branches, open PRs
+- Custom admin at `/admin` — write notes, upload images, open PRs
 - `⌘K` search powered by **Fuse.js** over a prebuilt `/search-index.json`
 - Real-time note reactions via Convex
 - Dark / light mode with no flash across view transitions
@@ -23,7 +23,7 @@ Live at [beckyschmidt.me](https://beckyschmidt.me).
 
 ## Environment Variables
 
-Set these in `.env.local` (see `.env.example`) and in the Netlify dashboard:
+Set these in `.env.local` (see `.env.example`) and as secrets in the Cloudflare dashboard:
 
 ```bash
 CONVEX_URL=your_convex_deployment_url        # public
@@ -40,10 +40,14 @@ They're declared and validated in `astro.config.mjs` (`env.schema`) and read via
 | Command             | Action                                  |
 | :------------------ | :-------------------------------------- |
 | `npm install`       | Install dependencies                    |
-| `npm run dev`       | Start Convex + Netlify dev server       |
+| `npm run dev`       | Start Convex + Astro dev server         |
 | `npm run astro-dev` | Astro dev only (no Convex)              |
 | `npm run build`     | Build to `./dist/`                      |
-| `npm run preview`   | Preview build locally                   |
+| `npm run preview`   | Build, then preview with `wrangler dev` |
+| `npm run deploy`    | Build and deploy via `wrangler deploy`  |
+
+`npm run dev` spawns `convex dev` in the background (backgrounded with `&`) alongside
+`astro dev`. Use `npm run astro-dev` for an Astro-only dev server with no Convex process.
 
 ## Content
 
@@ -60,14 +64,14 @@ Note images are committed to `public/notes-images/<slug>/` by the admin uploader
 
 ```
 src/
-  layouts/     BaseLayout (html shell) → DefaultLayout / NoteLayout / AdminLayout
-  pages/       routes; /notes/* is the blog, /admin* is the editor, api/* are endpoints
+  layouts/     BaseLayout (html shell) → DefaultLayout → NoteLayout
+  pages/       routes; /notes/* is the blog, /admin/* is the editor, api/* are endpoints
   pages/api/   auth + GitHub endpoints (all /api/github/* require an admin session)
-  components/  Navbar, SearchModal + FuseSearch, NotesReel, reactions, NoteEditor
-  lib/         session.ts (admin auth), github.ts (Octokit + env)
+  components/  Navbar, SearchModal + CommandPalette (Fuse.js), NotesReel, TagList, reactions, NoteEditor
+  lib/         all shared code: session/auth, github (Octokit + githubRoute), cms-api
+               (typed CMS client), frontmatter, notes, slugify, images, constants, http
   notes/       Markdown notes (the content collection)
   story/       homepage sections
-  utils/       remark/rehype plugins, slugify, client-side image processor
 ```
 
 ## Admin auth

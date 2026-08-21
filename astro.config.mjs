@@ -1,12 +1,9 @@
 // @ts-check
 import { defineConfig, fontProviders, envField } from 'astro/config';
-import { unified } from '@astrojs/markdown-remark';
 import sitemap from "@astrojs/sitemap";
 import react from '@astrojs/react';
-import remarkToc from "remark-toc";
-import remarkCollapse from "remark-collapse";
-import { remarkReadingTime } from './src/utils/remark-reading-time.mjs';
-import { rehypeExternalLinks } from './src/utils/rehype-external-links.mjs';
+import rehypeExternalLinks from 'rehype-external-links';
+import { remarkReadingTime } from './src/lib/remark-reading-time.mjs';
 
 
 import tailwindcss from '@tailwindcss/vite';
@@ -61,16 +58,10 @@ export default defineConfig({
       },
       wrap: true,
     },
-    processor: unified({
-      remarkPlugins: [
-        [remarkToc, { tight: true }],
-        [remarkCollapse, { test: 'Table of contents' }],
-        remarkReadingTime,
-      ],
-      rehypePlugins: [
-        rehypeExternalLinks,
-      ],
-    }),
+    remarkPlugins: [remarkReadingTime],
+    rehypePlugins: [
+      [rehypeExternalLinks, { target: '_blank', rel: ['noopener', 'noreferrer'] }],
+    ],
   },
 
   fonts: [{
