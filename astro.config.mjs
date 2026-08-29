@@ -2,6 +2,7 @@
 import { defineConfig, fontProviders, envField } from 'astro/config';
 import sitemap from "@astrojs/sitemap";
 import react from '@astrojs/react';
+import { unified } from '@astrojs/markdown-remark';
 import rehypeExternalLinks from 'rehype-external-links';
 import { remarkReadingTime } from './src/lib/remark-reading-time.mjs';
 
@@ -13,6 +14,11 @@ import cloudflare from "@astrojs/cloudflare";
 // https://astro.build/config
 export default defineConfig({
   site: "https://beckyschmidt.me",
+
+  // Astro 7 changed the default to 'jsx' (React-style whitespace stripping).
+  // Pinned to `true` to keep v6's HTML output byte-for-byte.
+  compressHTML: true,
+
   integrations: [
     sitemap({ filter: (page) => page !== 'https://beckyschmidt.me/admin' }),
     react()
@@ -58,10 +64,15 @@ export default defineConfig({
       },
       wrap: true,
     },
-    remarkPlugins: [remarkReadingTime],
-    rehypePlugins: [
-      [rehypeExternalLinks, { target: '_blank', rel: ['noopener', 'noreferrer'] }],
-    ],
+    // Astro 7 defaults to the native Sätteri pipeline, which has no remark/rehype
+    // support and no built-in external-link handling. Stay on the unified
+    // (remark/rehype) processor so both plugins below keep working unchanged.
+    processor: unified({
+      remarkPlugins: [remarkReadingTime],
+      rehypePlugins: [
+        [rehypeExternalLinks, { target: '_blank', rel: ['noopener', 'noreferrer'] }],
+      ],
+    }),
   },
 
   fonts: [{

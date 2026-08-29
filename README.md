@@ -6,7 +6,7 @@ Live at [beckyschmidt.me](https://beckyschmidt.me).
 
 ## Stack
 
-- **Astro 6** — content site with server endpoints (`@astrojs/cloudflare` adapter)
+- **Astro 7** — content site with server endpoints (`@astrojs/cloudflare` adapter)
 - **React** — interactive islands (search, reactions, admin editor)
 - **Tailwind CSS 4** — styling (via `@tailwindcss/vite`, no config file)
 - **Convex** — real-time reactions on notes

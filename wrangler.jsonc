@@ -3,7 +3,11 @@
   "name": "becky-schmidt-personal-site",
   // Unified server entrypoint provided by @astrojs/cloudflare.
   "main": "@astrojs/cloudflare/entrypoints/server",
-  "compatibility_date": "2025-11-01",
+  // Must be >= 2026-02-19, when the `fetch_iterable_type_support` flag became
+  // default-on. Astro 7 streams pages as an async iterable Response body; older
+  // workerd stringified that to "[object Object]", so every prerendered page was
+  // emitted as a 15-byte stub. Matches @astrojs/cloudflare v14's own default.
+  "compatibility_date": "2026-04-15",
   // Required for node:crypto + Buffer used by the cookie-signing in src/lib/session.ts.
   "compatibility_flags": ["nodejs_compat"],
   // Astro's build output; static files are served directly, SSR routes hit the Worker.

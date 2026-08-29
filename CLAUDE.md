@@ -1,6 +1,6 @@
 # CLAUDE.md
 
-Personal site for Becky Schmidt (beckyschmidt.me). Astro 6 + Tailwind 4 + React islands, deployed to **Cloudflare Workers** (not Netlify — older docs/history may say otherwise). Includes a GitHub-API-backed admin CMS at `/admin` and Convex-powered note reactions.
+Personal site for Becky Schmidt (beckyschmidt.me). Astro 7 + Tailwind 4 + React islands, deployed to **Cloudflare Workers** (not Netlify — older docs/history may say otherwise). Includes a GitHub-API-backed admin CMS at `/admin` and Convex-powered note reactions.
 
 ## Commands
 
