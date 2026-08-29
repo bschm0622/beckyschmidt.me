@@ -28,13 +28,16 @@ const notes = defineCollection({
 const projects = defineCollection({
     loader: file("src/data/projects.json", {
         // Entries in the JSON have no `id` field; derive one from the name.
+        // `order` records array position — getCollection() does not guarantee
+        // file order, so consumers must sort by it.
         parser: (text) =>
-            JSON.parse(text).map((p: { name: string }) => ({ id: p.name, ...p })),
+            JSON.parse(text).map((p: { name: string }, i: number) => ({ id: p.name, order: i, ...p })),
     }),
     schema: z.object({
         name: z.string(),
         href: z.string().url(),
         description: z.string(),
+        order: z.number(),
     })
 });
 

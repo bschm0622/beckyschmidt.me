@@ -9,7 +9,9 @@ import { getCollection } from "astro:content";
 const noteCount = (await getCollection("notes")).length;
 
 // Projects list lives in src/data/projects.json — edit that file, not this one.
-const projects = (await getCollection("projects")).map((p) => p.data);
+const projects = (await getCollection("projects"))
+  .map((p) => p.data)
+  .sort((a, b) => a.order - b.order);
 
 function withUtm(href: string) {
   const url = new URL(href);

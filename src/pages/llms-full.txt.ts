@@ -8,7 +8,7 @@ export const GET: APIRoute = async ({ site }) => {
 
     // Fetch collections
     const sortedNotes = await getSortedNotes();
-    const projects = await getCollection('projects');
+    const projects = (await getCollection('projects')).sort((a, b) => a.data.order - b.data.order);
 
     // Generate side projects section
     const buildingList = projects.map(({ data: p }, index) => {

@@ -6,7 +6,7 @@ export const GET: APIRoute = async ({ site }) => {
     const siteURL = siteOrigin(site);
 
     // Generate projects list
-    const projects = await getCollection('projects');
+    const projects = (await getCollection('projects')).sort((a, b) => a.data.order - b.data.order);
     const buildingList = projects
         .map(({ data: p }) => `- ${p.name} (${p.href}) - ${p.description}`)
         .join('\n');

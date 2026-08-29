@@ -1,17 +1,13 @@
 [
   {
-    "name": "BiblePlan",
-    "href": "https://bibleplan.app",
-    "description": "Flexible Bible reading plan app with 160+ users and 200+ plans created."
-  },
-  {
     "name": "remotepmjobs.com",
     "href": "https://remotepmjobs.com",
     "description": "Remote product manager job board, fully automated using local AI models & nightly ATS scraping."
   },
   {
-    "name": "editor.beckyschmidt.me",
-    "href": "https://editor.beckyschmidt.me",
-    "description": "Minimal markdown reader for writing with AI, and diffing changes across versions."
+    "name": "BiblePlan",
+    "href": "https://bibleplan.app",
+    "description": "Flexible Bible reading plan app with 160+ users and 200+ plans created."
   }
+
 ]
