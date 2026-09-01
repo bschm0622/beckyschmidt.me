@@ -20,18 +20,21 @@
 // One entry per leaf. `swirl` picks one of the three motion paths defined in
 // the style block; everything else is per-leaf variation so that no two leaves
 // read as the same object. left/top are percentages of the wrapper and put the
-// leaf over the canopy; ground is the percentage it lands at (the tree line
+// leaf over the canopy (leftSm is the start used below the md breakpoint,
+// where the image is cropped to its middle ~55% and a leaf starting near
+// either edge would fly through the visible part in a second or exit at
+// once); ground is the percentage it lands at (the tree line
 // sits around 86-89% of the image); size is px; duration/delay/spin are
 // seconds; tilt is the leaf's resting angle in degrees so they don't all hang
 // the same way. A leaf is only visible for about 70% of its cycle (see the
 // keyframes), so the durations here are longer than the visible flight.
 const leaves = [
-    { swirl: "a", left: 4,  top: 52, ground: 86, size: 22, fill: "#d9823f", duration: 22, delay: 0,  spin: 2.2, tilt: 25 },
-    { swirl: "b", left: 20, top: 44, ground: 88, size: 18, fill: "#c99a2e", duration: 20, delay: 7,  spin: 1.9, tilt: -40 },
-    { swirl: "c", left: 36, top: 62, ground: 87, size: 20, fill: "#b5552f", duration: 26, delay: 3,  spin: 2.6, tilt: 70 },
-    { swirl: "a", left: 52, top: 40, ground: 85, size: 17, fill: "#a8402a", duration: 21, delay: 14, spin: 2.0, tilt: -15 },
-    { swirl: "b", left: 62, top: 68, ground: 89, size: 24, fill: "#d9823f", duration: 27, delay: 10, spin: 2.8, tilt: 50 },
-    { swirl: "c", left: 12, top: 72, ground: 87, size: 19, fill: "#c99a2e", duration: 24, delay: 18, spin: 2.4, tilt: -60 },
+    { swirl: "a", left: 4,  leftSm: 14, top: 52, ground: 86, size: 22, fill: "#d9823f", duration: 22, delay: 0,  spin: 2.2, tilt: 25 },
+    { swirl: "b", left: 20, leftSm: 22, top: 44, ground: 88, size: 18, fill: "#c99a2e", duration: 20, delay: 7,  spin: 1.9, tilt: -40 },
+    { swirl: "c", left: 36, leftSm: 36, top: 62, ground: 87, size: 20, fill: "#b5552f", duration: 26, delay: 3,  spin: 2.6, tilt: 70 },
+    { swirl: "a", left: 52, leftSm: 30, top: 40, ground: 85, size: 17, fill: "#a8402a", duration: 21, delay: 14, spin: 2.0, tilt: -15 },
+    { swirl: "b", left: 62, leftSm: 42, top: 68, ground: 89, size: 24, fill: "#d9823f", duration: 27, delay: 10, spin: 2.8, tilt: 50 },
+    { swirl: "c", left: 12, leftSm: 18, top: 72, ground: 87, size: 19, fill: "#c99a2e", duration: 24, delay: 18, spin: 2.4, tilt: -60 },
 ];
 
 // A single pointed leaf that fills its 24x24 box, so the svg size is the leaf
@@ -44,6 +47,7 @@ const LEAF_VEINS =
 ---
 
 <footer
+    id="skyline-footer"
     class="relative w-full shrink-0 overflow-hidden flex justify-center
            bg-linear-to-b from-transparent via-transparent to-[#e6ecf1]/50
            dark:from-background dark:via-[#1c2136] dark:to-[#272c42]"
@@ -62,10 +66,10 @@ const LEAF_VEINS =
             loading="lazy"
             decoding="async"
         />
-        {leaves.map(({ swirl, left, top, ground, size, fill, duration, delay, spin, tilt }) => (
+        {leaves.map(({ swirl, left, leftSm, top, ground, size, fill, duration, delay, spin, tilt }) => (
             <span
                 class={`skyline-leaf skyline-swirl-${swirl} pointer-events-none`}
-                style={`left:${left}%;--leaf-top:${top}%;--leaf-ground:${ground}%;--leaf-duration:${duration}s;--leaf-delay:${delay}s;--leaf-spin:${spin}s;--leaf-tilt:${tilt}deg`}
+                style={`--leaf-left:${left}%;--leaf-left-sm:${leftSm}%;--leaf-top:${top}%;--leaf-ground:${ground}%;--leaf-duration:${duration}s;--leaf-delay:${delay}s;--leaf-spin:${spin}s;--leaf-tilt:${tilt}deg`}
                 aria-hidden="true"
             >
                 <span class="skyline-leaf-path">
@@ -162,6 +166,7 @@ const LEAF_VEINS =
        never appear. Don't give them a visible resting opacity. */
     .skyline-leaf {
         position: absolute;
+        left: var(--leaf-left-sm);
         top: var(--leaf-top);
         width: 0;
         height: 0;
@@ -170,10 +175,32 @@ const LEAF_VEINS =
         animation: skyline-leaf-fall var(--leaf-duration) linear var(--leaf-delay) infinite;
     }
     @media (min-width: 768px) {
-        .skyline-leaf { --swirl-scale: 0.72; }
+        .skyline-leaf { left: var(--leaf-left); --swirl-scale: 0.72; }
     }
     @media (min-width: 1280px) {
         .skyline-leaf { --swirl-scale: 1; }
+    }
+    /* Below md the whole flight is scaled to 0.62, which would shrink the
+       glyphs to ~11-15px over a busy watercolor. Scale the leaf itself back
+       up; the path length is unaffected. */
+    @media (max-width: 767px) {
+        .skyline-leaf-spin { scale: 1.4; }
+    }
+
+    /* The cycle only runs while the footer is on screen. Everything starts
+       paused; the script below adds .is-live when the footer scrolls into
+       view, so the first gust happens right as the reader arrives instead of
+       at some arbitrary point in a loop that began at page load. Leaving the
+       viewport pauses the clocks again (and saves the work). */
+    .skyline-leaf,
+    .skyline-leaf-path,
+    .skyline-leaf-spin {
+        animation-play-state: paused;
+    }
+    .is-live .skyline-leaf,
+    .is-live .skyline-leaf-path,
+    .is-live .skyline-leaf-spin {
+        animation-play-state: running;
     }
 
     .skyline-leaf-path {
@@ -240,3 +267,15 @@ const LEAF_VEINS =
         to   { rotate: calc(var(--leaf-tilt) + 12deg); }
     }
 </style>
+
+<script>
+    const footer = document.getElementById("skyline-footer");
+    if (footer) {
+        new IntersectionObserver(
+            (entries) => {
+                for (const entry of entries) footer.classList.toggle("is-live", entry.isIntersecting);
+            },
+            { threshold: 0.2 },
+        ).observe(footer);
+    }
+</script>
