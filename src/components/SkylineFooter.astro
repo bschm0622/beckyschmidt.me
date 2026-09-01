@@ -180,11 +180,11 @@ const LEAF_VEINS =
     @media (min-width: 1280px) {
         .skyline-leaf { --swirl-scale: 1; }
     }
-    /* Below md the whole flight is scaled to 0.62, which would shrink the
-       glyphs to ~11-15px over a busy watercolor. Scale the leaf itself back
-       up; the path length is unaffected. */
+    /* Below md the whole flight is scaled to 0.62, which shrinks the glyphs
+       with it. Nudge the leaf itself back up a touch (much more and they
+       look pasted on top of the painting); the path length is unaffected. */
     @media (max-width: 767px) {
-        .skyline-leaf-spin { scale: 1.4; }
+        .skyline-leaf-spin { scale: 1.1; }
     }
 
     /* The cycle only runs while the footer is on screen. Everything starts
