@@ -6,6 +6,8 @@
  *   NoteLayout passes "typography").
  * - `fullWidth`: drop the max-width/prose styling (admin pages).
  * - `noSearch`: omit the search modal (admin pages).
+ * - `skylineFooter`: show the Indy skyline illustration flush under the
+ *   content (homepage only); other pages keep bottom padding instead.
  * Slots: default (main content), "head" (extra <head> tags),
  * "before-nav" (e.g. the note scroll-progress bar).
  */
@@ -21,6 +23,7 @@ interface Props {
     proseClass?: string;
     fullWidth?: boolean;
     noSearch?: boolean;
+    skylineFooter?: boolean;
 }
 
 const {
@@ -31,11 +34,12 @@ const {
     proseClass = "type-standard",
     fullWidth = false,
     noSearch = false,
+    skylineFooter = false,
 } = Astro.props;
 
 const mainClass = fullWidth
     ? "px-4 flex-1"
-    : `px-4 pb-16 mt-4 md:mt-6 flex-1 mx-auto w-full max-w-3xl ${proseClass}`;
+    : `px-4 ${skylineFooter ? "" : "pb-16"} mt-4 md:mt-6 flex-1 mx-auto w-full max-w-3xl ${proseClass}`;
 ---
 
 <BaseLayout
@@ -50,5 +54,20 @@ const mainClass = fullWidth
     <main class={mainClass}>
         <slot />
     </main>
+    {skylineFooter && (
+        <footer class="w-full">
+            <img
+                src="/indy-skyline.webp"
+                srcset="/indy-skyline-768.webp 768w, /indy-skyline.webp 1536w"
+                sizes="100vw"
+                alt="Watercolor illustration of the Indianapolis skyline with autumn trees"
+                class="w-full h-auto max-h-[400px] object-contain"
+                width="1536"
+                height="430"
+                loading="lazy"
+                decoding="async"
+            />
+        </footer>
+    )}
     {!noSearch && <SearchModal />}
 </BaseLayout>
