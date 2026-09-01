@@ -8,9 +8,11 @@ interface Props {
     posts?: Note[];
     /** Show only the 5 most recent notes. */
     preview?: boolean;
+    /** Show tag chips next to titles. Off in compact contexts (homepage). */
+    showTags?: boolean;
 }
 
-const { posts, preview = false } = Astro.props;
+const { posts, preview = false, showTags = true } = Astro.props;
 
 const allPosts = posts ?? (await getSortedNotes());
 const postsToShow = preview ? allPosts.slice(0, 5) : allPosts;
@@ -34,14 +36,14 @@ const postsToShow = preview ? allPosts.slice(0, 5) : allPosts;
           >
             {post.data.title}
           </a>
-          {post.data.tags && (
+          {showTags && post.data.tags && (
             <TagList
               tags={post.data.tags}
               class="flex flex-wrap gap-1.5 max-md:basis-full max-md:mt-2"
             />
           )}
         </div>
-        <FormattedDate date={post.data.pubDate} class="text-base text-muted-foreground shrink-0" />
+        <FormattedDate date={post.data.pubDate} variant="month-year" class="text-sm text-muted-foreground shrink-0" />
       </div>
     </div>
   ))}
