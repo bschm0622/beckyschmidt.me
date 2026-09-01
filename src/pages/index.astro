@@ -4,6 +4,7 @@ import NotesReel from "@/components/NotesReel.astro";
 import { Content as Hero } from "@/story/hero.md";
 import { Content as Contact } from "@/story/contact.md";
 import { getCollection } from "astro:content";
+import { SITE } from "@/siteConfig";
 
 const noteCount = (await getCollection("notes")).length;
 
@@ -78,9 +79,14 @@ function withUtm(href: string) {
       <NotesReel preview={true} showTags={false} />
     </section>
 
-    <!-- Contact / closing CTA: edit src/story/contact.md -->
+    <!-- Contact / closing CTA: edit src/story/contact.md. Contact links come
+         from siteConfig so the address lives in one place. -->
     <section class="typography">
       <Contact />
+      <p>
+        <a href={`mailto:${SITE.email}`}>Email me</a> or find me on
+        <a href={SITE.socials.linkedin} target="_blank" rel="noopener noreferrer">LinkedIn</a>.
+      </p>
     </section>
 
   </div>

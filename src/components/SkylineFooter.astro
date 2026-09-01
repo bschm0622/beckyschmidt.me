@@ -1,0 +1,242 @@
+---
+/**
+ * Homepage footer: the Indy skyline watercolor, plus two quiet touches.
+ *
+ * 1. Sky. The illustration has a transparent background, so the footer
+ *    itself paints the sky. Light mode gets a faint cool horizon; dark mode
+ *    gets a night gradient and a few stars behind the buildings. This also
+ *    keeps the pale bottom wash from reading as a floating island on the
+ *    near-black page background.
+ * 2. Leaves. Six small SVG leaves get picked up by a gust every so often:
+ *    each shoots along a shallow wave, slows as the breeze drops, falls to
+ *    the tree line, rests a moment, and fades. They live in the same wrapper
+ *    as the image so their start and landing points track the trees at any
+ *    width.
+ *
+ * Image is 1536x430 (aspect 3.572), so at the 400px desktop max height the
+ * wrapper caps at 1429px wide instead of letterboxing inside a full-width box.
+ */
+
+// One entry per leaf. `swirl` picks one of the three motion paths defined in
+// the style block; everything else is per-leaf variation so that no two leaves
+// read as the same object. left/top are percentages of the wrapper and put the
+// leaf over the canopy; ground is the percentage it lands at (the tree line
+// sits around 86-89% of the image); size is px; duration/delay/spin are
+// seconds; tilt is the leaf's resting angle in degrees so they don't all hang
+// the same way. A leaf is only visible for about 70% of its cycle (see the
+// keyframes), so the durations here are longer than the visible flight.
+const leaves = [
+    { swirl: "a", left: 4,  top: 52, ground: 86, size: 22, fill: "#d9823f", duration: 22, delay: 0,  spin: 2.2, tilt: 25 },
+    { swirl: "b", left: 20, top: 44, ground: 88, size: 18, fill: "#c99a2e", duration: 20, delay: 7,  spin: 1.9, tilt: -40 },
+    { swirl: "c", left: 36, top: 62, ground: 87, size: 20, fill: "#b5552f", duration: 26, delay: 3,  spin: 2.6, tilt: 70 },
+    { swirl: "a", left: 52, top: 40, ground: 85, size: 17, fill: "#a8402a", duration: 21, delay: 14, spin: 2.0, tilt: -15 },
+    { swirl: "b", left: 62, top: 68, ground: 89, size: 24, fill: "#d9823f", duration: 27, delay: 10, spin: 2.8, tilt: 50 },
+    { swirl: "c", left: 12, top: 72, ground: 87, size: 19, fill: "#c99a2e", duration: 24, delay: 18, spin: 2.4, tilt: -60 },
+];
+
+// A single pointed leaf that fills its 24x24 box, so the svg size is the leaf
+// size. It is drawn slightly lopsided (fuller on the right, tip bent) because
+// a perfectly symmetric oval reads as a seed; the midrib and veins are what
+// make it read as a leaf when it is this small.
+const LEAF_PATH = "M12 1.5 C19.5 5 21.5 13.5 12.4 22 C3.6 14 5.2 5.8 12 1.5 Z";
+const LEAF_VEINS =
+    "M12 4 Q12.6 13 12.4 21.5 M12.4 22 V24 M12.2 8.5 L8.8 11.5 M12.2 8.5 L15.8 11.4 M12.4 13.5 L9.4 16.2 M12.4 13.5 L15.4 16";
+---
+
+<footer
+    class="relative w-full shrink-0 overflow-hidden flex justify-center
+           bg-linear-to-b from-transparent via-transparent to-[#e6ecf1]/50
+           dark:from-background dark:via-[#1c2136] dark:to-[#272c42]"
+>
+    {/* shrink-0 prevents the flex-col body from collapsing this to 0 height */}
+    <div class="skyline-stars pointer-events-none absolute inset-0 opacity-0 dark:opacity-100 transition-opacity duration-700" aria-hidden="true"></div>
+    <div class="relative h-48 shrink-0 md:h-auto md:w-full md:max-w-[1429px]">
+        <img
+            src="/indy-skyline.webp"
+            srcset="/indy-skyline-768.webp 768w, /indy-skyline.webp 1536w"
+            sizes="100vw"
+            alt="Watercolor illustration of the Indianapolis skyline with autumn trees"
+            class="block h-full w-auto max-w-none md:h-auto md:w-full dark:brightness-85 dark:saturate-90"
+            width="1536"
+            height="430"
+            loading="lazy"
+            decoding="async"
+        />
+        {leaves.map(({ swirl, left, top, ground, size, fill, duration, delay, spin, tilt }) => (
+            <span
+                class={`skyline-leaf skyline-swirl-${swirl} pointer-events-none`}
+                style={`left:${left}%;--leaf-top:${top}%;--leaf-ground:${ground}%;--leaf-duration:${duration}s;--leaf-delay:${delay}s;--leaf-spin:${spin}s;--leaf-tilt:${tilt}deg`}
+                aria-hidden="true"
+            >
+                <span class="skyline-leaf-path">
+                    <span class="skyline-leaf-spin">
+                        <svg
+                            width={size}
+                            height={size}
+                            viewBox="0 0 24 24"
+                            class="block dark:brightness-85 dark:saturate-90"
+                            aria-hidden="true"
+                        >
+                            <path d={LEAF_PATH} fill={fill} />
+                            <path
+                                d={LEAF_VEINS}
+                                fill="none"
+                                stroke="rgb(0 0 0 / 0.32)"
+                                stroke-width="1.3"
+                                stroke-linecap="round"
+                            />
+                        </svg>
+                    </span>
+                </span>
+            </span>
+        ))}
+    </div>
+</footer>
+
+<style>
+    /* A handful of soft stars in the upper half of the sky. Positions are
+       fixed percentages so they stay put as the footer resizes; the tallest
+       buildings simply cover whichever ones they overlap.
+
+       The gradients live on a ::before so the twinkle can animate opacity (a
+       compositor-friendly property everywhere) rather than filter: brightness,
+       which only composites reliably in Chromium. The outer element keeps its
+       Tailwind opacity-0 / dark:opacity-100 dark-mode gate, and the animation
+       itself is scoped to .dark so nothing animates in light mode. */
+    .skyline-stars::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background-image:
+            radial-gradient(1.5px 1.5px at 8% 18%, rgb(255 255 255 / 0.8), transparent 60%),
+            radial-gradient(1px 1px at 16% 40%, rgb(255 255 255 / 0.6), transparent 60%),
+            radial-gradient(1.5px 1.5px at 23% 12%, rgb(255 255 255 / 0.7), transparent 60%),
+            radial-gradient(1px 1px at 34% 30%, rgb(255 255 255 / 0.55), transparent 60%),
+            radial-gradient(1px 1px at 41% 8%, rgb(255 255 255 / 0.7), transparent 60%),
+            radial-gradient(1.5px 1.5px at 57% 22%, rgb(255 255 255 / 0.75), transparent 60%),
+            radial-gradient(1px 1px at 66% 36%, rgb(255 255 255 / 0.55), transparent 60%),
+            radial-gradient(1.5px 1.5px at 74% 10%, rgb(255 255 255 / 0.8), transparent 60%),
+            radial-gradient(1px 1px at 83% 28%, rgb(255 255 255 / 0.6), transparent 60%),
+            radial-gradient(1px 1px at 91% 16%, rgb(255 255 255 / 0.7), transparent 60%),
+            radial-gradient(1.5px 1.5px at 96% 42%, rgb(255 255 255 / 0.5), transparent 60%);
+    }
+    :global(.dark) .skyline-stars::before {
+        animation: skyline-twinkle 6s ease-in-out infinite alternate;
+    }
+    @keyframes skyline-twinkle {
+        from { opacity: 0.7; }
+        to   { opacity: 1; }
+    }
+
+    /* Leaves blown along the tree line by a gust.
+
+       Three nested elements, each with one job:
+         .skyline-leaf       anchor. A 0x0 absolutely positioned box parked at
+                             the leaf's start point with left/top percentages,
+                             scaled so the flight keeps the same proportion of
+                             the image at every breakpoint. Its own animation
+                             is the fall: `top` goes from the start height to
+                             the ground height once the gust has died. (Yes,
+                             that animates a layout property, but it is a 0x0
+                             abspos box with nothing in flow, and using top
+                             keeps the landing exact at every width, which a
+                             scaled px transform could not.)
+         .skyline-leaf-path  the traveller. Follows an offset-path and fades.
+         .skyline-leaf-spin  the flutter. A gentle rock around the leaf's
+                             resting tilt; no full rotations, and the leaf does
+                             not turn to follow the path.
+
+       offset-path/offset-distance is the CSS Motion Path module: Chrome 55+,
+       Firefox 72+, Safari 16+. It has been baseline since 2022, and a browser
+       without it just leaves the leaves parked and invisible (opacity 0),
+       which is the same thing reduced-motion users get.
+
+       path() takes no percentages, so the paths are authored in px against a
+       nominal ~1280px-wide wrapper and scaled down on smaller screens. Because
+       .skyline-leaf is 0x0, its padding box and the static position of its
+       child are the same point, so the path's origin is the anchor regardless
+       of how a given engine resolves offset-position.
+
+       Opacity is 0 at rest and on the last keyframe, so under the global
+       prefers-reduced-motion rule (duration 0.01ms, one iteration) the leaves
+       never appear. Don't give them a visible resting opacity. */
+    .skyline-leaf {
+        position: absolute;
+        top: var(--leaf-top);
+        width: 0;
+        height: 0;
+        --swirl-scale: 0.62;
+        transform: scale(var(--swirl-scale));
+        animation: skyline-leaf-fall var(--leaf-duration) linear var(--leaf-delay) infinite;
+    }
+    @media (min-width: 768px) {
+        .skyline-leaf { --swirl-scale: 0.72; }
+    }
+    @media (min-width: 1280px) {
+        .skyline-leaf { --swirl-scale: 1; }
+    }
+
+    .skyline-leaf-path {
+        position: absolute;
+        top: 0;
+        left: 0;
+        line-height: 0;
+        opacity: 0;
+        offset-path: var(--leaf-path);
+        offset-rotate: 0deg;
+        animation: skyline-leaf-swirl var(--leaf-duration) linear var(--leaf-delay) infinite;
+    }
+    .skyline-leaf-spin {
+        display: inline-block;
+        animation: skyline-leaf-spin var(--leaf-spin) ease-in-out infinite alternate;
+    }
+
+    /* Each path starts at its anchor (0,0) and runs downwind (rightward) in a
+       shallow wave, about 380px across and 40px tall against a 1280px wrapper,
+       roughly 30% of the image wide. The vertical drop to the ground is not
+       in the path; it is a separate animation on the anchor (see below), so
+       every leaf lands on the tree line whatever height it started at. */
+    .skyline-swirl-a {
+        --leaf-path: path("M0,0 C60,-28 125,-30 185,-6 C245,18 295,22 340,8 C362,1 378,8 388,20");
+    }
+    .skyline-swirl-b {
+        --leaf-path: path("M0,0 C50,18 110,26 170,4 C225,-16 275,-10 320,6 C345,15 362,24 372,34");
+    }
+    .skyline-swirl-c {
+        --leaf-path: path("M0,0 C70,-16 130,-2 190,10 C250,22 300,8 338,-4 C356,-9 370,2 380,16");
+    }
+
+    /* One cycle, as fractions of --leaf-duration:
+         0-60%   carried along the path. The animation is linear overall so the
+                 rest at the end is a true pause; the strong ease-out on the 0%
+                 keyframe applies to this segment only, so the leaf is already
+                 moving fast when it fades in, covers most of the path early,
+                 then slows to a drift.
+         22-58%  the fall (on the anchor). Held aloft while the gust is strong,
+                 then eases down to the ground height as the breeze drops.
+         58-64%  lying on the ground.
+         64-72%  fade out.
+         72-100% parked and invisible. With six staggered cycles the sky
+                 alternates between a gust of two or three leaves and a lull.
+       Both ends of every track are the resting value, so under the global
+       prefers-reduced-motion rule (0.01ms, one iteration) nothing is ever
+       visible or displaced. */
+    @keyframes skyline-leaf-swirl {
+        0%   { offset-distance: 0%;   opacity: 0;    animation-timing-function: cubic-bezier(0.12, 0.6, 0.25, 1); }
+        3%   { opacity: 0.85; }
+        60%  { offset-distance: 100%; }
+        64%  { opacity: 0.85; }
+        72%  { opacity: 0; }
+        100% { offset-distance: 100%; opacity: 0; }
+    }
+    @keyframes skyline-leaf-fall {
+        0%   { top: var(--leaf-top); }
+        22%  { top: var(--leaf-top); animation-timing-function: cubic-bezier(0.45, 0, 0.55, 1); }
+        58%  { top: var(--leaf-ground); }
+        100% { top: var(--leaf-ground); }
+    }
+    @keyframes skyline-leaf-spin {
+        from { rotate: calc(var(--leaf-tilt) - 12deg); }
+        to   { rotate: calc(var(--leaf-tilt) + 12deg); }
+    }
+</style>
