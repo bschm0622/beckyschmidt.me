@@ -180,11 +180,14 @@ const LEAF_VEINS =
     @media (min-width: 1280px) {
         .skyline-leaf { --swirl-scale: 1; }
     }
-    /* Below md the whole flight is scaled to 0.62, which shrinks the glyphs
-       with it. Nudge the leaf itself back up a touch (much more and they
-       look pasted on top of the painting); the path length is unaffected. */
+    /* Mobile leaf size knob. Below md the whole flight is scaled to 0.62,
+       but the image itself is only 0.54 of its desktop width there, so the
+       leaves come out a little large relative to the trees. 0.85 brings them
+       back to scale with the painting (0.62 x 0.85 = 0.53). Raise it toward
+       1.1 for more visible leaves, lower it toward 0.7 for subtler ones; the
+       flight path is unaffected either way. */
     @media (max-width: 767px) {
-        .skyline-leaf-spin { scale: 1.1; }
+        .skyline-leaf-spin { scale: 0.85; }
     }
 
     /* The cycle only runs while the footer is on screen. Everything starts
