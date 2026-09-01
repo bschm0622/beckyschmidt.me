@@ -18,11 +18,15 @@ export const slugifyStr = (str: string): string =>
 export const slugifyAll = (arr: string[]): string[] => arr.map(slugifyStr);
 
 /**
- * Format a date as "MMM D, YYYY" (e.g. "Aug 20, 2026").
+ * Format a date as "MMM D, YYYY" (e.g. "Aug 20, 2026"), or "MMM YYYY"
+ * (e.g. "Aug 2026") with `variant: "month-year"` for compact contexts.
  * - `Date` inputs are read as UTC calendar dates (no timezone shift).
  * - String inputs must be ISO "YYYY-MM-DD" and are parsed as local midnight.
  */
-export function formatDate(date: Date | string): string {
+export function formatDate(
+    date: Date | string,
+    variant: "full" | "month-year" = "full"
+): string {
     const localDate =
         typeof date === "string"
             ? new Date(`${date}T00:00:00`)
@@ -31,6 +35,6 @@ export function formatDate(date: Date | string): string {
     return localDate.toLocaleDateString("en-US", {
         year: "numeric",
         month: "short",
-        day: "numeric",
+        ...(variant === "full" && { day: "numeric" }),
     });
 }
