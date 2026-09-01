@@ -55,13 +55,14 @@ const mainClass = fullWidth
         <slot />
     </main>
     {skylineFooter && (
-        <footer class="w-full">
+        <footer class="w-full shrink-0 overflow-hidden flex justify-center">
+            {/* shrink-0 prevents the flex-col body from collapsing this to 0 height */}
             <img
                 src="/indy-skyline.webp"
                 srcset="/indy-skyline-768.webp 768w, /indy-skyline.webp 1536w"
                 sizes="100vw"
                 alt="Watercolor illustration of the Indianapolis skyline with autumn trees"
-                class="w-full h-auto max-h-[400px] object-contain"
+                class="h-48 w-auto max-w-none shrink-0 md:h-auto md:w-full md:max-h-[400px] md:object-contain"
                 width="1536"
                 height="430"
                 loading="lazy"
