@@ -39,6 +39,17 @@ Personal site for Becky Schmidt (beckyschmidt.me). Astro 7 + Tailwind 4 + React 
 - **Convex**: functions in `convex/` (`reactions.ts`, `schema.ts`); `convex/_generated/` is generated — never hand-edit.
 - **Machine-readable endpoints**: `rss.xml.ts`, `robots.txt.ts`, `llms.txt.ts`, `llms-full.txt.ts`, `search-index.json.ts` in `src/pages/` — keep their facts in sync with `siteConfig.ts` when identity/stack details change.
 
+## Link vocabulary
+
+Four link/interaction roles, each with ONE treatment. Don't invent a fifth; when adding a link, pick its role and copy an existing example.
+
+1. **Content links** (in prose and story copy): underlined at rest — `underline decoration-1 underline-offset-2 decoration-foreground/30`, decoration darkens to full foreground on hover. This is the default `a` style in both `.typography` and `.type-standard` (`src/styles/global.css`); a plain `<a>` gets it for free.
+2. **Titles of clickable list items/cards** (project cards, NotesReel note titles): no underline at rest, underline on hover (`no-underline!` + `hover:underline`/`group-hover:underline`).
+3. **Quiet meta-navigation** ("← all notes" via `AllNotesLink.astro`, "View all (n) →", tag chips): small muted text, `no-underline!`, hover signals by color only — `text-muted-foreground! hover:text-foreground!` (chips use a border change instead). The `!` on colors is required to beat the `.typography a` prose rule on note pages.
+4. **Navigation chrome** (navbar icon buttons): pill hover — `rounded-lg hover:bg-foreground/13`. Buttons only, never text links.
+
+External links additionally get the outbound icon via `.typography a[href^="http"]` (`global.css`).
+
 ## Conventions & gotchas
 
 - Path alias `@/*` → `src/*`. Tailwind 4 via the Vite plugin — there is no `tailwind.config`; design tokens live in `src/styles/global.css`.

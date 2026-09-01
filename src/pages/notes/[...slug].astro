@@ -2,6 +2,7 @@
 import { getCollection, render } from "astro:content";
 import NoteLayout from "@/layouts/NoteLayout.astro";
 import ReactionApp from "@/components/ReactionApp";
+import AllNotesLink from "@/components/AllNotesLink.astro";
 
 export async function getStaticPaths() {
     const posts = await getCollection("notes");
@@ -19,7 +20,5 @@ const minutesRead = remarkPluginFrontmatter?.minutesRead ?? "";
 <NoteLayout minutesRead={minutesRead} frontmatter={post.data} slug={post.id}>
     <Content />
     <ReactionApp client:visible postId={post.id} />
-    <a href="/notes" class="text-sm text-muted-foreground hover:text-foreground transition-colors mt-8 inline-block">
-        all notes
-    </a>
+    <AllNotesLink />
 </NoteLayout>

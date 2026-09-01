@@ -224,9 +224,11 @@ html:not(.light):not(.dark) {
     @apply mb-1;
   }
 
-  /* Links */
+  /* Links — same treatment as .typography a so content links read identically
+     everywhere. See "Link vocabulary" in CLAUDE.md: this resting underline is
+     the CONTENT-link role; titles and meta-links opt out with no-underline!. */
   a {
-    @apply text-foreground no-underline hover:underline decoration-1 transition-all;
+    @apply text-foreground underline decoration-1 underline-offset-2 decoration-foreground/30 hover:decoration-foreground transition-all;
   }
 
   /* Quotes, separators, tables, etc. */

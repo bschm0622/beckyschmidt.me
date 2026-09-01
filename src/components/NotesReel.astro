@@ -25,14 +25,15 @@ const postsToShow = preview ? allPosts.slice(0, 5) : allPosts;
     </p>
   </div>
 )}
-<div class="divide-y divide-muted">
+{postsToShow.length > 0 && (
+<div class="rounded-md border border-muted divide-y divide-muted px-4">
   {postsToShow.map((post) => (
     <div class="py-3">
       <div class="flex items-baseline justify-between gap-6">
         <div class="flex items-baseline gap-2 flex-wrap min-w-0">
           <a
             href={noteUrl(post)}
-            class="text-base font-medium leading-snug min-w-0"
+            class="text-base font-medium leading-snug min-w-0 no-underline! hover:underline! decoration-1"
           >
             {post.data.title}
           </a>
@@ -48,3 +49,4 @@ const postsToShow = preview ? allPosts.slice(0, 5) : allPosts;
     </div>
   ))}
 </div>
+)}
