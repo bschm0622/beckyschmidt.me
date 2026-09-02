@@ -1,12 +1,15 @@
 ---
 import DefaultLayout from "@/layouts/DefaultLayout.astro";
 import NotesReel from "@/components/NotesReel.astro";
+import HomeMinimap from "@/components/HomeMinimap.astro";
 import { Content as Hero } from "@/story/hero.md";
 import { Content as Contact } from "@/story/contact.md";
 import { getCollection } from "astro:content";
+import { getSortedNotes, formatDate } from "@/lib/notes";
 import { SITE } from "@/siteConfig";
 
-const noteCount = (await getCollection("notes")).length;
+const notes = await getSortedNotes();
+const noteCount = notes.length;
 
 // Projects list lives in src/data/projects.json.
 const projects = (await getCollection("projects"))
@@ -21,6 +24,18 @@ function withUtm(href: string) {
   return url.toString();
 }
 
+// Minimap card facts (HomeMinimap.astro). Derived from data so they never
+// drift from the page; nothing here is hand-written copy.
+const plural = (n: number, word: string) => `${n} ${word}${n === 1 ? "" : "s"}`;
+const minimap = {
+  about: `${SITE.jobTitle}, ${SITE.location.locality}`,
+  projects: plural(projects.length, "project"),
+  notes: noteCount === 0
+    ? "Coming soon"
+    : `${plural(noteCount, "note")}, latest ${formatDate(notes[0].data.pubDate, "month-year")}`,
+  contact: "Email or LinkedIn",
+};
+
 // All homepage copy lives in src/story/*.md.
 ---
 
@@ -32,7 +47,7 @@ function withUtm(href: string) {
   <div class="mx-auto w-full space-y-14">
 
     <!-- Story: edit src/story/hero.md -->
-    <section>
+    <section data-minimap-title="About" data-minimap-text={minimap.about}>
       <img
         src="/becky.png"
         alt="Becky Schmidt"
@@ -46,7 +61,7 @@ function withUtm(href: string) {
     </section>
 
     <!-- Projects -->
-    <section id="projects" class="space-y-3">
+    <section id="projects" class="space-y-3" data-minimap-title="Projects" data-minimap-text={minimap.projects}>
       <h2 class="text-2xl font-medium leading-[1.3] tracking-tight text-foreground">Projects</h2>
       <div class="space-y-3">
         {projects.map((project) => (
@@ -69,7 +84,7 @@ function withUtm(href: string) {
     </section>
 
     <!-- Notes -->
-    <section class="space-y-3">
+    <section class="space-y-3" data-minimap-title="Notes" data-minimap-text={minimap.notes}>
       <div class="flex items-baseline justify-between">
         <h2 class="text-2xl font-medium leading-[1.3] tracking-tight text-foreground">Notes</h2>
         {noteCount > 5 && (
@@ -81,7 +96,7 @@ function withUtm(href: string) {
 
     <!-- Contact / closing CTA: edit src/story/contact.md. Contact links come
          from siteConfig so the address lives in one place. -->
-    <section class="typography">
+    <section class="typography" data-minimap-title="Get in touch" data-minimap-text={minimap.contact}>
       <Contact />
       <p>
         <a href={`mailto:${SITE.email}`}>Email me</a> or find me on
@@ -90,4 +105,5 @@ function withUtm(href: string) {
     </section>
 
   </div>
+  <HomeMinimap />
 </DefaultLayout>

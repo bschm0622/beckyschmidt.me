@@ -1,0 +1,274 @@
+---
+/**
+ * Homepage minimap: a thin vertical rail of ticks pinned to the left edge,
+ * one tick per element marked with `data-minimap-title` (optional
+ * `data-minimap-text` for the preview body). Hover the rail to widen the
+ * nearest tick and show a floating preview; click to scroll there.
+ * Adapted from T3 Code's TimelineMinimap. Desktop only; renders nothing
+ * when the page has fewer than MIN_ITEMS marked elements.
+ */
+---
+
+<div
+  id="home-minimap"
+  class="fixed left-0 top-1/2 z-40 hidden -translate-y-1/2 lg:block"
+  data-active=""
+  hidden
+>
+  <button
+    type="button"
+    class="minimap-hit relative block h-[var(--rail-h)] w-10 cursor-pointer border-0 bg-transparent p-0 outline-none"
+    aria-label="Page sections"
+    aria-haspopup="true"
+  >
+    <span class="minimap-rail absolute inset-y-0 left-3 w-6" aria-hidden="true"></span>
+    <span class="minimap-preview" data-minimap-preview aria-hidden="true">
+      <span class="minimap-preview-title"></span>
+      <span class="minimap-preview-text"></span>
+    </span>
+  </button>
+</div>
+
+<style is:global>
+  #home-minimap {
+    --rail-h: 12rem;
+  }
+  #home-minimap .minimap-tick {
+    position: absolute;
+    left: 0;
+    height: 2px;
+    width: 0.75rem;
+    border-radius: 9999px;
+    background: color-mix(in oklab, var(--color-foreground) 40%, transparent);
+    transform: translateY(-50%);
+    transition: width 160ms ease, background-color 160ms ease;
+  }
+  /* At rest the current section is marked by color only; widths only ramp on hover. */
+  #home-minimap .minimap-tick[data-current="true"] {
+    background: color-mix(in oklab, var(--color-foreground) 80%, transparent);
+  }
+  #home-minimap .minimap-tick[data-distance="2"] { width: 0.875rem; }
+  #home-minimap .minimap-tick[data-distance="1"] { width: 1.125rem; }
+  #home-minimap .minimap-tick[data-distance="0"] {
+    width: 1.5rem;
+    background: var(--color-foreground);
+  }
+  #home-minimap .minimap-preview {
+    position: absolute;
+    left: 2.75rem;
+    display: none;
+    width: max-content;
+    max-width: min(16rem, calc(100vw - 4rem));
+    padding: 0.5rem 0.75rem;
+    border-radius: 0.625rem;
+    border: 1px solid var(--color-muted);
+    background: color-mix(in oklab, var(--color-surface) 92%, transparent);
+    backdrop-filter: blur(8px);
+    box-shadow: 0 8px 24px -12px rgb(0 0 0 / 0.35);
+    text-align: left;
+    pointer-events: none;
+  }
+  #home-minimap[data-active]:not([data-active=""]) .minimap-preview {
+    display: block;
+  }
+  #home-minimap .minimap-preview-title {
+    display: block;
+    white-space: nowrap;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    line-height: 1.4;
+    color: var(--color-foreground);
+  }
+  #home-minimap .minimap-preview-text {
+    display: block;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-top: 0.125rem;
+    font-size: 0.75rem;
+    line-height: 1.4;
+    color: var(--color-muted-foreground);
+  }
+  #home-minimap .minimap-preview-text:empty { display: none; }
+  #home-minimap .minimap-hit:focus-visible .minimap-rail {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 6px;
+    border-radius: 4px;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    #home-minimap .minimap-tick { transition: none; }
+  }
+</style>
+
+<script>
+  const MIN_ITEMS = 3;
+  const TICK_GAP_PX = 14;
+
+  interface Item {
+    el: HTMLElement;
+    title: string;
+    text: string;
+    tick: HTMLSpanElement;
+  }
+
+  function init() {
+    const root = document.getElementById("home-minimap");
+    if (!root) return;
+    const hit = root.querySelector<HTMLButtonElement>(".minimap-hit")!;
+    const rail = root.querySelector<HTMLSpanElement>(".minimap-rail")!;
+    const preview = root.querySelector<HTMLSpanElement>(".minimap-preview")!;
+    const previewTitle = root.querySelector<HTMLSpanElement>(".minimap-preview-title")!;
+    const previewText = root.querySelector<HTMLSpanElement>(".minimap-preview-text")!;
+
+    const sources = Array.from(
+      document.querySelectorAll<HTMLElement>("[data-minimap-title]"),
+    );
+    if (sources.length < MIN_ITEMS) return;
+
+    const items: Item[] = sources.map((el, i) => {
+      const tick = document.createElement("span");
+      tick.className = "minimap-tick";
+      tick.style.top = `${topPercent(i, sources.length)}%`;
+      rail.appendChild(tick);
+      return {
+        el,
+        title: el.dataset.minimapTitle ?? "",
+        text: el.dataset.minimapText ?? "",
+        tick,
+      };
+    });
+
+    root.style.setProperty("--rail-h", `${(items.length - 1) * TICK_GAP_PX + 8}px`);
+    root.hidden = false;
+
+    let active: number | null = null;
+    let current = 0;
+
+    function topPercent(i: number, n: number) {
+      return n <= 1 ? 50 : (i / (n - 1)) * 100;
+    }
+
+    function indexFromPointer(clientY: number) {
+      const rect = rail.getBoundingClientRect();
+      if (rect.height === 0) return 0;
+      const ratio = (clientY - rect.top) / rect.height;
+      const idx = Math.round(ratio * (items.length - 1));
+      return Math.max(0, Math.min(items.length - 1, idx));
+    }
+
+    function render() {
+      items.forEach((item, i) => {
+        if (active === null) {
+          item.tick.removeAttribute("data-distance");
+        } else {
+          item.tick.dataset.distance = String(Math.min(3, Math.abs(i - active)));
+        }
+        item.tick.dataset.current = String(i === current);
+      });
+      if (active === null) {
+        root!.dataset.active = "";
+        return;
+      }
+      root!.dataset.active = String(active);
+      const item = items[active];
+      previewTitle.textContent = item.title;
+      previewText.textContent = item.text;
+      const pct = topPercent(active, items.length);
+      preview.style.top = `${pct}%`;
+      preview.style.transform = "translateY(-50%)";
+    }
+
+    function setActive(next: number | null) {
+      if (next === active) return;
+      active = next;
+      render();
+    }
+
+    // After a click, the target stays "current" until the reader scrolls on
+    // their own. Otherwise a short section near the page bottom can never be
+    // scrolled to the reading line and the highlight lands on its neighbour.
+    let pinned: number | null = null;
+    function unpin() {
+      if (pinned === null) return;
+      pinned = null;
+      onScroll();
+    }
+    window.addEventListener("wheel", unpin, { passive: true });
+    window.addEventListener("touchmove", unpin, { passive: true });
+    window.addEventListener("keydown", (e) => {
+      if (e.target === hit) return;
+      unpin();
+    });
+
+    function scrollToItem(i: number) {
+      pinned = i;
+      if (current !== i) { current = i; render(); }
+      const el = items[i].el;
+      const top = el.getBoundingClientRect().top + window.scrollY - 24;
+      const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      window.scrollTo({ top, behavior: reduce ? "auto" : "smooth" });
+    }
+
+    // Track which item is currently being read: the last one whose top has
+    // scrolled past a reading line ~30% down the viewport (i.e. the section
+    // the reader is inside), not merely the one nearest that line.
+    let ticking = false;
+    function updateCurrent() {
+      ticking = false;
+      if (pinned !== null) return;
+      const line = window.innerHeight * 0.3;
+      let best = 0;
+      items.forEach((item, i) => {
+        if (item.el.getBoundingClientRect().top <= line) best = i;
+      });
+      // If scrolled to the bottom, the last item wins.
+      if (window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 2) {
+        best = items.length - 1;
+      }
+      if (best !== current) { current = best; render(); }
+    }
+    function onScroll() {
+      if (!ticking) { ticking = true; requestAnimationFrame(updateCurrent); }
+    }
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll, { passive: true });
+
+    hit.addEventListener("mousemove", (e) => setActive(indexFromPointer(e.clientY)));
+    hit.addEventListener("mouseleave", () => {
+      // Keep the preview open only for keyboard focus, not focus left behind by a click.
+      if (!hit.matches(":focus-visible")) setActive(null);
+    });
+    hit.addEventListener("click", (e) => {
+      const target = e.target as Element | null;
+      if (target?.closest("[data-minimap-preview]")) return;
+      scrollToItem(indexFromPointer(e.clientY));
+      hit.blur();
+      setActive(null);
+    });
+    hit.addEventListener("focus", () => {
+      if (hit.matches(":focus-visible")) setActive(active ?? current);
+    });
+    hit.addEventListener("blur", () => setActive(null));
+    hit.addEventListener("keydown", (e) => {
+      const last = items.length - 1;
+      const from = active ?? current;
+      let next: number | null = null;
+      switch (e.key) {
+        case "ArrowDown": case "ArrowRight": next = Math.min(last, from + 1); break;
+        case "ArrowUp": case "ArrowLeft": next = Math.max(0, from - 1); break;
+        case "Home": next = 0; break;
+        case "End": next = last; break;
+        case "Enter": case " ": e.preventDefault(); scrollToItem(from); return;
+        case "Escape": hit.blur(); return;
+        default: return;
+      }
+      e.preventDefault();
+      setActive(next);
+    });
+
+    render();
+    updateCurrent();
+  }
+
+  init();
+</script>
