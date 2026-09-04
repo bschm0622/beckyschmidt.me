@@ -20,7 +20,11 @@ const {
 
 const origin = siteOrigin(Astro.site);
 
-const fullTitle = title ? `${SITE.name} | ${title}` : SITE.name;
+// <title> carries the brand for tabs/bookmarks; social cards get it via og:site_name instead.
+const fullTitle = title
+    ? `${title} | ${SITE.name}`
+    : `${SITE.name} | ${SITE.jobTitle}`;
+const socialTitle = title || `${SITE.name} | ${SITE.jobTitle}`;
 
 const imageUrl =
     typeof image === "string"
@@ -82,7 +86,8 @@ const shouldLoadAnalytics = import.meta.env.PROD;
 
 <!-- Open Graph / Facebook -->
 <meta property="og:type" content="website" />
-<meta property="og:title" content={title} />
+<meta property="og:site_name" content={SITE.name} />
+<meta property="og:title" content={socialTitle} />
 <meta property="og:description" content={description} />
 <meta property="og:image" content={imageUrl} />
 <meta property="og:url" content={canonicalStr} />
@@ -90,7 +95,7 @@ const shouldLoadAnalytics = import.meta.env.PROD;
 
 <!-- Twitter -->
 <meta name="twitter:card" content="summary_large_image" />
-<meta name="twitter:title" content={title} />
+<meta name="twitter:title" content={socialTitle} />
 <meta name="twitter:description" content={description} />
 <meta name="twitter:image" content={imageUrl} />
 
