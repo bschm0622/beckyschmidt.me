@@ -62,35 +62,32 @@ function ReactionButton({ postId }: ReactionButtonProps) {
         <>
             <div className="flex gap-3 mb-2">
                 {REACTIONS.map((reaction) => {
-                    if (!reactions) {
-                        return (
-                            <div
-                                key={reaction}
-                                className="w-16 h-8 rounded bg-muted animate-pulse"
-                            />
-                        );
-                    }
-
-                    const reactionData = reactions.find((r) => r.reaction === reaction);
+                    const reactionData = reactions?.find((r) => r.reaction === reaction);
                     const count = reactionData?.count ?? 0;
 
                     const alreadyReacted = isClient
                         ? !!localStorage.getItem(`reacted_${postId}_${reaction}`)
                         : false;
 
+                    // Render the real button while the count loads (rather than a
+                    // blank skeleton) so the control is recognizable immediately.
+                    // The count is hidden at zero ("0" reads as "nobody liked this").
+                    // Fixed height so the box only grows rightward when the count appears.
                     return (
                         <button
                             key={reaction}
-                            className={`flex items-center gap-2 px-3 py-2 rounded border text-sm transition
+                            className={`flex items-center gap-2 h-9 px-3 rounded border text-sm transition cursor-pointer
                                 ${alreadyReacted
-                                    ? "bg-primary border-primary text-background dark:text-foreground"
+                                    ? "bg-primary border-primary text-background"
                                     : "border-muted text-muted-foreground hover:border-foreground/30 hover:text-foreground"
                                 }`}
                             onClick={() => handleClick(reaction)}
+                            disabled={!reactions}
                             aria-pressed={alreadyReacted}
+                            aria-label={`Like this note${count > 0 ? ` (${count} ${count === 1 ? "like" : "likes"})` : ""}`}
                         >
-                            <span className="text-base leading-none">+</span>
-                            <span className="font-medium">{count}</span>
+                            <span className="text-base leading-none" aria-hidden="true">+</span>
+                            {count > 0 && <span className="font-medium tabular-nums">{count}</span>}
                         </button>
                     );
                 })}

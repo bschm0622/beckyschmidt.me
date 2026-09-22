@@ -37,6 +37,8 @@ const projects = defineCollection({
         name: z.string(),
         href: z.string().url(),
         description: z.string(),
+        // Optional path under public/, e.g. "/project-icons/foo.png".
+        icon: z.string().optional(),
         order: z.number(),
     })
 });

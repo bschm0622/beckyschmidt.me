@@ -4,6 +4,7 @@
  * Optional `counts` renders "tag (n)" labels (notes index page).
  * Pass `class` to control the wrapper layout; use "contents" to let the
  * pills participate directly in a parent flex container.
+ * `linked={false}` renders plain labels, for use inside another link.
  */
 import { slugifyStr } from "@/lib/slugify";
 
@@ -11,20 +12,28 @@ interface Props {
     tags: string[];
     counts?: Record<string, number>;
     class?: string;
+    linked?: boolean;
 }
 
-const { tags, counts, class: className = "flex flex-wrap gap-1.5" } = Astro.props;
+const { tags, counts, class: className = "flex flex-wrap gap-1.5", linked = true } = Astro.props;
 ---
 
 {tags.length > 0 && (
     <div class={className}>
-        {tags.map((tag) => (
-            <a
-                href={`/notes/tag/${slugifyStr(tag)}/`}
-                class="px-2 py-0.5 border border-muted rounded text-sm text-muted-foreground! no-underline! hover:border-foreground/30 transition-colors"
-            >
-                {counts ? `${tag} (${counts[tag]})` : tag}
-            </a>
-        ))}
+        {tags.map((tag) => {
+            const label = counts ? `${tag} (${counts[tag]})` : tag;
+            return linked ? (
+                <a
+                    href={`/notes/tag/${slugifyStr(tag)}/`}
+                    class="px-2 py-0.5 border border-muted rounded text-sm text-muted-foreground! no-underline! hover:border-foreground/30 transition-colors"
+                >
+                    {label}
+                </a>
+            ) : (
+                <span class="px-2 py-0.5 border border-muted rounded text-sm text-muted-foreground">
+                    {label}
+                </span>
+            );
+        })}
     </div>
 )}

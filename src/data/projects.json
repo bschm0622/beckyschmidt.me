@@ -2,12 +2,14 @@
   {
     "name": "remotepmjobs.com",
     "href": "https://remotepmjobs.com",
-    "description": "Remote product manager job board, fully automated using local AI models & nightly ATS scraping."
+    "description": "Remote product manager job board, fully automated using local AI models & nightly ATS scraping.",
+    "icon": "/project-icons/remotepmjobs.png"
   },
   {
     "name": "BiblePlan",
     "href": "https://bibleplan.app",
-    "description": "Flexible Bible reading plan app with 300+ users and 200+ plans created."
+    "description": "Flexible Bible reading plan app with 300+ users and 200+ plans created.",
+    "icon": "/project-icons/bibleplan.png"
   }
 
 ]
