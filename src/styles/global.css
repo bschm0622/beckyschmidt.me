@@ -6,11 +6,22 @@ html {
   scrollbar-gutter: stable;
 }
 
+/* Global type scale. Commissioner's lowercase letters are smaller than those
+   of Inter (the previous font), so every text size is multiplied by this one
+   value. Spacing is unaffected. */
+:root {
+  --type-scale: 1.05;
+}
+
 html,
 body {
   margin: 0;
   width: 100%;
   height: 100%;
+}
+
+body {
+  font-size: calc(1rem * var(--type-scale));
 }
 
 /* Prevent flash of unstyled content: hide until the theme class is applied
@@ -20,7 +31,17 @@ html:not(.light):not(.dark) {
 }
 
 @theme {
-  --font-sans: var(--font-inter);
+  --font-sans: var(--font-commissioner);
+
+  /* Tailwind's default text sizes, run through --type-scale. Line heights stay
+     as Tailwind's ratios, so they scale along with the text. */
+  --text-xs: calc(0.75rem * var(--type-scale));
+  --text-sm: calc(0.875rem * var(--type-scale));
+  --text-base: calc(1rem * var(--type-scale));
+  --text-lg: calc(1.125rem * var(--type-scale));
+  --text-xl: calc(1.25rem * var(--type-scale));
+  --text-2xl: calc(1.5rem * var(--type-scale));
+  --text-3xl: calc(1.875rem * var(--type-scale));
   --color-primary: #44403c;
   --color-muted: #e7e5e4;
   --color-muted-foreground: #57534e;
@@ -115,7 +136,7 @@ html:not(.light):not(.dark) {
 }
 
 .typography {
-  @apply text-base leading-7 text-foreground;
+  @apply text-base leading-[1.75] text-foreground;
 
   /* Headings */
   h1 {
@@ -139,13 +160,13 @@ html:not(.light):not(.dark) {
 
   /* Body & lists — lighter gray is the default body color site-wide */
   p {
-    @apply text-base leading-7 mb-5 text-muted-foreground;
+    @apply text-base leading-[1.75] mb-5 text-muted-foreground;
   }
   ul {
-    @apply list-disc pl-5 mb-5 text-base leading-7 text-muted-foreground;
+    @apply list-disc pl-5 mb-5 text-base leading-[1.75] text-muted-foreground;
   }
   ol {
-    @apply list-decimal pl-5 mb-5 text-base leading-7 text-muted-foreground;
+    @apply list-decimal pl-5 mb-5 text-base leading-[1.75] text-muted-foreground;
   }
   li {
     @apply mb-1;
@@ -158,7 +179,7 @@ html:not(.light):not(.dark) {
 
   /* Blockquote */
   blockquote {
-    @apply border-l-2 border-foreground/20 pl-4 italic text-muted-foreground text-base leading-7 my-6;
+    @apply border-l-2 border-foreground/20 pl-4 italic text-muted-foreground text-base leading-[1.75] my-6;
   }
 
   /* Misc */
@@ -173,7 +194,7 @@ html:not(.light):not(.dark) {
   }
   th,
   td {
-    @apply border border-muted px-4 py-2 text-[1rem] leading-relaxed;
+    @apply border border-muted px-4 py-2 text-base leading-relaxed;
   }
   strong {
     @apply font-bold;
@@ -190,7 +211,7 @@ html:not(.light):not(.dark) {
 }
 
 .type-standard {
-  @apply text-base leading-6 text-foreground;
+  @apply text-base leading-normal text-foreground;
 
   /* Headings — subtle loosened leading */
   h1 {

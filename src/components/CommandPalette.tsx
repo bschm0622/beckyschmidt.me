@@ -314,7 +314,7 @@ export default function CommandPalette({ maxHeight }: Props) {
                 ) : (
                     groups.map((group) => (
                         <div key={group.label} className="mb-3 last:mb-0">
-                            <div className="px-2 mb-1 text-[0.7rem] font-medium uppercase tracking-wide text-muted-foreground">
+                            <div className="px-2 mb-1 text-[calc(0.7rem*var(--type-scale))] font-medium uppercase tracking-wide text-muted-foreground">
                                 {group.label}
                             </div>
                             <ul>

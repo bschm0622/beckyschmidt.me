@@ -77,8 +77,8 @@ export default defineConfig({
 
   fonts: [{
     provider: fontProviders.fontsource(),
-    name: "Inter",
-    cssVariable: "--font-inter",
+    name: "Commissioner",
+    cssVariable: "--font-commissioner",
     weights: ["400", "500", "600", "700"]
   }],
 
