@@ -1,4 +1,5 @@
 @import 'tailwindcss';
+@import 'cal-sans';
 
 @custom-variant dark (&:where(.dark, .dark *));
 
@@ -6,11 +7,11 @@ html {
   scrollbar-gutter: stable;
 }
 
-/* Global type scale. Commissioner's lowercase letters are smaller than those
-   of Inter (the previous font), so every text size is multiplied by this one
-   value. Spacing is unaffected. */
+/* Global type scale. Every text size is multiplied by this one value, so a
+   font with a smaller or larger x-height can be evened out in one place.
+   Spacing is unaffected. Cal Sans needs no adjustment. */
 :root {
-  --type-scale: 1.05;
+  --type-scale: 1;
 }
 
 html,
@@ -31,7 +32,7 @@ html:not(.light):not(.dark) {
 }
 
 @theme {
-  --font-sans: var(--font-commissioner);
+  --font-sans: "Cal Sans", sans-serif;
 
   /* Tailwind's default text sizes, run through --type-scale. Line heights stay
      as Tailwind's ratios, so they scale along with the text. */

@@ -1,5 +1,5 @@
 // @ts-check
-import { defineConfig, fontProviders, envField } from 'astro/config';
+import { defineConfig, envField } from 'astro/config';
 import sitemap from "@astrojs/sitemap";
 import react from '@astrojs/react';
 import { unified } from '@astrojs/markdown-remark';
@@ -74,13 +74,6 @@ export default defineConfig({
       ],
     }),
   },
-
-  fonts: [{
-    provider: fontProviders.fontsource(),
-    name: "Commissioner",
-    cssVariable: "--font-commissioner",
-    weights: ["400", "500", "600", "700"]
-  }],
 
   adapter: cloudflare(),
 });

@@ -2,7 +2,6 @@
 import { SITE, siteOrigin } from "@/siteConfig";
 import { ClientRouter } from "astro:transitions";
 import Favicons from "@/components/Favicons.astro";
-import { Font } from "astro:assets";
 
 interface Props {
     title?: string;
@@ -156,7 +155,6 @@ const shouldLoadAnalytics = import.meta.env.PROD;
 <!-- Sitemap (manifest link lives in Favicons.astro) -->
 <link rel="sitemap" href="/sitemap-index.xml" />
 
-<Font cssVariable="--font-commissioner" preload />
 <Favicons />
 <ClientRouter />
 
