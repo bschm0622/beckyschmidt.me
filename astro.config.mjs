@@ -1,5 +1,5 @@
 // @ts-check
-import { defineConfig, envField } from 'astro/config';
+import { defineConfig, fontProviders, envField } from 'astro/config';
 import sitemap from "@astrojs/sitemap";
 import react from '@astrojs/react';
 import { unified } from '@astrojs/markdown-remark';
@@ -74,6 +74,21 @@ export default defineConfig({
       ],
     }),
   },
+
+  // Cal Sans (cal-sans npm package, OFL), trimmed to Latin characters with
+  // a fixed optical size; weights 400-700 stay variable. Upright is
+  // preloaded; italic only downloads on pages that use it.
+  fonts: [{
+    provider: fontProviders.local(),
+    name: "Cal Sans",
+    cssVariable: "--font-cal-sans",
+    options: {
+      variants: [
+        { src: ["./src/assets/fonts/CalSans-Upright.woff2"], weight: "400 700", style: "normal" },
+        { src: ["./src/assets/fonts/CalSans-Italic.woff2"], weight: "400 700", style: "italic" },
+      ],
+    },
+  }],
 
   adapter: cloudflare(),
 });

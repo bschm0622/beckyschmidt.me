@@ -1,5 +1,4 @@
 @import 'tailwindcss';
-@import 'cal-sans';
 
 @custom-variant dark (&:where(.dark, .dark *));
 
@@ -32,7 +31,7 @@ html:not(.light):not(.dark) {
 }
 
 @theme {
-  --font-sans: "Cal Sans", sans-serif;
+  --font-sans: var(--font-cal-sans);
 
   /* Tailwind's default text sizes, run through --type-scale. Line heights stay
      as Tailwind's ratios, so they scale along with the text. */
