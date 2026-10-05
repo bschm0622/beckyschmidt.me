@@ -23,6 +23,7 @@ This is the personal website of Becky Schmidt, a senior product manager who buil
 
 - Homepage: ${siteURL.href}
 - Notes (essays): ${siteURL.href}notes/
+- Colophon (how the site is built): ${siteURL.href}colophon
 
 ## Key Content
 

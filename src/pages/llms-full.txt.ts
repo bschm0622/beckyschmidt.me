@@ -79,16 +79,19 @@ ${notesList}
 - **UI Components:** React
 - **Styling:** Tailwind CSS 4.x
 - **Backend:** Convex (real-time reactions)
-- **Hosting:** Netlify
+- **Hosting:** Cloudflare Workers
 - **CMS:** Self-built admin dashboard that opens GitHub pull requests
 - **Search:** Fuse.js full-text search
+- **Typeface:** Cal Sans
+- **Analytics:** Umami
+- **Colophon:** /colophon
 
 ---
 
 ## Crawling Guidelines
 
 ### Allowed
-- All public pages (/, /notes/)
+- All public pages (/, /notes/, /colophon)
 - Individual notes (/notes/[slug])
 - RSS feed (/rss.xml)
 - Sitemap (/sitemap-index.xml)
