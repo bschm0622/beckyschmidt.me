@@ -9,6 +9,7 @@ Personal site for Becky Schmidt (beckyschmidt.me). Astro 7 + Tailwind 4 + React 
 - `npm run check` — `astro check` (typecheck; there are no tests or linter — this is the verification step)
 - `npm run build` — production build
 - `npm run deploy` — build + `wrangler deploy` (**never run unless explicitly asked**)
+- **Pushing to `master` auto-deploys** the live site via Cloudflare's Git integration, so a push is a production release: only push when asked, and there's no need for `npm run deploy` afterward. (CMS PRs merged into `master` go live the same way.)
 
 ## Where things live
 
@@ -56,4 +57,4 @@ External links additionally get the outbound icon via `.typography a[href^="http
 - Env vars are declared in `astro.config.mjs` `env.schema` and read via `astro:env/client|server`. Local values in `.env.local` (gitignored; never print it). `convex dev` writes `CONVEX_DEPLOYMENT`/`CONVEX_SITE_URL` there automatically.
 - Client components (`.tsx` islands) must not import server-only modules (`astro:content`, `src/lib/github.ts`, `src/lib/notes.ts`).
 - `NoteEditor.tsx` contains delicate mobile-viewport/scroll workarounds (see its inline comments) — edit conservatively.
-- Verification = `npm run check` then `npm run build`. Don't commit or deploy unless asked.
+- Verification = `npm run check` then `npm run build`. Don't commit, push, or deploy unless asked.
