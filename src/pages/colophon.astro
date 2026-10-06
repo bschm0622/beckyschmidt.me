@@ -27,6 +27,10 @@ import { Content, frontmatter } from "@/story/colophon.md";
         vertical-align: -0.125em;
         border-radius: 0.2em;
     }
+    /* Keep the icon and its name together on one line. */
+    .tool-links a:has(> img) {
+        white-space: nowrap;
+    }
     .tool-links a[href]:has(> img)::after {
         content: none;
     }
