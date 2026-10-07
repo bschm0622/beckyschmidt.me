@@ -13,7 +13,9 @@ const key =
 >
     <!-- Modal Container -->
     <div id="search-modal-container" class="fixed inset-0 overflow-y-auto">
-        <div class="flex min-h-full items-center justify-center p-4">
+        <!-- Anchored near the top, not centered: results change height as you
+             type, and a centered box would move the search field with them. -->
+        <div class="flex min-h-full items-start justify-center p-4 md:pt-[12vh]">
             <!-- Modal Content -->
             <div
                 id="search-modal-content"

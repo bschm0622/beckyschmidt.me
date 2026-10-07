@@ -9,6 +9,7 @@ import { formatDate } from "@/lib/slugify";
 import projects from "@/data/projects.json";
 
 interface SearchItem {
+    kind: "note" | "page";
     title: string;
     description: string;
     tags: string[];
@@ -20,12 +21,13 @@ interface SearchItem {
 interface Command {
     id: string;
     label: string;
-    sublabel?: string;
+    sublabel?: React.ReactNode;
+    /** Sublabel is a search excerpt: allow two lines instead of one. */
+    excerpt?: boolean;
     hint?: string;
     external?: boolean;
     icon?: React.ReactNode;
     group: string;
-    keywords?: string;
     perform: () => void;
 }
 
@@ -93,13 +95,60 @@ const IconExternalLink = ({ active }: { active?: boolean }) => (
     </svg>
 );
 
+// --- Search excerpts ---
+// Where a note or page matched, so a result shows the term in context instead
+// of only its description. Tries the whole query first, then its longest word.
+const EXCERPT_BEFORE = 40;
+const EXCERPT_AFTER = 140;
+
+// Matches only at the start of a word, so "fi" finds "files" but not "profile".
+function findTerm(text: string, q: string): { at: number; len: number } | null {
+    const lower = q.toLowerCase();
+    const terms = [lower, ...lower.split(/\s+/).filter((w) => w.length >= 3).sort((a, b) => b.length - a.length)];
+    for (const t of terms) {
+        const escaped = t.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+        const m = new RegExp(`(?<![\\p{L}\\p{N}])${escaped}`, "iu").exec(text);
+        if (m) return { at: m.index, len: t.length };
+    }
+    return null;
+}
+
+function Highlight({ text, at, len }: { text: string; at: number; len: number }) {
+    return (
+        <>
+            {text.slice(0, at)}
+            <mark className="bg-transparent text-foreground font-medium">{text.slice(at, at + len)}</mark>
+            {text.slice(at + len)}
+        </>
+    );
+}
+
+/** Sublabel for a note/page result: description (highlighted if it holds the
+ *  term), else the body passage around the term, else the plain description. */
+function resultSublabel(item: SearchItem, q: string): { node?: React.ReactNode; excerpt: boolean } {
+    const inDesc = item.description ? findTerm(item.description, q) : null;
+    if (inDesc) return { node: <Highlight text={item.description} {...inDesc} />, excerpt: false };
+    const inTitle = findTerm(item.title, q);
+    const inBody = inTitle ? null : findTerm(item.body, q);
+    if (!inBody) return { node: item.description || undefined, excerpt: false };
+
+    let start = Math.max(0, inBody.at - EXCERPT_BEFORE);
+    let end = Math.min(item.body.length, inBody.at + inBody.len + EXCERPT_AFTER);
+    // Snap to word boundaries so the excerpt doesn't open or close mid-word.
+    if (start > 0) start = item.body.indexOf(" ", start) + 1 || start;
+    if (start > inBody.at) start = inBody.at;
+    if (end < item.body.length) end = Math.max(inBody.at + inBody.len, item.body.lastIndexOf(" ", end));
+    const text = `${start > 0 ? "…" : ""}${item.body.slice(start, end)}${end < item.body.length ? "…" : ""}`;
+    const at = inBody.at - start + (start > 0 ? 1 : 0);
+    return { node: <Highlight text={text} at={at} len={inBody.len} />, excerpt: true };
+}
+
 // Static commands — navigation, projects, and actions. Built once.
 const STATIC_COMMANDS: Command[] = [
     ...SITE.nav.map((link) => ({
         id: `nav:${link.href}`,
         label: link.label,
         group: "Go to",
-        keywords: "page navigate",
         perform: () => goInternal(link.href),
     })),
     ...projects.map((p) => ({
@@ -108,7 +157,6 @@ const STATIC_COMMANDS: Command[] = [
         sublabel: p.description,
         external: true,
         group: "Projects",
-        keywords: "project external site app",
         perform: () => goExternal(p.href),
     })),
     {
@@ -117,7 +165,6 @@ const STATIC_COMMANDS: Command[] = [
         sublabel: SITE.email,
         icon: <IconMail />,
         group: "Actions",
-        keywords: "contact mail message reach",
         perform: () => mailTo(SITE.email),
     },
     {
@@ -125,7 +172,6 @@ const STATIC_COMMANDS: Command[] = [
         label: "Go to my LinkedIn",
         icon: <IconLinkedIn />,
         group: "Actions",
-        keywords: "social profile connect",
         perform: () => goExternal(SITE.socials.linkedin),
     },
     {
@@ -133,7 +179,6 @@ const STATIC_COMMANDS: Command[] = [
         label: "Copy link",
         icon: <IconCopy />,
         group: "Actions",
-        keywords: "share url clipboard",
         perform: copyLink,
     },
 ];
@@ -163,6 +208,7 @@ export default function CommandPalette({ maxHeight }: Props) {
                         threshold: 0.35,
                         ignoreLocation: true,
                         includeScore: true,
+                        includeMatches: true,
                     })
                 );
             });
@@ -173,30 +219,74 @@ export default function CommandPalette({ maxHeight }: Props) {
         const q = query.trim();
         const lower = q.toLowerCase();
 
+        // Empty box: one line per row (names only). Second lines (project
+        // descriptions, email address, note descriptions/excerpts) appear only
+        // once you type, when they help you choose.
+        // Match only text the row shows: its label and (for projects and email)
+        // its second line. Each typed word must start a word there, so "fi"
+        // doesn't match the middle of "profile".
+        const typedWords = lower.split(/\s+/).filter(Boolean);
         const cmds = q
-            ? STATIC_COMMANDS.filter((c) =>
-                  `${c.label} ${c.keywords ?? ""} ${c.group}`.toLowerCase().includes(lower)
-              )
-            : STATIC_COMMANDS;
+            ? STATIC_COMMANDS.filter((c) => {
+                  const words = `${c.label} ${typeof c.sublabel === "string" ? c.sublabel : ""}`.toLowerCase().split(/[^a-z0-9]+/);
+                  return typedWords.every((t) => words.some((w) => w.startsWith(t)));
+              })
+            : STATIC_COMMANDS.map((c) => ({ ...c, sublabel: undefined }));
 
+        // With no query: every page (e.g. the colophon) plus the 5 newest notes.
+        // Fuzzy matching forgives typos in titles and tags, but across a long
+        // note body it also "matches" unrelated words (sort → short, cursor).
+        // So a result must contain the query (or its longest word) at a word
+        // start, or, for queries of 4+ characters, have fuzzy-matched on its
+        // title or tags (short queries fuzzy-match almost any title).
         const noteMatches: SearchItem[] = q
             ? fuse
-                ? fuse.search(q).map((r) => r.item)
+                ? fuse
+                      .search(q)
+                      .filter(
+                          (r) =>
+                              findTerm(`${r.item.title} ${r.item.tags.join(" ")} ${r.item.description} ${r.item.body}`, q) ||
+                              (q.length >= 4 && r.matches?.some((m) => m.key === "title" || m.key === "tags"))
+                      )
+                      .map((r) => r.item)
                 : []
-            : [...notes].sort((a, b) => (a.pubDate < b.pubDate ? 1 : -1)).slice(0, 5);
+            : [
+                  ...notes.filter((n) => n.kind === "page"),
+                  ...notes
+                      .filter((n) => n.kind === "note")
+                      .sort((a, b) => (a.pubDate < b.pubDate ? 1 : -1))
+                      .slice(0, 5),
+              ];
 
-        const noteCmds: Command[] = noteMatches.map((n) => ({
-            id: `note:${n.url}`,
-            label: n.title,
-            sublabel: n.description || undefined,
-            hint: formatDate(n.pubDate),
-            group: q ? "Notes" : "Recent notes",
-            perform: () => goInternal(n.url),
-        }));
+        // Pages are listed under "Go to"; notes under Notes / Recent notes.
+        const noteCmds: Command[] = noteMatches.map((n) => {
+            const sub = q ? resultSublabel(n, q) : { node: undefined, excerpt: false };
+            return n.kind === "page"
+                ? {
+                      id: `page:${n.url}`,
+                      label: n.title,
+                      // Go to rows are text-only, like Home and Notes; a page
+                      // only gets a second line when it's showing a search excerpt.
+                      sublabel: sub.excerpt ? sub.node : undefined,
+                      excerpt: sub.excerpt,
+                      group: "Go to",
+                      perform: () => goInternal(n.url),
+                  }
+                : {
+                      id: `note:${n.url}`,
+                      label: n.title,
+                      sublabel: sub.node,
+                      excerpt: sub.excerpt,
+                      hint: formatDate(n.pubDate),
+                      group: q ? "Notes" : "Recent notes",
+                      perform: () => goInternal(n.url),
+                  };
+        });
 
+        // Writing first, then links that leave the site, then actions.
         const order = q
-            ? ["Go to", "Projects", "Actions", "Notes"]
-            : ["Go to", "Projects", "Actions", "Recent notes"];
+            ? ["Go to", "Notes", "Projects", "Actions"]
+            : ["Go to", "Recent notes", "Projects", "Actions"];
         const all = [...cmds, ...noteCmds];
 
         let idx = 0;
@@ -341,7 +431,7 @@ export default function CommandPalette({ maxHeight }: Props) {
                                                         {justCopied ? "Copied" : item.label}
                                                     </span>
                                                     {item.sublabel && (
-                                                        <span className="block text-xs text-muted-foreground leading-snug truncate">
+                                                        <span className={`block text-xs text-muted-foreground leading-snug ${item.excerpt ? "line-clamp-2" : "truncate"}`}>
                                                             {item.sublabel}
                                                         </span>
                                                     )}
