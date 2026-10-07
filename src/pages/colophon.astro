@@ -11,33 +11,8 @@ import { Content, frontmatter } from "@/story/colophon.md";
     <p class="text-sm text-muted-foreground">
         Last updated <FormattedDate date={new Date(frontmatter.updated)} />
     </p>
-    <div class="tool-links">
+    <div class="icon-links">
         <Content />
     </div>
 </DefaultLayout>
 
-<style is:global>
-    /* Tool names in the colophon lead with the tool's favicon
-       (public/tool-icons/), which replaces the usual outbound ↗. */
-    .tool-links a > img {
-        display: inline;
-        width: 1em;
-        height: 1em;
-        margin: 0 0.3em 0 0;
-        vertical-align: -0.125em;
-        border-radius: 0.2em;
-    }
-    /* Keep the icon and its name together on one line. */
-    .tool-links a:has(> img) {
-        white-space: nowrap;
-    }
-    .tool-links a[href]:has(> img)::after {
-        content: none;
-    }
-    /* Black-on-transparent icons would vanish on the dark background.
-       hue-rotate after invert keeps Astro's colored flame roughly its own color. */
-    .dark .tool-links img[src$="/astro.svg"],
-    .dark .tool-links img[src$="/umami.png"] {
-        filter: invert(1) hue-rotate(180deg);
-    }
-</style>

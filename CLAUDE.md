@@ -49,7 +49,11 @@ Four link/interaction roles, each with ONE treatment. Don't invent a fifth; when
 3. **Quiet meta-navigation** ("← all notes" via `AllNotesLink.astro`, "View all (n) →", tag chips): small muted text, `no-underline!`, hover signals by color only — `text-muted-foreground! hover:text-foreground!` (chips use a border change instead). The `!` on colors is required to beat the `.typography a` prose rule on note pages.
 4. **Navigation chrome** (navbar icon buttons): pill hover — `rounded-lg hover:bg-foreground/13`. Buttons only, never text links.
 
-External links additionally get the outbound icon via `.typography a[href^="http"]` (`global.css`).
+External links additionally get the outbound icon via `.typography a[href^="http"]` (`global.css`). Inside an `.icon-links` wrapper, a content link that starts with a favicon `<img>` from `public/tool-icons/` shows that icon instead of the outbound one (markdown: `[![](/tool-icons/name.png)Name](https://…)`).
+
+When to use an icon instead of the outbound arrow:
+- **Icon**: a set of named tools or services the reader recognizes or chooses between (the colophon's tool list, the homepage contact links). Every link in the set gets one, never a lone icon, and only with a recognizable mark that reads in both light and dark mode.
+- **Outbound arrow** (the default): any link inside a sentence that's telling a story, i.e. homepage intro, notes, most copy. Employer and project links in the intro stay plain.
 
 ## Conventions & gotchas
 

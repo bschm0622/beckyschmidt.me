@@ -340,6 +340,33 @@ html:not(.light):not(.dark) {
   mask: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%3E%3Cpath%20fill='%23000'%20d='M10%206v2H5v11h11v-5h2v6a1%201%200%200%201-1%201H4a1%201%200%200%201-1-1V7a1%201%200%200%201%201-1zm11-3v8h-2V6.413l-7.793%207.794l-1.414-1.414L17.585%205H13V3z'/%3E%3C/svg%3E") center / contain no-repeat;
 }
 
+/* Icon links: inside an .icon-links wrapper, a link that starts with an
+   <img> (a favicon from public/tool-icons/) shows it at text height in place
+   of the trailing outbound icon. Used on the colophon and the homepage contact links.
+   In markdown: [![](/tool-icons/name.png)Name](https://…) */
+.icon-links a > img {
+  display: inline;
+  width: 1em;
+  height: 1em;
+  margin: 0 0.3em 0 0;
+  vertical-align: -0.125em;
+  border-radius: 0.2em;
+}
+/* Keep the icon and its name together on one line. */
+.icon-links a:has(> img) {
+  white-space: nowrap;
+}
+.icon-links a[href]:has(> img)::after {
+  content: none;
+}
+/* Black-on-transparent icons would vanish on the dark background.
+   hue-rotate after invert keeps Astro's colored flame roughly its own color. */
+.dark .icon-links img[src$="/astro.svg"],
+.dark .icon-links img[src$="/umami.png"],
+.dark .icon-links img[src$="/email.svg"] {
+  filter: invert(1) hue-rotate(180deg);
+}
+
 
 .astro-code,
 .astro-code span {
