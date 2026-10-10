@@ -21,6 +21,7 @@ interface Props {
     description?: string;
     image?: URL | string;
     canonicalURL?: URL | string;
+    noindex?: boolean;
     proseClass?: string;
     fullWidth?: boolean;
     noSearch?: boolean;
@@ -32,6 +33,7 @@ const {
     description,
     image,
     canonicalURL,
+    noindex,
     proseClass = "type-standard",
     fullWidth = false,
     noSearch = false,
@@ -48,6 +50,7 @@ const mainClass = fullWidth
     description={description}
     image={image}
     canonicalURL={canonicalURL}
+    noindex={noindex}
 >
     <slot name="head" slot="head" />
     <slot name="before-nav" />

@@ -363,7 +363,8 @@ html:not(.light):not(.dark) {
    hue-rotate after invert keeps Astro's colored flame roughly its own color. */
 .dark .icon-links img[src$="/astro.svg"],
 .dark .icon-links img[src$="/umami.png"],
-.dark .icon-links img[src$="/email.svg"] {
+.dark .icon-links img[src$="/email.svg"],
+.dark .icon-links img[src$="/x.svg"] {
   filter: invert(1) hue-rotate(180deg);
 }
 

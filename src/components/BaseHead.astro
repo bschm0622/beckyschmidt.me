@@ -1,5 +1,6 @@
 ---
 import { SITE, siteOrigin } from "@/siteConfig";
+import { SKILLS, EDUCATION } from "@/data/career";
 import { ClientRouter } from "astro:transitions";
 import Favicons from "@/components/Favicons.astro";
 import { Font } from "astro:assets";
@@ -9,6 +10,8 @@ interface Props {
     description?: string;
     image?: URL | string;
     canonicalURL?: URL | string;
+    /** Keep the page out of search results (admin, 404). */
+    noindex?: boolean;
 }
 
 const {
@@ -16,6 +19,7 @@ const {
     description = SITE.description,
     image,
     canonicalURL,
+    noindex = false,
 } = Astro.props;
 
 const origin = siteOrigin(Astro.site);
@@ -81,7 +85,7 @@ const shouldLoadAnalytics = import.meta.env.PROD;
 <title>{fullTitle}</title>
 <meta name="title" content={fullTitle} />
 <meta name="description" content={description} />
-<meta name="robots" content="index, follow" />
+<meta name="robots" content={noindex ? "noindex, nofollow" : "index, follow"} />
 <meta name="author" content={SITE.author} />
 
 <!-- Open Graph / Facebook -->
@@ -122,6 +126,8 @@ const shouldLoadAnalytics = import.meta.env.PROD;
             "@id": `${origin}#person`,
             "name": SITE.name,
             "url": origin.toString(),
+            "image": new URL(SITE.headshot, origin).toString(),
+            "description": SITE.description,
             "email": SITE.email,
             "jobTitle": SITE.jobTitle,
             "worksFor": {
@@ -135,8 +141,29 @@ const shouldLoadAnalytics = import.meta.env.PROD;
                 "addressRegion": SITE.location.region,
                 "addressCountry": SITE.location.country
             },
+            "alumniOf": {
+                "@type": "CollegeOrUniversity",
+                "name": EDUCATION.school,
+                "url": EDUCATION.schoolUrl
+            },
+            "hasCredential": {
+                "@type": "EducationalOccupationalCredential",
+                "credentialCategory": "degree",
+                "name": EDUCATION.degree,
+                "recognizedBy": {
+                    "@type": "CollegeOrUniversity",
+                    "name": `${EDUCATION.school}, ${EDUCATION.college}`
+                }
+            },
+            "knowsAbout": SKILLS,
+            "hasOccupation": {
+                "@type": "Occupation",
+                "name": SITE.jobTitle,
+                "skills": SKILLS.join(", ")
+            },
             "sameAs": [
-                SITE.socials.linkedin
+                SITE.socials.linkedin,
+                SITE.socials.x
             ]
         },
         {

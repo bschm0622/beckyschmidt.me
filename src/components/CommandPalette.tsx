@@ -72,6 +72,11 @@ const IconLinkedIn = () => (
         <path d="M3 12C3 7.75736 3 5.63604 4.31802 4.31802C5.63604 3 7.75736 3 12 3C16.2426 3 18.364 3 19.682 4.31802C21 5.63604 21 7.75736 21 12C21 16.2426 21 18.364 19.682 19.682C18.364 21 16.2426 21 12 21C7.75736 21 5.63604 21 4.31802 19.682C3 18.364 3 16.2426 3 12Z" />
     </svg>
 );
+const IconX = () => (
+    <svg className={iconCls} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+        <path d="M4 4L20 20M20 4L4 20" />
+    </svg>
+);
 const IconCopy = () => (
     <svg className={iconCls} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
         <path d="M9 15C9 12.1716 9 10.7574 9.87868 9.87868C10.7574 9 12.1716 9 15 9L16 9C18.8284 9 20.2426 9 21.1213 9.87868C22 10.7574 22 12.1716 22 15V16C22 18.8284 22 20.2426 21.1213 21.1213C20.2426 22 18.8284 22 16 22H15C12.1716 22 10.7574 22 9.87868 21.1213C9 20.2426 9 18.8284 9 16L9 15Z" />
@@ -173,6 +178,13 @@ const STATIC_COMMANDS: Command[] = [
         icon: <IconLinkedIn />,
         group: "Actions",
         perform: () => goExternal(SITE.socials.linkedin),
+    },
+    {
+        id: "action:x",
+        label: "Go to my X",
+        icon: <IconX />,
+        group: "Actions",
+        perform: () => goExternal(SITE.socials.x),
     },
     {
         id: "action:copy",

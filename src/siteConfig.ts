@@ -20,8 +20,11 @@ export interface SiteConfiguration {
 
     socials: {
         linkedin: string;
+        x: string;
     };
 
+    /** Headshot path (homepage avatar and schema.org Person image). */
+    headshot: string;
     /** Default Open Graph image path. */
     ogImage: string;
     analytics: { umamiWebsiteId: string };
@@ -34,7 +37,7 @@ export interface SiteConfiguration {
 
 export const SITE: SiteConfiguration = {
     name: "Becky Schmidt",
-    description: "Becky Schmidt's personal website.",
+    description: "Becky Schmidt is a senior product manager at Octane11 in Indianapolis who builds AI products on B2B marketing data, including an AI assistant and MCP server.",
     href: "https://beckyschmidt.me",
     author: "Becky Schmidt",
     locale: "en-US",
@@ -46,8 +49,10 @@ export const SITE: SiteConfiguration = {
 
     socials: {
         linkedin: "https://www.linkedin.com/in/becky--schmidt/",
+        x: "https://x.com/bschm0622",
     },
 
+    headshot: "/becky.png",
     ogImage: "/og.png",
     analytics: { umamiWebsiteId: "2d238baf-947c-468a-aac9-1ac81b265110" },
     rss: {

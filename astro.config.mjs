@@ -20,7 +20,7 @@ export default defineConfig({
   compressHTML: true,
 
   integrations: [
-    sitemap({ filter: (page) => page !== 'https://beckyschmidt.me/admin' }),
+    sitemap({ filter: (page) => !new URL(page).pathname.startsWith('/admin') }),
     react()
   ],
     

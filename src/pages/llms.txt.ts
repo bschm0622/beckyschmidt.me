@@ -1,54 +1,51 @@
 import type { APIRoute } from 'astro';
-import { getCollection } from 'astro:content';
-import { SITE, siteOrigin } from '@/siteConfig';
+import { siteOrigin } from '@/siteConfig';
+import { getLlmsContent } from '@/lib/llms';
 
+// Built entirely from live site content; see src/lib/llms.ts.
 export const GET: APIRoute = async ({ site }) => {
-    const siteURL = siteOrigin(site);
+    const origin = siteOrigin(site);
+    const c = await getLlmsContent(origin);
 
-    // Generate projects list
-    const projects = (await getCollection('projects')).sort((a, b) => a.data.order - b.data.order);
-    const buildingList = projects
-        .map(({ data: p }) => `- ${p.name} (${p.href}) - ${p.description}`)
-        .join('\n');
+    const content = `${c.title}
 
-    const content = `# ${SITE.name} - Personal Website
+${c.summary}
 
-> ${SITE.jobTitle} at ${SITE.employer.name} | AI & data products | ${SITE.location.locality}, ${SITE.location.region}
+${c.intro}
 
-## About This Site
+${c.contact}
 
-This is the personal website of Becky Schmidt, a senior product manager who builds. The site tells her story (marketing degree to business analyst to senior PM of AI products), documents the production systems she has built and runs herself, and hosts her notes on product management, AI, and agency.
+## Experience
 
-## Site Structure
+${c.experience}
 
-- Homepage: ${siteURL.href}
-- Notes (essays): ${siteURL.href}notes/
-- Colophon (how the site is built): ${siteURL.href}colophon
+## Education
 
-## Key Content
+${c.education}
 
-### Professional Background
-Becky is a Senior Product Manager at Octane11, a B2B data and AI startup, where she was the second product hire and now owns the AI products: an AI chat built on a homegrown MCP server, and the company's first agent for campaign mapping. She got into product by teaching herself SQL and Tableau as a business analyst at a credit union.
+## Skills
 
-### Things She Has Built
-${buildingList}
+${c.skills}
 
-### Notes Topics
-Essays on product management, AI, agency, and building in public. Flagship essay: ${siteURL.href}notes/how-to-know-if-you-have-agency
+## Projects
+
+${c.projects}
+
+## Notes
+
+${c.notesList}
 
 ## Contact
 
-- Email: ${SITE.email}
-- LinkedIn: ${SITE.socials.linkedin}
+${c.links}
 
-## For More Details
+## More
 
-See the full LLM guide at: ${siteURL.href}llms-full.txt
+- [Full text of every note and page](${new URL('llms-full.txt', origin).href})
+- [Colophon: how this site is built](${new URL('colophon', origin).href})
 `;
 
     return new Response(content, {
-        headers: {
-            'Content-Type': 'text/plain; charset=utf-8',
-        },
+        headers: { 'Content-Type': 'text/plain; charset=utf-8' },
     });
 };

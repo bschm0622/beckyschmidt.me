@@ -7,9 +7,10 @@ interface Props {
     description?: string;
     image?: URL | string;
     canonicalURL?: URL | string;
+    noindex?: boolean;
 }
 
-const { title, description, image, canonicalURL } = Astro.props;
+const { title, description, image, canonicalURL, noindex } = Astro.props;
 ---
 
 <!doctype html>
@@ -20,6 +21,7 @@ const { title, description, image, canonicalURL } = Astro.props;
             description={description}
             image={image}
             canonicalURL={canonicalURL}
+            noindex={noindex}
         />
         <slot name="head" />
     </head>

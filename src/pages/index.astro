@@ -33,22 +33,19 @@ const minimap = {
   notes: noteCount === 0
     ? "Coming soon"
     : `${plural(noteCount, "note")}, latest ${formatDate(notes[0].data.pubDate, "month-year")}`,
-  contact: "Email or LinkedIn",
+  contact: "Email, LinkedIn or X",
 };
 
 // All homepage copy lives in src/story/*.md.
 ---
 
-<DefaultLayout
-  description="Becky Schmidt is a senior product manager who builds: AI products at Octane11 by day, her own production systems at night."
-  skylineFooter={true}
->
+<DefaultLayout skylineFooter={true}>
   <div class="mx-auto w-full space-y-14">
 
     <!-- Story: edit src/story/hero.md -->
     <section data-minimap-title="About" data-minimap-text={minimap.about}>
       <img
-        src="/becky.png"
+        src={SITE.headshot}
         alt="Becky Schmidt"
         width="64"
         height="64"
@@ -115,7 +112,8 @@ const minimap = {
       <Contact />
       <p>
         <a href={`mailto:${SITE.email}`}><img src="/tool-icons/email.svg" alt="" />Email me</a> or find me on
-        <a href={SITE.socials.linkedin} target="_blank" rel="noopener noreferrer"><img src="/tool-icons/linkedin.svg" alt="" />LinkedIn</a>.
+        <a href={SITE.socials.linkedin} target="_blank" rel="noopener noreferrer"><img src="/tool-icons/linkedin.svg" alt="" />LinkedIn</a> and
+        <a href={SITE.socials.x} target="_blank" rel="noopener noreferrer"><img src="/tool-icons/x.svg" alt="" />X</a>.
       </p>
     </section>
 
