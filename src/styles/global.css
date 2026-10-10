@@ -356,6 +356,10 @@ html:not(.light):not(.dark) {
 .icon-links a:has(> img) {
   white-space: nowrap;
 }
+/* A logo that is itself the name (X) stands alone (add class="icon-only"), with no gap after it. */
+.icon-links a.icon-only > img {
+  margin-right: 0;
+}
 .icon-links a[href]:has(> img)::after {
   content: none;
 }

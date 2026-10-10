@@ -6,7 +6,7 @@ I joined Octane11 in 2021 as the second product hire and seventh employee, takin
 
 - Launching our in-platform AI Assistant & MCP server
 - Designing new features end-to-end using AI tools like Claude Code to design, prototype, and launch
-- Leading API integrations with LinkedIn, The Trade Desk, Beeswax, and more
+- Leading API integrations & business development partnerships with LinkedIn, The Trade Desk, Beeswax, and more
 - Architecting our proprietary data blending logic to provide best-in-class account identification
 
 
