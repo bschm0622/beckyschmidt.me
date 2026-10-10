@@ -10,11 +10,5 @@
     "href": "https://bibleplan.app",
     "description": "Flexible Bible reading plan app with 300+ users and 200+ plans created.",
     "icon": "/project-icons/bibleplan.png"
-  },
-  {
-    "name": "ceopaycheck.com",
-    "href": "https://ceopaycheck.com",
-    "description": "Programmatic SEO site detailing nonprofit CEO salaries. Data scraped from the IRS Form 990 filing.",
-    "icon": "/project-icons/ceopaycheck.png"
   }
 ]
