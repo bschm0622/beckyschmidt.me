@@ -363,13 +363,25 @@ html:not(.light):not(.dark) {
 .icon-links a[href]:has(> img)::after {
   content: none;
 }
+/* Brand icons sit in grayscale and show their color on hover. Applies to
+   icon links and to anything marked .brand-icon (the homepage project list).
+   --icon-dark-filter carries the per-icon dark-mode fix below. */
+.icon-links a > img,
+.brand-icon {
+  filter: grayscale(var(--icon-gray, 1)) var(--icon-dark-filter, );
+  transition: filter 150ms ease;
+}
+.icon-links a:hover > img,
+a:hover .brand-icon {
+  --icon-gray: 0;
+}
 /* Black-on-transparent icons would vanish on the dark background.
    hue-rotate after invert keeps Astro's colored flame roughly its own color. */
 .dark .icon-links img[src$="/astro.svg"],
 .dark .icon-links img[src$="/umami.png"],
 .dark .icon-links img[src$="/email.svg"],
 .dark .icon-links img[src$="/x.svg"] {
-  filter: invert(1) hue-rotate(180deg);
+  --icon-dark-filter: invert(1) hue-rotate(180deg);
 }
 /* Logos with an official light-on-dark version: swap the file instead of inverting. */
 .dark .icon-links img[src$="/octane11.png"] {
