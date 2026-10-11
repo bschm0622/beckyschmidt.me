@@ -1,0 +1,41 @@
+---
+/**
+ * Becky's local time, e.g. "Indianapolis · 3:42:07 PM ET". Rendered as the city
+ * alone and filled in by the browser, since cached HTML would show a stale time.
+ */
+import { SITE } from "@/siteConfig";
+---
+
+<p class="h-10 flex items-center text-sm text-muted-foreground tabular-nums" data-local-time data-tz={SITE.location.timeZone}>
+    {SITE.location.locality}<span data-local-time-value></span>
+</p>
+
+<script>
+    let timer: number | undefined;
+
+    function tick() {
+        const el = document.querySelector<HTMLElement>("[data-local-time]");
+        const value = el?.querySelector<HTMLElement>("[data-local-time-value]");
+        if (!el || !value) return;
+        const time = new Date().toLocaleTimeString("en-US", {
+            timeZone: el.dataset.tz,
+            hour: "numeric",
+            minute: "2-digit",
+            second: "2-digit",
+        });
+        value.textContent = ` · ${time} ET`;
+    }
+
+    function initLocalTime() {
+        clearInterval(timer);
+        tick();
+        timer = window.setInterval(tick, 1000);
+    }
+
+    if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", initLocalTime);
+    } else {
+        initLocalTime();
+    }
+    document.addEventListener("astro:page-load", initLocalTime);
+</script>

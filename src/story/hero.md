@@ -1,13 +1,11 @@
 # Hi, I'm Becky Schmidt
 
-I'm a senior product manager at [Octane11](https://octane11.com), a B2B marketing measurement platform that unifies fragmented ads, social, and CRM data into one normalized feed. I lead our AI products: an in-platform AI assistant that answers questions about your data, the MCP server powering the assistant, and agentic workflows we're building to take action for clients.
+I'm a senior product manager at [Octane11](https://octane11.com), a B2B marketing analytics platform that connects ad, web, CRM, and email data to accounts and pipeline. I'm looking for a remote role on a small team building an AI-native product.
 
-I joined Octane11 in 2021 as the second product hire and seventh employee, taking the entire data pipeline and reporting platform from 0 to 1. I've spearheaded a variety of projects, including:
+- Lead our AI roadmap, including our in-platform AI assistant, the MCP server behind it, and an agent that gets clients set up on our platform
+- Joined as the second product hire and seventh employee, and took our data pipeline and reporting platform from 0 to 1
+- Led our API integrations with The Trade Desk, LinkedIn, and Beeswax
+- Built our identity resolution logic, blending two third-party data vendors with our first-party data to raise signal on target accounts 50%
+- Prototype and ship new features myself with AI tools like Claude Code
 
-- Launching our in-platform AI Assistant & MCP server
-- Designing new features end-to-end using AI tools like Claude Code to design, prototype, and launch
-- Leading API integrations & business development partnerships with LinkedIn, The Trade Desk, Beeswax, and more
-- Architecting our proprietary data blending logic to provide best-in-class account identification
-
-
-Outside of work I tinker on my side projects (listed below), cycle on Zwift, and raise my daughters in Indianapolis with my husband.
+Outside of work I tinker on my side projects, cycle on Zwift, and raise my daughters in Indianapolis with my husband.

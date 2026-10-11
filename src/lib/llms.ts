@@ -9,7 +9,6 @@ import { getCollection } from "astro:content";
 import { SITE } from "@/siteConfig";
 import { getSortedNotes, noteUrl, formatDate, type Note } from "@/lib/notes";
 import * as hero from "@/story/hero.md";
-import * as contact from "@/story/contact.md";
 import * as colophon from "@/story/colophon.md";
 import { ROLES, SKILLS, EDUCATION } from "@/data/career";
 
@@ -46,7 +45,6 @@ export async function getLlmsContent(origin: URL) {
         title: `# ${SITE.name}`,
         summary: `> ${SITE.description}`,
         intro: toLlmsMarkdown(hero.rawContent(), origin, { stripH1: true }),
-        contact: toLlmsMarkdown(contact.rawContent(), origin),
         colophon: toLlmsMarkdown(colophon.rawContent(), origin),
         projects: projects.map(({ data: p }) => `- [${p.name}](${p.href}): ${p.description}`).join("\n"),
         experience: ROLES.map((r) =>

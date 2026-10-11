@@ -23,8 +23,6 @@ ${c.summary}
 
 ${c.intro}
 
-${c.contact}
-
 ## Experience
 
 ${c.experience}

@@ -1,7 +1,7 @@
 ---
 title: "How I built remotepmjobs.com"
 pubDate: "2026-10-02"
-description: ""
+description: "How I built Remote PM Jobs, a job board that scrapes 1,000+ company job boards every night and enriches the listings with a local AI model."
 author: "Becky Schmidt"
 tags: ["side project"]
 ---

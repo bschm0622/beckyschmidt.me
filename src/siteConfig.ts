@@ -16,7 +16,8 @@ export interface SiteConfiguration {
     email: string;
     jobTitle: string;
     employer: { name: string; url: string };
-    location: { locality: string; region: string; country: string };
+    /** `timeZone` is an IANA zone, used for the homepage local-time clock. */
+    location: { locality: string; region: string; country: string; timeZone: string };
 
     socials: {
         linkedin: string;
@@ -37,7 +38,7 @@ export interface SiteConfiguration {
 
 export const SITE: SiteConfiguration = {
     name: "Becky Schmidt",
-    description: "Becky Schmidt is a senior product manager at Octane11 in Indianapolis who builds AI products on B2B marketing data, including an AI assistant and MCP server.",
+    description: "Becky Schmidt is a senior product manager at Octane11 who launched its AI assistant and MCP server. She's looking for remote PM roles at small AI-native companies.",
     href: "https://beckyschmidt.me",
     author: "Becky Schmidt",
     locale: "en-US",
@@ -45,7 +46,7 @@ export const SITE: SiteConfiguration = {
     email: "beckyschmidt0622@gmail.com",
     jobTitle: "Senior Product Manager",
     employer: { name: "Octane11", url: "https://octane11.com" },
-    location: { locality: "Indianapolis", region: "IN", country: "US" },
+    location: { locality: "Indianapolis", region: "IN", country: "US", timeZone: "America/Indiana/Indianapolis" },
 
     socials: {
         linkedin: "https://www.linkedin.com/in/becky--schmidt/",
