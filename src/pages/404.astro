@@ -2,23 +2,26 @@
 import DefaultLayout from "@/layouts/DefaultLayout.astro";
 ---
 
-<DefaultLayout title="Page Not Found" description="404" noindex>
-    <div
-        class="w-full flex justify-center"
-
-    >
-        <div
-            class="w-full max-w-2xl flex flex-col items-center justify-center text-center gap-6"
-        >
-            <h1>
-                You found a secret page!
-                <br />
-                Just kidding. It’s broken.
-            </h1>
-            <div class="flex gap-4">
-                <a href="/">Home</a>
-                <a href="/notes">Notes</a>
-            </div>
-        </div>
+<DefaultLayout title="Page not found" description="This page doesn't exist." noindex noNav skylineFooter={true}>
+    <div class="w-full pt-10 md:pt-16 pb-16">
+        <section class="typography">
+            <h1>Page not found</h1>
+            <p>This page doesn't exist, or it used to and I've since cleaned house.</p>
+            <p class="flex flex-wrap items-center gap-x-5 gap-y-2">
+                <button
+                    type="button"
+                    data-search-trigger
+                    class="cursor-pointer text-foreground underline decoration-1 underline-offset-2 decoration-foreground/30 hover:decoration-foreground"
+                >Search the site</button>
+                <a href="/">Go home</a>
+            </p>
+        </section>
     </div>
 </DefaultLayout>
+
+<script>
+    // The navbar normally wires up search triggers; this page has no navbar.
+    document.querySelectorAll<HTMLElement>("[data-search-trigger]").forEach((btn) => {
+        btn.addEventListener("click", () => window.openSearchModal?.());
+    });
+</script>

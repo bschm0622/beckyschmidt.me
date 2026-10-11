@@ -6,6 +6,7 @@
  *   NoteLayout passes "typography").
  * - `fullWidth`: drop the max-width/prose styling (admin pages).
  * - `noSearch`: omit the search modal (admin pages).
+ * - `noNav`: omit the navbar (404, whose own links cover home and search).
  * - `skylineFooter`: show the Indy skyline illustration flush under the
  *   content (homepage only); other pages keep bottom padding instead.
  * Slots: default (main content), "head" (extra <head> tags),
@@ -25,6 +26,7 @@ interface Props {
     proseClass?: string;
     fullWidth?: boolean;
     noSearch?: boolean;
+    noNav?: boolean;
     skylineFooter?: boolean;
 }
 
@@ -37,12 +39,13 @@ const {
     proseClass = "type-standard",
     fullWidth = false,
     noSearch = false,
+    noNav = false,
     skylineFooter = false,
 } = Astro.props;
 
 const mainClass = fullWidth
     ? "px-4 flex-1"
-    : `px-4 ${skylineFooter ? "" : "pb-16"} mt-4 md:mt-6 flex-1 mx-auto w-full max-w-3xl ${proseClass}`;
+    : `px-4 ${skylineFooter ? "" : "pb-16"} mt-4 md:mt-6 flex-1 mx-auto w-full max-w-[38rem] ${proseClass}`;
 ---
 
 <BaseLayout
@@ -54,7 +57,7 @@ const mainClass = fullWidth
 >
     <slot name="head" slot="head" />
     <slot name="before-nav" />
-    <Navbar />
+    {!noNav && <Navbar />}
     <main class={mainClass}>
         <slot />
     </main>

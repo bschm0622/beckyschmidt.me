@@ -53,7 +53,8 @@ External links additionally get the outbound icon via `.typography a[href^="http
 
 When to use an icon instead of the outbound arrow:
 - **Icon**: a set of named tools or services the reader recognizes or chooses between (the colophon's tool list, the homepage contact links). Every link in the set gets one, never a lone icon, and only with a recognizable mark that reads in both light and dark mode.
-- **Outbound arrow** (the default): any link inside a sentence that's telling a story, i.e. homepage intro, notes, most copy. Employer and project links in the intro stay plain.
+- **Brand favicon in the homepage intro**: the employer, project and contact links in the intro get their favicon (`public/tool-icons/` or `public/project-icons/`). Keep it to named brands and products; never on generic links or on passing mentions (e.g. the integration partners in the intro sentence). If a logo has an official dark-mode version, swap it via `content: url()` in `global.css` rather than inverting.
+- **Outbound arrow** (the default): any other link inside a sentence that's telling a story, i.e. notes and most copy.
 
 ## Conventions & gotchas
 

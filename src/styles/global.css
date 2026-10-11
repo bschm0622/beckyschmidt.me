@@ -371,6 +371,10 @@ html:not(.light):not(.dark) {
 .dark .icon-links img[src$="/x.svg"] {
   filter: invert(1) hue-rotate(180deg);
 }
+/* Logos with an official light-on-dark version: swap the file instead of inverting. */
+.dark .icon-links img[src$="/octane11.png"] {
+  content: url("/tool-icons/octane11-white.png");
+}
 
 
 .astro-code,
