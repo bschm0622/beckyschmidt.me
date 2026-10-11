@@ -25,12 +25,12 @@ const { tags, counts, class: className = "flex flex-wrap gap-1.5", linked = true
             return linked ? (
                 <a
                     href={`/notes/tag/${slugifyStr(tag)}/`}
-                    class="px-2 py-0.5 border border-muted rounded text-sm text-muted-foreground! no-underline! hover:border-foreground/30 transition-colors"
+                    class="px-2 py-0.5 rounded bg-foreground/5 text-sm text-muted-foreground! no-underline! hover:bg-foreground/10 transition-colors"
                 >
                     {label}
                 </a>
             ) : (
-                <span class="px-2 py-0.5 border border-muted rounded text-sm text-muted-foreground">
+                <span class="px-2 py-0.5 rounded bg-foreground/5 text-sm text-muted-foreground">
                     {label}
                 </span>
             );

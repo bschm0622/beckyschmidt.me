@@ -46,7 +46,7 @@ Four link/interaction roles, each with ONE treatment. Don't invent a fifth; when
 
 1. **Content links** (in prose and story copy): underlined at rest — `underline decoration-1 underline-offset-2 decoration-foreground/30`, decoration darkens to full foreground on hover. This is the default `a` style in both `.typography` and `.type-standard` (`src/styles/global.css`); a plain `<a>` gets it for free.
 2. **Titles of clickable list items/cards** (project cards, NotesReel note titles): no underline at rest, underline on hover (`no-underline!` + `hover:underline`/`group-hover:underline`).
-3. **Quiet meta-navigation** ("← all notes" via `AllNotesLink.astro`, "View all (n) →", tag chips): small muted text, `no-underline!`, hover signals by color only — `text-muted-foreground! hover:text-foreground!` (chips use a border change instead). The `!` on colors is required to beat the `.typography a` prose rule on note pages.
+3. **Quiet meta-navigation** ("← all notes" via `AllNotesLink.astro`, "View all (n) →", tag chips): small muted text, `no-underline!`, hover signals by color only — `text-muted-foreground! hover:text-foreground!` (chips use a background tint change instead). The `!` on colors is required to beat the `.typography a` prose rule on note pages.
 4. **Navigation chrome** (navbar icon buttons): pill hover — `rounded-lg hover:bg-foreground/13`. Buttons only, never text links.
 
 External links additionally get the outbound icon via `.typography a[href^="http"]` (`global.css`). Inside an `.icon-links` wrapper, a content link that starts with a favicon `<img>` from `public/tool-icons/` shows that icon instead of the outbound one (markdown: `[![](/tool-icons/name.png)Name](https://…)`).
@@ -58,6 +58,7 @@ When to use an icon instead of the outbound arrow:
 
 ## Conventions & gotchas
 
+- Headings: on standard pages (`.type-standard`: home, notes index, tag pages, 404) a plain `<h1>`/`<h2>` is body-sized medium text by default — don't add size classes. Notes and the colophon use `.typography`, which keeps large headings.
 - Path alias `@/*` → `src/*`. Tailwind 4 via the Vite plugin — there is no `tailwind.config`; design tokens live in `src/styles/global.css`.
 - Env vars are declared in `astro.config.mjs` `env.schema` and read via `astro:env/client|server`. Local values in `.env.local` (gitignored; never print it). `convex dev` writes `CONVEX_DEPLOYMENT`/`CONVEX_SITE_URL` there automatically.
 - Client components (`.tsx` islands) must not import server-only modules (`astro:content`, `src/lib/github.ts`, `src/lib/notes.ts`).

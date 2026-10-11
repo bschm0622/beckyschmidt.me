@@ -43,7 +43,7 @@ const projectIcon = "brand-icon size-5 shrink-0 mt-px rounded";
           class="size-16 rounded-full! object-cover"
         />
         <div class="leading-snug">
-          <h1 class="text-base! font-medium! leading-snug! tracking-normal! text-foreground">{SITE.name}</h1>
+          <h1>{SITE.name}</h1>
           <p class="mt-1 flex items-center gap-2 text-sm text-muted-foreground">
             <span class="size-[7px] rounded-full bg-success" aria-hidden="true"></span>
             Open to remote opportunities
@@ -63,7 +63,7 @@ const projectIcon = "brand-icon size-5 shrink-0 mt-px rounded";
 
     {/* Projects */}
     <section id="projects" class="space-y-3">
-      <h2 class="text-base! font-medium! leading-snug! tracking-normal! text-foreground">Projects</h2>
+      <h2>Projects</h2>
       <div>
         {projects.map((project) => (
           <a
@@ -96,7 +96,7 @@ const projectIcon = "brand-icon size-5 shrink-0 mt-px rounded";
     {/* Notes */}
     <section class="space-y-3">
       <div class="flex items-baseline justify-between">
-        <h2 class="text-base! font-medium! leading-snug! tracking-normal! text-foreground">Notes</h2>
+        <h2>Notes</h2>
         {noteCount > 5 && (
           <a href="/notes" class="text-sm text-muted-foreground! hover:text-foreground! transition-colors no-underline!">View all ({noteCount}) →</a>
         )}
