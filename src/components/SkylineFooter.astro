@@ -1,75 +1,32 @@
 ---
 /**
- * Homepage footer: the Indy skyline watercolor over a painted sky.
+ * Footer: a black-and-white ink sketch of the Indy skyline, with the local
+ * clock underneath.
  *
- * The illustration has a transparent background, so the footer itself
- * paints the sky. Light mode gets a faint cool horizon; dark mode gets a
- * night gradient and a few stars behind the buildings. This also keeps the
- * pale bottom wash from reading as a floating island on the near-black
- * page background.
+ * The sketch is black line art on a transparent background, so it sits on
+ * the page background as-is and simply inverts to white lines in dark mode.
  *
- * Image is 1536x430 (aspect 3.572), so at the 400px desktop max height the
- * wrapper caps at 1429px wide instead of letterboxing inside a full-width box.
+ * Image is 1536x362 (aspect 4.243). It scales to full width at every size
+ * (no side cropping on mobile, so every landmark stays in view), capped at
+ * 1400px on wide screens.
  */
 import LocalTime from "@/components/LocalTime.astro";
 ---
 
-<footer
-    id="skyline-footer"
-    class="relative w-full shrink-0 overflow-hidden flex flex-col items-center
-           bg-linear-to-b from-transparent via-transparent to-[#e6ecf1]/50
-           dark:from-background dark:via-[#1c2136] dark:to-[#272c42]"
->
+<footer id="skyline-footer" class="relative w-full shrink-0 overflow-hidden flex flex-col items-center">
     {/* shrink-0 prevents the flex-col body from collapsing this to 0 height */}
-    <div class="skyline-stars pointer-events-none absolute inset-0 opacity-0 dark:opacity-100 transition-opacity duration-700" aria-hidden="true"></div>
-    <div class="relative h-48 shrink-0 md:h-auto md:w-full md:max-w-[1429px]">
+    <div class="relative w-full max-w-[1400px] shrink-0">
         <img
-            src="/indy-skyline.webp"
-            srcset="/indy-skyline-768.webp 768w, /indy-skyline.webp 1536w"
+            src="/indy-skyline-sketch.webp"
+            srcset="/indy-skyline-sketch-768.webp 768w, /indy-skyline-sketch.webp 1536w"
             sizes="100vw"
-            alt="Watercolor illustration of the Indianapolis skyline with autumn trees"
-            class="block h-full w-auto max-w-none md:h-auto md:w-full dark:brightness-85 dark:saturate-90"
+            alt="Ink sketch of the Indianapolis skyline and canal"
+            class="block h-auto w-full opacity-80 dark:invert"
             width="1536"
-            height="430"
+            height="362"
             loading="lazy"
             decoding="async"
         />
     </div>
     <LocalTime class="relative w-full py-4 text-center text-xs md:text-sm" />
 </footer>
-
-<style>
-    /* A handful of soft stars in the upper half of the sky. Positions are
-       fixed percentages so they stay put as the footer resizes; the tallest
-       buildings simply cover whichever ones they overlap.
-
-       The gradients live on a ::before so the twinkle can animate opacity (a
-       compositor-friendly property everywhere) rather than filter: brightness,
-       which only composites reliably in Chromium. The outer element keeps its
-       Tailwind opacity-0 / dark:opacity-100 dark-mode gate, and the animation
-       itself is scoped to .dark so nothing animates in light mode. */
-    .skyline-stars::before {
-        content: "";
-        position: absolute;
-        inset: 0;
-        background-image:
-            radial-gradient(1.5px 1.5px at 8% 18%, rgb(255 255 255 / 0.8), transparent 60%),
-            radial-gradient(1px 1px at 16% 40%, rgb(255 255 255 / 0.6), transparent 60%),
-            radial-gradient(1.5px 1.5px at 23% 12%, rgb(255 255 255 / 0.7), transparent 60%),
-            radial-gradient(1px 1px at 34% 30%, rgb(255 255 255 / 0.55), transparent 60%),
-            radial-gradient(1px 1px at 41% 8%, rgb(255 255 255 / 0.7), transparent 60%),
-            radial-gradient(1.5px 1.5px at 57% 22%, rgb(255 255 255 / 0.75), transparent 60%),
-            radial-gradient(1px 1px at 66% 36%, rgb(255 255 255 / 0.55), transparent 60%),
-            radial-gradient(1.5px 1.5px at 74% 10%, rgb(255 255 255 / 0.8), transparent 60%),
-            radial-gradient(1px 1px at 83% 28%, rgb(255 255 255 / 0.6), transparent 60%),
-            radial-gradient(1px 1px at 91% 16%, rgb(255 255 255 / 0.7), transparent 60%),
-            radial-gradient(1.5px 1.5px at 96% 42%, rgb(255 255 255 / 0.5), transparent 60%);
-    }
-    :global(.dark) .skyline-stars::before {
-        animation: skyline-twinkle 6s ease-in-out infinite alternate;
-    }
-    @keyframes skyline-twinkle {
-        from { opacity: 0.7; }
-        to   { opacity: 1; }
-    }
-</style>
