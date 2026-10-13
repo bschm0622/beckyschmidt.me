@@ -6,16 +6,15 @@
  * The sketch is black line art on a transparent background, so it sits on
  * the page background as-is and simply inverts to white lines in dark mode.
  *
- * Image is 1536x362 (aspect 4.243). It scales to full width at every size
- * (no side cropping on mobile, so every landmark stays in view), capped at
- * 1400px on wide screens.
+ * Image is 1536x362 (aspect 4.243). It matches the main text column's width
+ * and side padding (see DefaultLayout), so it lines up with the copy above.
  */
 import LocalTime from "@/components/LocalTime.astro";
 ---
 
 <footer id="skyline-footer" class="relative w-full shrink-0 overflow-hidden flex flex-col items-center">
     {/* shrink-0 prevents the flex-col body from collapsing this to 0 height */}
-    <div class="relative w-full max-w-[1400px] shrink-0">
+    <div class="relative w-full max-w-[38rem] shrink-0 px-6 md:px-4">
         <img
             src="/indy-skyline-sketch.webp"
             srcset="/indy-skyline-sketch-768.webp 768w, /indy-skyline-sketch.webp 1536w"
