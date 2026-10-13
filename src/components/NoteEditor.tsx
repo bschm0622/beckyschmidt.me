@@ -5,10 +5,10 @@ import { EditorView, placeholder } from '@codemirror/view';
 import type { EditorView as EditorViewType } from '@codemirror/view';
 import MarkdownIt from 'markdown-it';
 import { slugifyStr } from '@/lib/slugify';
-import { validateImage, optimizeImage } from '@/lib/images';
+import { validateImage, optimizeImage, MAX_FILE_SIZE } from '@/lib/images';
 import { parseFrontmatter, parseTagsValue, serializeFrontmatter } from '@/lib/frontmatter';
 import { DEFAULT_BRANCH } from '@/lib/constants';
-import { checkSession, getNote, prStatus, publishNote } from '@/lib/cms-api';
+import { ApiError, checkSession, getNote, pending as listPending, prStatus, publishNote } from '@/lib/cms-api';
 import { useMobileFormattingBar } from './hooks/useMobileFormattingBar';
 import { useDraftSafety } from './hooks/useDraftSafety';
 
@@ -21,10 +21,68 @@ interface FrontMatter {
   tags: string;
 }
 
-// A writing surface, not a code IDE: no gutters, prose font, comfortable
+interface Snapshot {
+  frontMatter: FrontMatter;
+  markdownContent: string;
+}
+
+// Today's date in the writer's time zone. toISOString() would give the UTC
+// date, which is already tomorrow on a US evening.
+const today = () => new Date().toLocaleDateString('en-CA');
+
+const emptyFrontMatter = (): FrontMatter => ({
+  title: '',
+  slug: '',
+  pubDate: today(),
+  description: '',
+  author: 'Becky Schmidt',
+  tags: '',
+});
+
+// Order-stable key for "has anything changed since the last save?"
+const snapshotKey = ({ frontMatter: f, markdownContent }: Snapshot) =>
+  JSON.stringify([f.title, f.slug, f.pubDate, f.description, f.author, f.tags, markdownContent]);
+
+const IMAGE_PATH_RE = /\/notes-images\/[^\s)"']+/g;
+const imagePaths = (md: string) => new Set(md.match(IMAGE_PATH_RE) ?? []);
+
+// Inserted as an image's alt text and selected, so typing replaces it.
+const IMAGE_ALT_PLACEHOLDER = 'Describe the image';
+
+// Build an editor snapshot from a raw markdown document. The schema has no
+// `slug` field (the filename is the slug), so notes without one fall back to
+// `fallbackSlug`; legacy notes that still carry `slug:` keep it.
+function snapshotFromDocument(content: string, fallbackSlug: string): Snapshot {
+  const { data, body } = parseFrontmatter(content);
+  const frontMatter = emptyFrontMatter();
+  for (const key of Object.keys(frontMatter) as Array<keyof FrontMatter>) {
+    const value = data[key];
+    if (value !== undefined) frontMatter[key] = Array.isArray(value) ? value.join(', ') : value;
+  }
+  // Store tags as a friendly comma list for the input.
+  frontMatter.tags = parseTagsValue(data.tags ?? []).join(', ');
+  if (!frontMatter.slug) frontMatter.slug = fallbackSlug;
+  return { frontMatter, markdownContent: body.trim() };
+}
+
+// Older backups may predate a field; fill gaps with defaults.
+const normalizeSnapshot = (s: Partial<Snapshot>): Snapshot => ({
+  frontMatter: { ...emptyFrontMatter(), ...(s.frontMatter ?? {}) },
+  markdownContent: s.markdownContent ?? '',
+});
+
+const formatSavedAt = (savedAt: number | null) =>
+  savedAt
+    ? new Date(savedAt).toLocaleString(undefined, { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })
+    : 'your last visit';
+
+// A writing surface, not a code IDE: no gutters, comfortable
 // leading, and a transparent background so it sits flat on the page.
+// `&.cm-editor` (two classes) outranks the light/dark theme's white background.
+// The text stays in CodeMirror's monospace on purpose: it's a reminder that
+// this is Markdown source, not the rendered note.
 const writingTheme = EditorView.theme({
-  '&': { backgroundColor: 'transparent', fontSize: '16px' },
+  '&.cm-editor': { backgroundColor: 'transparent', fontSize: '16px' },
   '&.cm-focused': { outline: 'none' },
   '.cm-content': {
     fontFamily: 'inherit',
@@ -55,14 +113,7 @@ export default function NoteEditor() {
   const [error, setError] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
 
-  const [frontMatter, setFrontMatter] = useState<FrontMatter>({
-    title: '',
-    slug: '',
-    pubDate: new Date().toISOString().split('T')[0],
-    description: '',
-    author: 'Becky Schmidt',
-    tags: '',
-  });
+  const [frontMatter, setFrontMatter] = useState<FrontMatter>(emptyFrontMatter);
   const [slugEdited, setSlugEdited] = useState(false);
   const [allTags, setAllTags] = useState<string[]>([]);
   const [tagDraft, setTagDraft] = useState('');
@@ -82,14 +133,25 @@ export default function NoteEditor() {
   const [prNumber, setPrNumber] = useState<number | null>(null);
   const [prUrl, setPrUrl] = useState<string | null>(null);
   const [isPublishing, setIsPublishing] = useState(false);
-  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  // snapshotKey() of the last saved/loaded version; null until loaded.
+  const [savedKey, setSavedKey] = useState<string | null>(null);
 
   // Image upload state
   const [isUploadingImage, setIsUploadingImage] = useState(false);
   const [uploadMessage, setUploadMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const editorViewRef = useRef<EditorViewType | null>(null);
-  const [pendingImages, setPendingImages] = useState<Array<{ file: File; placeholder: string; filename: string }>>([]);
+  // Images added this session, uploaded on the next save. `folder` is the
+  // public/notes-images/ subfolder the markdown points at; it's fixed when the
+  // first image is added, so renaming the note later can't break the paths.
+  const [pendingImages, setPendingImages] = useState<Array<{ file: File; path: string; folder: string; filename: string }>>([]);
+  const imageFolderRef = useRef<string | null>(null);
+  // Local previews for images that aren't on the site yet (path → object URL).
+  const previewUrlsRef = useRef(new Map<string, string>());
+  // Image paths in the last saved version, and paths from a restored backup
+  // whose files were lost with the old tab (only the text is backed up).
+  const savedImagesRef = useRef(new Set<string>());
+  const lostImagesRef = useRef(new Set<string>());
   const [editorTheme, setEditorTheme] = useState<'light' | 'dark'>('light');
 
   // Mobile formatting bar — the delicate visual-viewport tracking lives in the
@@ -100,55 +162,56 @@ export default function NoteEditor() {
   // Draft-safety state
   const [confirmingLeave, setConfirmingLeave] = useState(false);
   const [draftKey, setDraftKey] = useState('');
+  // Set when unsaved edits from a previous visit were loaded automatically.
+  const [restored, setRestored] = useState<{ savedAt: number | null; loaded: Snapshot } | null>(null);
   // Memoized so unrelated re-renders don't reset the hook's autosave debounce.
-  const draftSnapshot = useMemo(
+  const draftSnapshot = useMemo<Snapshot>(
     () => ({ frontMatter, markdownContent }),
     [frontMatter, markdownContent],
   );
-  const { pendingDraft, restoreDraft, discardDraft, clearDraft } = useDraftSafety({
+  // Unsaved = differs from the last saved version, so undoing an edit counts.
+  const hasUnsavedChanges = useMemo(
+    () => savedKey !== null && snapshotKey(draftSnapshot) !== savedKey,
+    [draftSnapshot, savedKey],
+  );
+  const { readBackup, clearBackup, discardAndLeave } = useDraftSafety<Snapshot>({
     draftKey,
     snapshot: draftSnapshot,
-    hasUnsavedChanges,
-    onRestore: (draft) => {
-      setFrontMatter(draft.frontMatter);
-      setMarkdownContent(draft.markdownContent);
-      setSlugEdited(true);
-      setHasUnsavedChanges(true);
-    },
+    dirty: hasUnsavedChanges,
   });
+
+  const applySnapshot = (snap: Snapshot) => {
+    setFrontMatter(snap.frontMatter);
+    setMarkdownContent(snap.markdownContent);
+  };
 
   const showSuccess = (text: string) => {
     setSuccessMessage(text);
     window.setTimeout(() => setSuccessMessage(''), 6000);
   };
 
-  const mdParser = new MarkdownIt();
-
-  // Render pending (not-yet-uploaded) images as placeholders; add error/lazy
-  // handling to real ones.
-  const defaultRender =
-    mdParser.renderer.rules.image ||
-    function (tokens, idx, options, _env, self) {
-      return self.renderToken(tokens, idx, options);
-    };
-  mdParser.renderer.rules.image = function (tokens, idx, options, env, self) {
-    const token = tokens[idx];
-    const srcIndex = token.attrIndex('src');
-    const altIndex = token.attrIndex('alt');
-    if (srcIndex >= 0) {
-      const src = token.attrs![srcIndex][1];
-      const alt = altIndex >= 0 ? token.attrs![altIndex][1] : 'Image';
-      if (src.startsWith('/notes-images/')) {
-        return `<div class="border border-dashed border-muted rounded p-4 text-center text-muted-foreground my-4">
-          <p class="text-sm">Image: ${alt}</p>
-          <p class="text-xs mt-1 opacity-75">(uploads when you publish)</p>
-        </div>`;
+  // Built once. Images added this session aren't on the site yet, so the
+  // preview shows the local copy; others load from the site as usual.
+  const mdParser = useMemo(() => {
+    const md = new MarkdownIt();
+    const defaultRender =
+      md.renderer.rules.image ||
+      function (tokens, idx, options, _env, self) {
+        return self.renderToken(tokens, idx, options);
+      };
+    md.renderer.rules.image = function (tokens, idx, options, env, self) {
+      const token = tokens[idx];
+      const srcIndex = token.attrIndex('src');
+      if (srcIndex >= 0) {
+        const local = previewUrlsRef.current.get(token.attrs![srcIndex][1]);
+        if (local) token.attrs![srcIndex][1] = local;
+        token.attrPush(['onerror', "this.style.display='none'"]);
+        token.attrPush(['loading', 'lazy']);
       }
-      token.attrPush(['onerror', "this.style.display='none'"]);
-      token.attrPush(['loading', 'lazy']);
-    }
-    return defaultRender(tokens, idx, options, env, self);
-  };
+      return defaultRender(tokens, idx, options, env, self);
+    };
+    return md;
+  }, []);
 
   // Keep the editor theme in sync with the site's light/dark toggle.
   useEffect(() => {
@@ -185,8 +248,9 @@ export default function NoteEditor() {
       const branchParam = urlParams.get('branch');
       const prParam = urlParams.get('pr');
       const branch = branchParam && branchParam !== DEFAULT_BRANCH ? branchParam : null;
-      setDraftKey(`note-draft:${hasFile ? filename : 'new'}`);
+      const key = `note-draft:${hasFile ? filename : 'new'}`;
 
+      let loaded: Snapshot = { frontMatter: emptyFrontMatter(), markdownContent: '' };
       if (hasFile) {
         setCurrentFile(filename);
         setSlugEdited(true); // existing note already has a slug (its filename)
@@ -197,9 +261,37 @@ export default function NoteEditor() {
           if (prParam) setPrNumber(Number(prParam));
           hydratePrStatus(branch);
         }
-        await loadFileContent(filename!, branch || DEFAULT_BRANCH);
+        const doc = await loadFileContent(filename!, branch || DEFAULT_BRANCH);
+        if (!doc) {
+          // Leave saving disabled (no saved version to compare against) so a
+          // failed load can't be saved over the real note.
+          setIsLoading(false);
+          return;
+        }
+        loaded = doc;
       }
 
+      applySnapshot(loaded);
+      setSavedKey(snapshotKey(loaded));
+      savedImagesRef.current = imagePaths(loaded.markdownContent);
+
+      // Unsaved edits from a previous visit (tab closed, crash, phone dropped
+      // the page) come back automatically, with a link to revert.
+      const backup = readBackup(key);
+      if (backup) {
+        const snap = normalizeSnapshot(backup.snapshot);
+        if (snapshotKey(snap) !== snapshotKey(loaded)) {
+          applySnapshot(snap);
+          setSlugEdited(hasFile || snap.frontMatter.slug !== slugifyStr(snap.frontMatter.title));
+          setRestored({ savedAt: backup.savedAt, loaded });
+          const loadedPaths = imagePaths(loaded.markdownContent);
+          lostImagesRef.current = new Set([...imagePaths(snap.markdownContent)].filter((p) => !loadedPaths.has(p)));
+        } else {
+          clearBackup(key);
+        }
+      }
+
+      setDraftKey(key);
       setIsLoading(false);
     })();
   }, []);
@@ -240,39 +332,27 @@ export default function NoteEditor() {
     }
   };
 
-  const loadFileContent = async (filename: string, branch: string = DEFAULT_BRANCH) => {
+  const loadFileContent = async (filename: string, branch: string = DEFAULT_BRANCH): Promise<Snapshot | null> => {
     try {
       setError('');
       const data = await getNote(filename, branch);
-      if (!data || !data.content) throw new Error('File content is empty or missing');
+      if (!data || typeof data.content !== 'string' || !data.content) throw new Error('File content is empty or missing');
       setCurrentFileSha(data.sha);
-      applyMarkdownDocument(data.content, filename.replace(/\.md$/, ''));
+      return snapshotFromDocument(data.content, filename.replace(/\.md$/, ''));
     } catch (err: any) {
       setError(`Failed to load ${filename}: ${err.message}`);
+      return null;
     }
   };
 
-  // Hydrate the editor from a raw markdown document. The schema no longer has
-  // a `slug` field (the filename is the slug), so notes without one fall back
-  // to `fallbackSlug`; legacy notes that still carry `slug:` keep it.
-  const applyMarkdownDocument = (content: string, fallbackSlug: string) => {
-    if (!content || typeof content !== 'string') {
-      setError('Invalid file content received');
-      return;
-    }
-    const { data, body } = parseFrontmatter(content);
-    setFrontMatter((prev) => {
-      const parsed = { ...prev };
-      for (const key of Object.keys(parsed) as Array<keyof FrontMatter>) {
-        const value = data[key];
-        if (value !== undefined) parsed[key] = Array.isArray(value) ? value.join(', ') : value;
-      }
-      // Store tags as a friendly comma list for the input.
-      parsed.tags = parseTagsValue(data.tags ?? []).join(', ');
-      if (!parsed.slug) parsed.slug = fallbackSlug;
-      return parsed;
-    });
-    setMarkdownContent(body.trim());
+  // Put the editor back to the last saved version and drop the backup.
+  const revertToSaved = () => {
+    if (!restored) return;
+    applySnapshot(restored.loaded);
+    setSlugEdited(!!currentFile);
+    clearBackup();
+    lostImagesRef.current = new Set();
+    setRestored(null);
   };
 
   const generateFullMarkdown = () =>
@@ -293,27 +373,50 @@ export default function NoteEditor() {
       title: value,
       slug: slugEdited ? prev.slug : slugifyStr(value),
     }));
-    setHasUnsavedChanges(true);
   };
 
   const handleFrontMatterChange = (field: keyof FrontMatter, value: string) => {
     if (field === 'slug') setSlugEdited(true);
     setFrontMatter((prev) => ({ ...prev, [field]: value }));
-    setHasUnsavedChanges(true);
   };
 
   const handleMarkdownChange = useCallback((value: string) => {
     setMarkdownContent(value);
-    setHasUnsavedChanges(true);
   }, []);
+
+  // Paste or drop image files straight into the editor. The handler is built
+  // once (see editorExtensions), so it calls through a ref to the latest
+  // addImageFiles.
+  const addImageFilesRef = useRef<(files: File[], at?: number) => void>(() => {});
+  const imagePasteDrop = useMemo(
+    () =>
+      EditorView.domEventHandlers({
+        paste(event) {
+          const files = Array.from(event.clipboardData?.files ?? []).filter((f) => f.type.startsWith('image/'));
+          if (!files.length) return false;
+          event.preventDefault();
+          addImageFilesRef.current(files);
+          return true;
+        },
+        drop(event, view) {
+          const files = Array.from(event.dataTransfer?.files ?? []).filter((f) => f.type.startsWith('image/'));
+          if (!files.length) return false;
+          event.preventDefault();
+          const at = view.posAtCoords({ x: event.clientX, y: event.clientY }) ?? undefined;
+          addImageFilesRef.current(files, at);
+          return true;
+        },
+      }),
+    [],
+  );
 
   // Build the editor config ONCE. Rebuilding these inline on every render makes
   // react-codemirror reconfigure the editor, which can trigger a scroll-into-view
   // that fires a scroll event, re-renders us, and loops — the "jumping" on long
   // paragraphs. Memoizing keeps the editor stable across re-renders.
   const editorExtensions = useMemo(
-    () => [markdown(), EditorView.lineWrapping, writingTheme, placeholder(WRITING_PLACEHOLDER), proseInputBehavior, suppressCmScroll],
-    [suppressCmScroll],
+    () => [markdown(), EditorView.lineWrapping, writingTheme, placeholder(WRITING_PLACEHOLDER), proseInputBehavior, suppressCmScroll, imagePasteDrop],
+    [suppressCmScroll, imagePasteDrop],
   );
   const editorBasicSetup = useMemo(
     () => ({
@@ -375,7 +478,6 @@ export default function NoteEditor() {
         : { anchor: from + before.length },
     });
     view.focus();
-    setHasUnsavedChanges(true);
   };
 
   const applyLinePrefix = (prefix: string) => {
@@ -388,7 +490,6 @@ export default function NoteEditor() {
       selection: { anchor: head + prefix.length },
     });
     view.focus();
-    setHasUnsavedChanges(true);
   };
 
   const insertLink = () => {
@@ -403,7 +504,6 @@ export default function NoteEditor() {
       selection: { anchor: urlStart, head: urlStart + 3 }, // select `url`
     });
     view.focus();
-    setHasUnsavedChanges(true);
   };
 
   const formatActions: Array<{ label: string; title: string; onClick: () => void; className?: string }> = [
@@ -417,21 +517,55 @@ export default function NoteEditor() {
     { label: 'Code block', title: 'Code block', onClick: () => applyWrap('```\n', '\n```') },
   ];
 
+  // A new note's filename is its URL, so it can't match a published note or
+  // one that's still in review.
+  const assertSlugAvailable = async (filename: string) => {
+    const url = `/notes/${filename.replace(/\.md$/, '')}/`;
+    try {
+      await getNote(filename);
+      throw new Error(`There's already a note at ${url}. Change the slug under Details.`);
+    } catch (err) {
+      if (!(err instanceof ApiError && err.status === 404)) throw err;
+    }
+    const { pending } = await listPending();
+    if (pending.some((pr) => pr.filename === filename && !pr.isDelete)) {
+      throw new Error(`A note at ${url} is already in review. Change the slug under Details.`);
+    }
+  };
+
   // One-click publish: auto-branch off master (first time), upload staged
   // images, commit, and open a PR. Repeat publishes reuse the same branch/PR.
   const handlePublish = async () => {
-    if (!frontMatter.title.trim() && !markdownContent.trim()) {
-      setError('Nothing to save yet — add a title or some content.');
+    if (!frontMatter.title.trim()) {
+      setError('Add a title before saving.');
       return;
     }
+    if (markdownContent.includes(`![${IMAGE_ALT_PLACEHOLDER}]`)) {
+      setError(`Add a short description to each image (replace "${IMAGE_ALT_PLACEHOLDER}").`);
+      return;
+    }
+    const lost = [...imagePaths(markdownContent)].filter((p) => lostImagesRef.current.has(p));
+    if (lost.length) {
+      setError(
+        `${lost.length === 1 ? 'An image' : `${lost.length} images`} from your unsaved changes didn't survive closing the page. Delete ${lost.length === 1 ? 'its line' : 'those lines'} and add ${lost.length === 1 ? 'it' : 'them'} again.`,
+      );
+      return;
+    }
+
+    const isNew = !currentFile;
+    const slug = isNew
+      ? slugifyStr(frontMatter.slug || frontMatter.title) || 'note'
+      : currentFile!.replace(/\.md$/, '');
+    const filename = currentFile || `${slug}.md`;
+    // Only upload images the note still uses.
+    const images = pendingImages.filter((img) => markdownContent.includes(img.path));
+    const saved: Snapshot = { frontMatter: { ...frontMatter, slug }, markdownContent };
 
     setIsPublishing(true);
     setError('');
 
     try {
-      const slug = frontMatter.slug || slugifyStr(frontMatter.title) || 'note';
-      if (!frontMatter.slug) setFrontMatter((prev) => ({ ...prev, slug }));
-      const filename = currentFile || `${slug}.md`;
+      if (isNew) await assertSlugAvailable(filename);
 
       const result = await publishNote({
         slug,
@@ -439,17 +573,30 @@ export default function NoteEditor() {
         content: generateFullMarkdown(),
         title: frontMatter.title,
         description: frontMatter.description,
-        isUpdate: !!currentFile,
+        isUpdate: !isNew,
         branch: sessionBranch,
         sha: sessionSha || currentFileSha,
         prNumber,
-        images: pendingImages,
+        images,
       });
 
       setSessionBranch(result.branch);
-      setPendingImages([]);
-      setCurrentFile(filename);
       setSessionSha(result.sha);
+      setCurrentFile(filename);
+      setFrontMatter((prev) => ({ ...prev, slug }));
+      setSavedKey(snapshotKey(saved));
+      images.forEach((img) => savedImagesRef.current.add(img.path));
+      setPendingImages((prev) => prev.filter((img) => !images.includes(img)));
+
+      // The backup moves from the shared "new" slot to this note's own slot,
+      // so it can't resurface in the next new note.
+      if (isNew) {
+        clearBackup('note-draft:new');
+        setDraftKey(`note-draft:${filename}`);
+      } else {
+        clearBackup();
+      }
+      setRestored(null);
 
       if (result.createdPr && result.pullRequest) {
         setPrNumber(result.pullRequest.number);
@@ -458,9 +605,6 @@ export default function NoteEditor() {
       } else {
         showSuccess(`Updated PR #${prNumber}.`);
       }
-
-      setHasUnsavedChanges(false);
-      clearDraft();
     } catch (err: any) {
       setError(err.message || 'Save failed');
     } finally {
@@ -468,54 +612,78 @@ export default function NoteEditor() {
     }
   };
 
-  const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
+  // Put image markdown on its own line(s) at `at` (or the cursor) and select
+  // the first image's alt text so typing replaces it.
+  const insertImageMarkdown = (text: string, at?: number) => {
+    const view = editorViewRef.current;
+    if (!view || !view.dom.isConnected) {
+      setMarkdownContent((prev) => `${prev.trimEnd()}\n\n${text}\n`);
+      return;
+    }
+    const pos = Math.min(at ?? view.state.selection.main.head, view.state.doc.length);
+    const line = view.state.doc.lineAt(pos);
+    const before = line.text.slice(0, pos - line.from).trim() ? '\n\n' : '';
+    const after = line.text.slice(pos - line.from).trim() ? '\n\n' : '';
+    const altStart = pos + before.length + 2; // after `![`
+    view.dispatch({
+      changes: { from: pos, insert: `${before}${text}${after}` },
+      selection: { anchor: altStart, head: altStart + IMAGE_ALT_PLACEHOLDER.length },
+    });
+    view.focus();
+  };
+
+  // Resize/compress images in the browser and stage them for the next save.
+  // Used by the Image button, paste, and drag-and-drop.
+  const addImageFiles = async (files: File[], at?: number) => {
+    if (!files.length) return;
     setUploadMessage(null);
-
-    const validation = validateImage(file);
-    if (!validation.valid) {
-      setUploadMessage({ type: 'error', text: validation.error || 'Invalid image' });
-      return;
-    }
-    const slug = frontMatter.slug || slugifyStr(frontMatter.title);
-    if (!slug) {
-      setUploadMessage({ type: 'error', text: 'Add a title (or slug) before adding images.' });
-      return;
-    }
-
     setIsUploadingImage(true);
+
+    imageFolderRef.current ??=
+      currentFile?.replace(/\.md$/, '') ||
+      slugifyStr(frontMatter.slug || frontMatter.title) ||
+      `note-${Date.now().toString(36)}`;
+    const folder = imageFolderRef.current;
+
+    const lines: string[] = [];
     try {
-      const optimizedFile = await optimizeImage(file);
-      const timestamp = Date.now();
-      const sanitizedName = file.name.replace(/[^a-zA-Z0-9.-]/g, '-');
-      const filename = `${slug}-${timestamp}-${sanitizedName}`;
-      const imagePath = `/notes-images/${slug}/${filename}`;
-
-      setPendingImages((prev) => [...prev, { file: optimizedFile, placeholder: imagePath, filename }]);
-
-      const altText = file.name.split('.')[0];
-      const imageMarkdown = `![${altText}](${imagePath})`;
-      if (editorViewRef.current) {
-        const view = editorViewRef.current;
-        const cursorPos = view.state.selection.main.head;
-        view.dispatch({
-          changes: { from: cursorPos, insert: imageMarkdown },
-          selection: { anchor: cursorPos + imageMarkdown.length },
-        });
-      } else {
-        setMarkdownContent((prev) => prev + '\n' + imageMarkdown + '\n');
+      for (const [i, file] of files.entries()) {
+        const validation = validateImage(file);
+        if (!validation.valid) throw new Error(validation.error || 'Invalid image');
+        const optimized = await optimizeImage(file);
+        if (optimized.size > MAX_FILE_SIZE) {
+          throw new Error(`${file.name} is still over ${MAX_FILE_SIZE / 1024 / 1024}MB after resizing. Try a smaller image.`);
+        }
+        const base = slugifyStr(optimized.name.replace(/\.[^.]+$/, '')) || 'image';
+        const ext = optimized.name.split('.').pop()?.toLowerCase() || 'jpg';
+        const filename = `${base}-${Date.now().toString(36)}${i}.${ext}`;
+        const path = `/notes-images/${folder}/${filename}`;
+        previewUrlsRef.current.set(path, URL.createObjectURL(optimized));
+        setPendingImages((prev) => [...prev, { file: optimized, path, folder, filename }]);
+        lines.push(`![${IMAGE_ALT_PLACEHOLDER}](${path})`);
       }
-
-      setUploadMessage({ type: 'success', text: `Image added — uploads when you publish (${pendingImages.length + 1} pending).` });
-      setHasUnsavedChanges(true);
-      if (fileInputRef.current) fileInputRef.current.value = '';
-      window.setTimeout(() => setUploadMessage(null), 5000);
     } catch (err: any) {
       setUploadMessage({ type: 'error', text: err.message || 'Failed to process image' });
     } finally {
       setIsUploadingImage(false);
     }
+
+    if (lines.length) {
+      insertImageMarkdown(lines.join('\n\n'), at);
+      setUploadMessage((prev) =>
+        prev?.type === 'error'
+          ? prev
+          : { type: 'success', text: 'Type a short description over the highlighted text. Images upload when you save.' },
+      );
+      window.setTimeout(() => setUploadMessage((prev) => (prev?.type === 'success' ? null : prev)), 8000);
+    }
+  };
+  addImageFilesRef.current = addImageFiles;
+
+  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(event.target.files ?? []);
+    event.target.value = '';
+    addImageFiles(files);
   };
 
   const goBack = () => {
@@ -562,10 +730,10 @@ export default function NoteEditor() {
         type="button"
         onClick={() => fileInputRef.current?.click()}
         disabled={isUploadingImage}
-        title="Add image"
+        title="Add image (you can also paste or drop one into the editor)"
         className="rounded px-2 py-1.5 text-sm text-muted-foreground hover:text-foreground hover:bg-foreground/5 transition-colors disabled:opacity-40"
       >
-        {isUploadingImage ? 'Processing…' : `Image${pendingImages.length > 0 ? ` (${pendingImages.length})` : ''}`}
+        {isUploadingImage ? 'Adding…' : 'Image'}
       </button>
     </>
   );
@@ -574,7 +742,13 @@ export default function NoteEditor() {
     <div className="space-y-6">
       {/* Top bar */}
       <div className="flex items-center justify-between gap-4">
-        <button onClick={goBack} className="btn-ghost">← Notes</button>
+        {/* Same bent arrow as the navbar's back button. */}
+        <button onClick={goBack} className="btn-ghost">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M20.25 5.25A9 9 0 0 1 11.25 14.25H3.75M8.25 9.75L3.75 14.25L8.25 18.75" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+          All notes
+        </button>
         <div className="flex items-center gap-4">
           <span className="text-sm text-muted-foreground">{statusText}</span>
           {prUrl && (
@@ -589,21 +763,20 @@ export default function NoteEditor() {
       </div>
 
       {/* Banners */}
-      {pendingDraft && (
-        <div className="status-warning flex flex-wrap items-center justify-between gap-3">
-          <span>Unsaved draft found for this note.</span>
-          <span className="flex gap-4">
-            <button onClick={restoreDraft} className="font-medium hover:opacity-80">Restore</button>
-            <button onClick={discardDraft} className="hover:opacity-80">Discard</button>
-          </span>
-        </div>
+      {restored && (
+        <p className="text-sm text-muted-foreground">
+          Picked up your unsaved changes from {formatSavedAt(restored.savedAt)}.{' '}
+          <button onClick={revertToSaved} className="underline decoration-foreground/30 underline-offset-2 hover:text-foreground hover:decoration-foreground">
+            {currentFile ? 'Revert to saved version' : 'Start over'}
+          </button>
+        </p>
       )}
       {confirmingLeave && (
         <div className="status-warning flex flex-wrap items-center justify-between gap-3">
-          <span>You have unsaved changes. Leave anyway?</span>
+          <span>Leave without saving? Your changes will be discarded.</span>
           <span className="flex gap-4">
-            <button onClick={() => (window.location.href = '/admin')} className="font-medium hover:opacity-80">Leave</button>
-            <button onClick={() => setConfirmingLeave(false)} className="hover:opacity-80">Stay</button>
+            <button onClick={() => discardAndLeave('/admin')} className="font-medium hover:opacity-80">Discard and leave</button>
+            <button onClick={() => setConfirmingLeave(false)} className="hover:opacity-80">Keep editing</button>
           </span>
         </div>
       )}
@@ -634,7 +807,15 @@ export default function NoteEditor() {
           <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="field-label">Slug</label>
-              <input type="text" value={frontMatter.slug} onChange={(e) => handleFrontMatterChange('slug', e.target.value)} className="field-input" placeholder="post-slug" />
+              {currentFile ? (
+                <>
+                  {/* The filename is the URL, fixed at the first save. */}
+                  <input type="text" value={currentFile.replace(/\.md$/, '')} disabled className="field-input opacity-60" />
+                  <p className="mt-1 text-xs text-muted-foreground">Set when the note was first saved.</p>
+                </>
+              ) : (
+                <input type="text" value={frontMatter.slug} onChange={(e) => handleFrontMatterChange('slug', e.target.value)} className="field-input" placeholder="post-slug" />
+              )}
             </div>
             <div>
               <label className="field-label">Date</label>
@@ -697,6 +878,7 @@ export default function NoteEditor() {
         ref={fileInputRef}
         type="file"
         accept="image/jpeg,image/jpg,image/png,image/webp,image/gif"
+        multiple
         onChange={handleImageUpload}
         className="hidden"
       />
@@ -723,8 +905,12 @@ export default function NoteEditor() {
         </div>
 
         {/* Inline formatting toolbar (desktop, or a phone before you tap in). */}
-        {tab === 'write' && !barFloating && (
-          <div className="flex flex-wrap items-center gap-0.5">{formatToolbarButtons}</div>
+        {/* While the floating bar shows, this stays in the layout (invisible) so
+            the text doesn't jump up, and the floating bar sits in its space. */}
+        {tab === 'write' && (
+          <div className={`flex flex-wrap items-center gap-0.5 ${barFloating ? 'invisible' : ''}`} aria-hidden={barFloating || undefined}>
+            {formatToolbarButtons}
+          </div>
         )}
       </div>
 

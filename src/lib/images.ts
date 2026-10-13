@@ -4,7 +4,11 @@
 const MAX_WIDTH = 1200;
 const JPEG_QUALITY = 0.85;
 
+/** Max size of an image after optimizeImage() — what the upload route accepts. */
 export const MAX_FILE_SIZE = 2 * 1024 * 1024; // 2MB
+/** Max size of the original file picked/pasted/dropped. Phone photos are often
+ *  3–10MB but shrink well under MAX_FILE_SIZE once resized to MAX_WIDTH. */
+export const MAX_INPUT_SIZE = 25 * 1024 * 1024; // 25MB
 export const ALLOWED_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif'];
 
 export interface ImageValidation {
@@ -13,7 +17,8 @@ export interface ImageValidation {
 }
 
 /**
- * Validates an image file
+ * Validates an original image file before optimization. The 2MB upload limit
+ * is checked after optimizeImage(), since resizing shrinks most photos.
  */
 export function validateImage(file: File): ImageValidation {
   if (!file) {
@@ -27,10 +32,10 @@ export function validateImage(file: File): ImageValidation {
     };
   }
 
-  if (file.size > MAX_FILE_SIZE) {
+  if (file.size > MAX_INPUT_SIZE) {
     return {
       valid: false,
-      error: `File is too large. Maximum size is ${MAX_FILE_SIZE / 1024 / 1024}MB.`
+      error: `File is too large. Maximum size is ${MAX_INPUT_SIZE / 1024 / 1024}MB.`
     };
   }
 
@@ -56,7 +61,10 @@ export async function optimizeImage(file: File): Promise<File> {
       return;
     }
 
+    const objectUrl = URL.createObjectURL(file);
+
     img.onload = () => {
+      URL.revokeObjectURL(objectUrl);
       let { width, height } = img;
 
       // Only resize if image is larger than MAX_WIDTH
@@ -69,10 +77,12 @@ export async function optimizeImage(file: File): Promise<File> {
       canvas.height = height;
       ctx.drawImage(img, 0, 0, width, height);
 
-      // Convert to JPEG for better compression (unless it's PNG and small)
-      const outputType = file.type === 'image/png' && file.size < 500 * 1024
-        ? 'image/png'
-        : 'image/jpeg';
+      // Convert to JPEG for better compression, except small PNGs and PNGs
+      // with transparency (JPEG has no alpha, so it would turn black).
+      const outputType =
+        file.type === 'image/png' && (file.size < 500 * 1024 || hasTransparency(ctx, width, height))
+          ? 'image/png'
+          : 'image/jpeg';
 
       canvas.toBlob(
         (blob) => {
@@ -87,7 +97,7 @@ export async function optimizeImage(file: File): Promise<File> {
             return;
           }
 
-          const optimizedFile = new File([blob], file.name, {
+          const optimizedFile = new File([blob], withExtension(file.name, outputType), {
             type: outputType,
             lastModified: Date.now(),
           });
@@ -100,9 +110,24 @@ export async function optimizeImage(file: File): Promise<File> {
     };
 
     img.onerror = () => {
+      URL.revokeObjectURL(objectUrl);
       reject(new Error('Failed to load image'));
     };
 
-    img.src = URL.createObjectURL(file);
+    img.src = objectUrl;
   });
+}
+
+function hasTransparency(ctx: CanvasRenderingContext2D, width: number, height: number): boolean {
+  const { data } = ctx.getImageData(0, 0, width, height);
+  for (let i = 3; i < data.length; i += 4) {
+    if (data[i] < 255) return true;
+  }
+  return false;
+}
+
+/** Swap a filename's extension to match the (possibly converted) MIME type. */
+export function withExtension(name: string, type: string): string {
+  const ext = type === 'image/png' ? 'png' : type === 'image/webp' ? 'webp' : type === 'image/gif' ? 'gif' : 'jpg';
+  return `${name.replace(/\.[^.]+$/, '') || 'image'}.${ext}`;
 }

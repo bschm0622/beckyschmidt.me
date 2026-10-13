@@ -67,6 +67,16 @@ export const POST = githubRoute(async ({ octokit, owner, repo }, { request }) =>
   // Upload to GitHub in public/notes-images/{slug}/
   const filePath = `public/notes-images/${slug}/${filename}`;
 
+  // If this exact file is already on the branch (a save that failed partway
+  // and is being retried), overwrite it instead of failing for lack of a sha.
+  let existingSha: string | undefined;
+  try {
+    const { data } = await octokit.rest.repos.getContent({ owner, repo, path: filePath, ref: branch });
+    if (!Array.isArray(data)) existingSha = data.sha;
+  } catch (error: any) {
+    if (error.status !== 404) throw error;
+  }
+
   const response = await octokit.rest.repos.createOrUpdateFileContents({
     owner,
     repo,
@@ -74,6 +84,7 @@ export const POST = githubRoute(async ({ octokit, owner, repo }, { request }) =>
     message,
     content: base64Content,
     branch,
+    ...(existingSha && { sha: existingSha }),
   });
 
   // Public files are accessible at /notes-images/...

@@ -112,7 +112,14 @@ export default function AdminDashboard() {
     window.location.href = `/admin/edit?${params.toString()}`;
   };
 
+  // If the note already has an edit in review, reopen that PR instead of
+  // starting a second, conflicting one from master.
   const handleEditNote = (filename: string) => {
+    const inReview = pending.find((pr) => pr.filename === filename && !pr.isDelete);
+    if (inReview) {
+      handleEditPending(inReview);
+      return;
+    }
     window.location.href = `/admin/edit?file=${encodeURIComponent(filename)}`;
   };
 
@@ -136,6 +143,8 @@ export default function AdminDashboard() {
 
       setConfirmingDelete(null);
       showSuccess(`Opened PR #${pr.number} to delete "${note.title}". Merge it to remove the note.`);
+      // Show the new delete PR under "In review".
+      api.pending().then((data) => setPending(data.pending || [])).catch(() => {});
     } catch (err: any) {
       setError(err.message || 'Failed to delete note');
     } finally {
@@ -175,14 +184,14 @@ export default function AdminDashboard() {
 
   return (
     <div className="space-y-8">
-      <div className="flex items-baseline justify-between gap-6">
+      <div className="flex items-center justify-between gap-6">
         <h1 className="text-2xl font-medium leading-[1.3] tracking-tight text-foreground">Notes</h1>
-        <div className="flex items-center gap-5 text-sm shrink-0">
-          <button onClick={handleLogout} className="text-muted-foreground hover:text-foreground transition-colors">
+        <div className="flex items-center gap-5 shrink-0">
+          <button onClick={handleLogout} className="btn-ghost">
             Log out
           </button>
-          <button onClick={handleCreateNew} className="text-muted-foreground hover:text-foreground transition-colors">
-            New note →
+          <button onClick={handleCreateNew} className="btn-primary">
+            New note
           </button>
         </div>
       </div>

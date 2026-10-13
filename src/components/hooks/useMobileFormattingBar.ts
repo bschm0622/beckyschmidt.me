@@ -29,15 +29,18 @@ export function useMobileFormattingBar(active: boolean) {
   }, []);
 
   // Put the bar at the top of the visible area (visual-viewport offset), clamped
-  // to the editor's own top so it never rides up over the details. Writes `top`
-  // straight to the DOM — no React state, so scrolling can't re-render us.
+  // so its bottom edge never goes below the editor's top: it sits in the space
+  // the (hidden) inline toolbar keeps reserved, above the text, rather than over
+  // the first lines you're typing. Writes `top` straight to the DOM — no React
+  // state, so scrolling can't re-render us.
   const positionBar = useCallback(() => {
     const vv = window.visualViewport;
     const bar = barRef.current;
     if (!vv || !bar) return;
     const top = vv.offsetTop;
-    const editorTop = editorBoxRef.current?.getBoundingClientRect().top ?? top;
-    bar.style.top = `${Math.round(Math.max(top, editorTop))}px`;
+    const editorTop = editorBoxRef.current?.getBoundingClientRect().top;
+    const minTop = editorTop === undefined ? top : editorTop - bar.offsetHeight;
+    bar.style.top = `${Math.round(Math.max(top, minTop))}px`;
   }, []);
 
   // Reposition on visual-viewport resize + scroll (iOS fires these as the

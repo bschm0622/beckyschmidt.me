@@ -9,13 +9,19 @@ export interface ParsedFrontmatter {
 
 const FRONTMATTER_REGEX = /^---\s*\r?\n([\s\S]*?)\r?\n---\s*\r?\n?([\s\S]*)$/;
 
-/** Strip one layer of surrounding quotes. */
+/** Strip one layer of surrounding quotes, undoing YAML escapes: `\"` and
+ *  `\\` inside double quotes (what serializeFrontmatter writes), `''` inside
+ *  single quotes. */
 function unquote(value: string): string {
-  if (
-    (value.startsWith('"') && value.endsWith('"')) ||
-    (value.startsWith("'") && value.endsWith("'"))
-  ) {
-    return value.slice(1, -1);
+  if (value.length >= 2 && value.startsWith('"') && value.endsWith('"')) {
+    try {
+      return JSON.parse(value);
+    } catch {
+      return value.slice(1, -1);
+    }
+  }
+  if (value.length >= 2 && value.startsWith("'") && value.endsWith("'")) {
+    return value.slice(1, -1).replace(/''/g, "'");
   }
   return value;
 }
@@ -54,7 +60,10 @@ export function serializeFrontmatter(
   body: string
 ): string {
   const lines = Object.entries(data).map(([key, value]) =>
-    Array.isArray(value) ? `${key}: ${tagsToLiteral(value)}` : `${key}: "${value}"`
+    // JSON string syntax is valid YAML double-quoted syntax, so quotes and
+    // backslashes in a title or description are escaped instead of breaking
+    // the frontmatter (and the site build).
+    Array.isArray(value) ? `${key}: ${tagsToLiteral(value)}` : `${key}: ${JSON.stringify(value)}`
   );
   return `---\n${lines.join('\n')}\n---\n\n${body.trim()}\n`;
 }

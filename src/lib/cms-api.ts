@@ -254,8 +254,9 @@ export interface PublishNoteInput {
   sha?: string | null;
   /** Existing PR number to reuse; a new PR is opened if omitted. */
   prNumber?: number | null;
-  /** Staged images to upload to the branch before committing. */
-  images?: Array<{ file: File; filename: string }>;
+  /** Staged images to upload to the branch before committing. `folder` is the
+   *  public/notes-images/ subfolder the note's markdown already points at. */
+  images?: Array<{ file: File; filename: string; folder: string }>;
 }
 
 export interface PublishNoteResult {
@@ -287,7 +288,7 @@ export async function publishNote(input: PublishNoteInput): Promise<PublishNoteR
   for (const img of images) {
     await uploadImage({
       file: img.file,
-      slug,
+      slug: img.folder,
       branch,
       filename: img.filename,
       message: `Add image for ${slug}`,
