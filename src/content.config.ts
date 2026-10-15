@@ -43,5 +43,22 @@ const projects = defineCollection({
     })
 });
 
+// Mini tools collection — edit the list in src/data/mini-tools.json. Same
+// shape as projects, but `href` is an internal path (each tool is a page
+// under src/pages/mini-tools/).
+const miniTools = defineCollection({
+    loader: file("src/data/mini-tools.json", {
+        parser: (text) =>
+            JSON.parse(text).map((t: { name: string }, i: number) => ({ id: t.name, order: i, ...t })),
+    }),
+    schema: z.object({
+        name: z.string(),
+        href: z.string().startsWith("/mini-tools/"),
+        description: z.string(),
+        icon: z.string().optional(),
+        order: z.number(),
+    })
+});
+
 // Export collections
-export const collections = { notes, projects };
+export const collections = { notes, projects, miniTools };

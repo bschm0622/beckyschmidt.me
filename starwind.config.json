@@ -1,0 +1,48 @@
+{
+  "$schema": "https://starwind.dev/config-schema.v2.json",
+  "version": 2,
+  "framework": "astro",
+  "registry": {
+    "source": "bundled",
+    "version": "2.2.0"
+  },
+  "components": [
+    {
+      "name": "button",
+      "version": "3.0.2",
+      "framework": "astro",
+      "registry": "default"
+    },
+    {
+      "name": "toggle-group",
+      "version": "2.0.2",
+      "framework": "astro",
+      "registry": "default"
+    },
+    {
+      "name": "dropzone",
+      "version": "2.0.2",
+      "framework": "astro",
+      "registry": "default"
+    },
+    {
+      "name": "collapsible",
+      "version": "2.0.2",
+      "framework": "astro",
+      "registry": "default"
+    },
+    {
+      "name": "tooltip",
+      "version": "2.2.1",
+      "framework": "astro",
+      "registry": "default"
+    }
+  ],
+  "tailwind": {
+    "css": "src/styles/starwind.css",
+    "baseColor": "neutral",
+    "cssVariables": true
+  },
+  "componentDir": "src/components/starwind",
+  "utilsDir": "src/lib/utils"
+}

@@ -40,6 +40,7 @@ ${c.links}
 ## More
 
 - [Full text of every note and page](${new URL('llms-full.txt', origin).href})
+- [Mini tools: small browser tools Becky built](${new URL('mini-tools', origin).href})
 - [Colophon: how this site is built](${new URL('colophon', origin).href})
 `;
 

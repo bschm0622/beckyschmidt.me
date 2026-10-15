@@ -9,6 +9,8 @@
  * - `noNav`: omit the navbar (404, whose own links cover home and search).
  * - `skylineFooter`: show the Indy skyline illustration flush under the
  *   content (homepage only); other pages keep bottom padding instead.
+ * - `wide`: a wider column (navbar included) for tools that need room,
+ *   e.g. /cleanshot.
  * Slots: default (main content), "head" (extra <head> tags),
  * "before-nav" (e.g. the note scroll-progress bar).
  */
@@ -28,6 +30,7 @@ interface Props {
     noSearch?: boolean;
     noNav?: boolean;
     skylineFooter?: boolean;
+    wide?: boolean;
 }
 
 const {
@@ -41,11 +44,12 @@ const {
     noSearch = false,
     noNav = false,
     skylineFooter = false,
+    wide = false,
 } = Astro.props;
 
 const mainClass = fullWidth
     ? "px-4 flex-1"
-    : `px-6 md:px-4 ${skylineFooter ? "" : "pb-16"} mt-4 md:mt-6 flex-1 mx-auto w-full max-w-[38rem] ${proseClass}`;
+    : `px-6 md:px-4 ${skylineFooter ? "" : "pb-16"} mt-4 md:mt-6 flex-1 mx-auto w-full ${wide ? "max-w-[68rem]" : "max-w-[38rem]"} ${proseClass}`;
 ---
 
 <BaseLayout
@@ -57,7 +61,7 @@ const mainClass = fullWidth
 >
     <slot name="head" slot="head" />
     <slot name="before-nav" />
-    {!noNav && <Navbar />}
+    {!noNav && <Navbar wide={wide} />}
     <main class={mainClass}>
         <slot />
     </main>

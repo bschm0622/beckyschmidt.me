@@ -2,6 +2,7 @@ import type { APIRoute } from "astro";
 import { getSortedNotes, noteUrl } from "@/lib/notes";
 import { parseFrontmatter } from "@/lib/frontmatter";
 import colophonSource from "@/story/colophon.md?raw";
+import miniTools from "@/data/mini-tools.json";
 
 export const prerender = true;
 
@@ -44,6 +45,24 @@ export const GET: APIRoute = async () => {
             pubDate: "",
             body: stripMarkdown(colophonSource),
         },
+        {
+            kind: "page",
+            title: "Mini tools",
+            description: "Small tools Becky built for things she kept doing by hand.",
+            tags: [],
+            url: "/mini-tools/",
+            pubDate: "",
+            body: miniTools.map((t) => `${t.name}. ${t.description}`).join(" "),
+        },
+        ...miniTools.map((t) => ({
+            kind: "page",
+            title: t.name,
+            description: t.description,
+            tags: [],
+            url: `${t.href}/`,
+            pubDate: "",
+            body: t.description,
+        })),
     ];
 
     const index = [...noteItems, ...pageItems];

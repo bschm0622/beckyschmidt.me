@@ -1,0 +1,33 @@
+---
+/** Mini tools index: every small tool on the site. The list lives in src/data/mini-tools.json. */
+import DefaultLayout from "@/layouts/DefaultLayout.astro";
+import { getCollection } from "astro:content";
+
+const tools = (await getCollection("miniTools"))
+    .map((t) => t.data)
+    .sort((a, b) => a.order - b.order);
+
+// Same row treatment as the homepage Projects list.
+const row = "group flex items-start gap-3 py-2 no-underline!";
+const icon = "brand-icon size-5 shrink-0 mt-px rounded";
+---
+
+<DefaultLayout title="Mini tools" description="Small free tools I built for things I kept doing by hand. They run in your browser.">
+    <div class="space-y-6">
+        <header class="space-y-1">
+            <h1>Mini tools</h1>
+            <p class="text-muted-foreground">Small tools I built for things I kept doing by hand. They run in your browser.</p>
+        </header>
+        <div>
+            {tools.map((tool) => (
+                <a href={tool.href} class={row}>
+                    {tool.icon && <img src={tool.icon} alt="" width="20" height="20" class={icon} />}
+                    <div class="min-w-0">
+                        <p class="text-base font-medium text-muted-foreground leading-snug transition-colors group-hover:text-foreground group-hover:underline decoration-1">{tool.name}</p>
+                        <p class="text-sm text-muted-foreground mt-0.5 leading-snug">{tool.description}</p>
+                    </div>
+                </a>
+            ))}
+        </div>
+    </div>
+</DefaultLayout>

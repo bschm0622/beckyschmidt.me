@@ -75,6 +75,15 @@ const projectIcon = "brand-icon size-5 shrink-0 mt-px rounded";
             </div>
           </a>
         ))}
+        {/* Mini tools: internal link to the /mini-tools index (the tools
+             themselves are listed in src/data/mini-tools.json). */}
+        <a href="/mini-tools" class={projectRow}>
+          <img src="/project-icons/mini-tools.svg" alt="" width="20" height="20" loading="lazy" class={projectIcon} />
+          <div class="min-w-0">
+            <p class="text-base font-medium text-muted-foreground leading-snug transition-colors group-hover:text-foreground group-hover:underline decoration-1">Mini tools</p>
+            <p class="text-sm text-muted-foreground mt-0.5 leading-snug">Small tools I built for things I kept doing by hand.</p>
+          </div>
+        </a>
         {/* This site: internal link to the colophon, so it isn't in
              projects.json (those are external, UTM-tagged, new-tab links). */}
         <a href="/colophon" class={projectRow}>

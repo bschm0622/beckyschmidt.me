@@ -1,4 +1,6 @@
 @import 'tailwindcss';
+@import 'tw-animate-css';
+@import './starwind.css';
 
 @custom-variant dark (&:where(.dark, .dark *));
 
@@ -46,7 +48,7 @@ html:not(.light):not(.dark) {
   --color-muted: #e7e5e4;
   --color-muted-foreground: #57534e;
   --color-surface: #fdfcfa;
-  --color-accent: #3b82f6;
+  --color-focus: #3b82f6;
   --color-secondary: #f5f4f0;
   --color-foreground: #1c1917;
   --color-background: #faf9f6;
@@ -70,7 +72,7 @@ html:not(.light):not(.dark) {
   --color-muted: #52525b;
   --color-muted-foreground: #c4c4cc;
   --color-surface: #27272a;
-  --color-accent: #60a5fa;
+  --color-focus: #60a5fa;
   --color-secondary: #3f3f46;
   --color-foreground: #fafafa;
   --color-background: #18181b;
@@ -432,7 +434,7 @@ html.dark code {
    (see .field-input). This rule is unlayered, so without the :not() it would
    override an input's layered outline:none and re-introduce the accent ring. */
 :focus-visible:not(input):not(textarea):not(select) {
-  outline: 2px solid var(--color-accent);
+  outline: 2px solid var(--color-focus);
   outline-offset: 2px;
 }
 

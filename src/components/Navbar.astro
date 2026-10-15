@@ -1,6 +1,12 @@
 ---
 import ThemeToggle from "@/components/ThemeToggle.astro";
 
+interface Props {
+    /** Match DefaultLayout's wide column. */
+    wide?: boolean;
+}
+
+const { wide = false } = Astro.props;
 const path = Astro.url.pathname;
 
 const isHome = path === "/";
@@ -21,7 +27,7 @@ const isHome = path === "/";
     document.addEventListener("astro:page-load", initSearchTriggers);
 </script>
 
-<nav class="px-6 md:px-4 py-6 flex items-center justify-between w-full max-w-[38rem] mx-auto">
+<nav class={`px-6 md:px-4 py-6 flex items-center justify-between w-full mx-auto ${wide ? "max-w-[68rem]" : "max-w-[38rem]"}`}>
     {/* Back to home (hidden on homepage) */}
     {!isHome && (
         <a
