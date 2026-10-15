@@ -48,7 +48,7 @@ export const GET: APIRoute = async () => {
         {
             kind: "page",
             title: "Mini tools",
-            description: "Small tools Becky built for things she kept doing by hand.",
+            description: "Custom tools built for my own workflows, hosted here.",
             tags: [],
             url: "/mini-tools/",
             pubDate: "",
