@@ -73,15 +73,15 @@
 }
 
 .dark {
-  --foreground-ink: #fafafa;
-  --primary-ink: #18181b;
-  --primary-ink-accent: #d4d4d8;
-  --card: #27272a;
-  --accent: #3f3f46;
+  --foreground-ink: #f7f8f8;
+  --primary-ink: #08090a;
+  --primary-ink-accent: #d0d6e0;
+  --card: #0f1011;
+  --accent: #1c1c1f;
   --info: #60a5fa;
   --error: #f87171;
-  --border: #3f3f46;
-  --outline: #71717a;
+  --border: #23252a;
+  --outline: #62666d;
 }
 
 /* Starwind components rely on a default border color; scope it to them so

@@ -61,7 +61,7 @@ export const SITE: SiteConfiguration = {
         description: "Becky's notes and writing",
         language: "en-us",
     },
-    themeColors: { light: "#faf9f6", dark: "#18181b" },
+    themeColors: { light: "#faf9f6", dark: "#08090a" },
 
     nav: [
         { label: "Home", href: "/" },

@@ -67,15 +67,17 @@ html:not(.light):not(.dark) {
   --color-warning-border: #fde68a;
 }
 
+/* Dark neutrals follow Linear's dark theme (linear.app): near-black
+   background, near-white text, and a clearly dimmer gray for secondary text. */
 .dark {
-  --color-primary: #d4d4d8;
-  --color-muted: #52525b;
-  --color-muted-foreground: #c4c4cc;
-  --color-surface: #27272a;
+  --color-primary: #d0d6e0;
+  --color-muted: #23252a;
+  --color-muted-foreground: #8a8f98;
+  --color-surface: #0f1011;
   --color-focus: #60a5fa;
-  --color-secondary: #3f3f46;
-  --color-foreground: #fafafa;
-  --color-background: #18181b;
+  --color-secondary: #1c1c1f;
+  --color-foreground: #f7f8f8;
+  --color-background: #08090a;
   --color-link: #93c5fd;
 
   /* Dark-mode status colors: brighter text, deep-tinted surfaces so banners
