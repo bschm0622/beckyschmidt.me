@@ -23,8 +23,8 @@ const icon = "brand-icon size-5 shrink-0 mt-px rounded";
                 <a href={tool.href} class={row}>
                     {tool.icon && <img src={tool.icon} alt="" width="20" height="20" class={icon} />}
                     <div class="min-w-0">
-                        <p class="text-base font-medium text-muted-foreground leading-snug transition-colors group-hover:text-foreground group-hover:underline decoration-1">{tool.name}</p>
-                        <p class="text-sm text-muted-foreground mt-0.5 leading-snug">{tool.description}</p>
+                        <p class="text-base leading-snug text-primary transition-colors group-hover:text-foreground group-hover:underline decoration-1">{tool.name}</p>
+                        <p class="text-sm text-faint-foreground mt-0.5 leading-snug">{tool.description}</p>
                     </div>
                 </a>
             ))}

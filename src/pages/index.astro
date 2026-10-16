@@ -36,7 +36,7 @@ const projectRows = [
 ---
 
 <DefaultLayout skylineFooter={true}>
-  <div class="mx-auto w-full space-y-12 pb-16">
+  <div class="mx-auto w-full space-y-16 pb-16">
 
     {/* Intro. Copy: src/story/hero.md; the closing line is here so contact links come from siteConfig. */}
     <section>
@@ -62,7 +62,7 @@ const projectRows = [
     </section>
 
     {/* Projects */}
-    <section id="projects" class="space-y-3">
+    <section id="projects" class="space-y-4">
       <h2>Projects</h2>
       <div>
         {projectRows.map((row) => (
@@ -76,8 +76,8 @@ const projectRows = [
               <img src={row.icon} alt="" width="20" height="20" loading="lazy" class="brand-icon size-5 shrink-0 mt-px rounded" />
             )}
             <div class="min-w-0">
-              <p class="text-base font-medium text-foreground leading-snug group-hover:underline decoration-1">{row.name}</p>
-              <p class="text-sm text-muted-foreground mt-0.5 leading-snug">{row.description}</p>
+              <p class="text-base leading-snug text-primary transition-colors group-hover:text-foreground group-hover:underline decoration-1">{row.name}</p>
+              <p class="text-sm text-faint-foreground mt-0.5 leading-snug">{row.description}</p>
             </div>
           </a>
         ))}
@@ -85,7 +85,7 @@ const projectRows = [
     </section>
 
     {/* Notes */}
-    <section class="space-y-3">
+    <section class="space-y-4">
       <div class="flex items-baseline justify-between">
         <h2>Notes</h2>
         {noteCount > 5 && (

@@ -31,7 +31,7 @@ const postsToShow = preview ? allPosts.slice(0, 5) : allPosts;
     <a href={noteUrl(post)} class="group block py-2 no-underline!">
       <div class="flex items-baseline justify-between gap-6">
         <div class="flex items-baseline gap-2 flex-wrap min-w-0">
-          <span class="text-base font-medium text-muted-foreground leading-snug min-w-0 transition-colors group-hover:text-foreground group-hover:underline decoration-1">
+          <span class="text-base leading-snug min-w-0 text-primary transition-colors group-hover:text-foreground group-hover:underline decoration-1">
             {post.data.title}
           </span>
           {showTags && post.data.tags && (
@@ -42,7 +42,7 @@ const postsToShow = preview ? allPosts.slice(0, 5) : allPosts;
             />
           )}
         </div>
-        <FormattedDate date={post.data.pubDate} variant="month-year" class="text-sm text-muted-foreground shrink-0 transition-colors group-hover:text-foreground" />
+        <FormattedDate date={post.data.pubDate} variant="month-year" class="text-sm text-faint-foreground shrink-0" />
       </div>
     </a>
   ))}

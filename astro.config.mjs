@@ -53,7 +53,46 @@ export default defineConfig({
   },
 
   vite: {
-    plugins: [tailwindcss()]
+    plugins: [tailwindcss()],
+    // Pre-bundle every package the server-rendered pages import. Without this,
+    // Vite discovers some of them only when a page that uses them is first
+    // visited (e.g. the Starwind components on CleanShot), re-bundles, and the
+    // already-loaded worker keeps pointing at the old bundle hashes, failing
+    // with "The file does not exist at node_modules/.vite/deps_ssr/...".
+    // When a page starts importing a new package, add it here.
+    // Same for the browser bundle: a late re-bundle there reloads the page
+    // mid-session and can load two copies of React ("Invalid hook call").
+    optimizeDeps: {
+      include: [
+        "@starwind-ui/runtime/button",
+        "astro/virtual-modules/transitions-events.js",
+        "astro/virtual-modules/transitions-router.js",
+        "astro/virtual-modules/transitions-swap-functions.js",
+        "astro/virtual-modules/transitions-types.js",
+      ],
+    },
+    environments: {
+      ssr: {
+        optimizeDeps: {
+          include: [
+            "@starwind-ui/astro/button",
+            "@starwind-ui/astro/collapsible",
+            "@starwind-ui/astro/dropzone",
+            "@starwind-ui/astro/toggle",
+            "@starwind-ui/astro/toggle-group",
+            "@starwind-ui/astro/tooltip",
+            "tailwind-variants",
+            "convex/react",
+            "fuse.js",
+            "markdown-it",
+            "@octokit/rest",
+            "astro/app/manifest",
+            "astro/logger/json",
+            "@astrojs/rss",
+          ],
+        },
+      },
+    },
   },
 
   markdown: {

@@ -1,7 +1,7 @@
 ---
-title: "How I built BiblePlan"
+title: "How I built bibleplan.app"
 pubDate: 2026-08-31
-description: "How I built BiblePlan, a flexible Bible reading plan app."
+description: "How I built bibleplan.app, a flexible Bible reading plan app."
 author: "Becky Schmidt"
 tags:
   - side project

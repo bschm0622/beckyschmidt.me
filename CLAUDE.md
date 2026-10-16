@@ -46,8 +46,8 @@ Personal site for Becky Schmidt (beckyschmidt.me). Astro 7 + Tailwind 4 + React 
 
 Four link/interaction roles, each with ONE treatment. Don't invent a fifth; when adding a link, pick its role and copy an existing example.
 
-1. **Content links** (in prose and story copy): underlined at rest — `underline decoration-1 underline-offset-2 decoration-foreground/30`, decoration darkens to full foreground on hover. This is the default `a` style in both `.typography` and `.type-standard` (`src/styles/global.css`); a plain `<a>` gets it for free.
-2. **Titles of clickable list items/cards** (project cards, NotesReel note titles): no underline at rest, underline on hover (`no-underline!` + `hover:underline`/`group-hover:underline`).
+1. **Content links** (in prose and story copy): underlined at rest — `underline decoration-1 underline-offset-2 decoration-foreground/30`, the link keeps the surrounding text color, and text and decoration go to full foreground on hover. This is the default `a` style in both `.typography` and `.type-standard` (`src/styles/global.css`); a plain `<a>` gets it for free.
+2. **Titles of clickable list items** (homepage project rows, NotesReel note titles, mini tools list): regular weight in `text-primary` (a softer white in dark mode), no underline at rest; on hover the title goes to full foreground and underlines (`group-hover:text-foreground group-hover:underline`). Their descriptions and dates are `text-sm text-faint-foreground`. The row itself is `no-underline!`.
 3. **Quiet meta-navigation** ("← all notes" via `AllNotesLink.astro`, "View all (n) →", tag chips): small muted text, `no-underline!`, hover signals by color only — `text-muted-foreground! hover:text-foreground!` (chips use a background tint change instead). The `!` on colors is required to beat the `.typography a` prose rule on note pages.
 4. **Navigation chrome** (navbar icon buttons): pill hover — `rounded-lg hover:bg-foreground/13`. Buttons only, never text links.
 
@@ -60,9 +60,10 @@ When to use an icon instead of the outbound arrow:
 
 ## Conventions & gotchas
 
-- Headings: on standard pages (`.type-standard`: home, notes index, tag pages, 404) a plain `<h1>`/`<h2>` is body-sized medium text by default — don't add size classes. Notes and the colophon use `.typography`, which keeps large headings.
+- Headings: on standard pages (`.type-standard`: home, notes index, tag pages, 404) a plain `<h1>`/`<h2>` is 20px regular in full foreground, one step above everything else; body text is muted gray. The whole site uses regular weight; only `<strong>` in notes is bold — don't add size classes. Notes and the colophon use `.typography`, which keeps large headings.
 - Path alias `@/*` → `src/*`. Tailwind 4 via the Vite plugin — there is no `tailwind.config`; design tokens live in `src/styles/global.css`.
 - Env vars are declared in `astro.config.mjs` `env.schema` and read via `astro:env/client|server`. Local values in `.env.local` (gitignored; never print it). `convex dev` writes `CONVEX_DEPLOYMENT`/`CONVEX_SITE_URL` there automatically.
 - Client components (`.tsx` islands) must not import server-only modules (`astro:content`, `src/lib/github.ts`, `src/lib/notes.ts`).
+- Dev-server "The file does not exist at node_modules/.vite/deps_ssr/…" or "Invalid hook call" errors mean Vite found a package late and re-bundled mid-session. The fix is to add that package to the `optimizeDeps.include` lists in `astro.config.mjs` (browser list, or `environments.ssr` for server-rendered imports), not to restart. Check `npx astro dev logs` for "dependency optimized: …" to see which one.
 - `NoteEditor.tsx` contains delicate mobile-viewport/scroll workarounds (see its inline comments) — edit conservatively.
 - Verification = `npm run check` then `npm run build`. Don't commit, push, or deploy unless asked.
