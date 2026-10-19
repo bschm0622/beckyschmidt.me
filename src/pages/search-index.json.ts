@@ -54,15 +54,6 @@ export const GET: APIRoute = async () => {
             pubDate: "",
             body: miniTools.map((t) => `${t.name}. ${t.description}`).join(" "),
         },
-        ...miniTools.map((t) => ({
-            kind: "page",
-            title: t.name,
-            description: t.description,
-            tags: [],
-            url: `${t.href}/`,
-            pubDate: "",
-            body: t.description,
-        })),
     ];
 
     const index = [...noteItems, ...pageItems];
