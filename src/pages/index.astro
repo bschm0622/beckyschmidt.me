@@ -22,12 +22,10 @@ function withUtm(href: string) {
   return url.toString();
 }
 
-// External projects (UTM-tagged, new tab) followed by internal rows: the
-// /mini-tools index (tools are listed in src/data/mini-tools.json) and this
-// site, which links to the colophon.
+// External projects (UTM-tagged, new tab) followed by this site, which links
+// to the colophon.
 const projectRows = [
   ...projects.map((p) => ({ name: p.name, href: withUtm(p.href), description: p.description, icon: p.icon, external: true })),
-  { name: "Mini tools", href: "/mini-tools", description: "Custom tools built for my own workflows, hosted here.", icon: "/project-icons/mini-tools.svg", external: false },
   { name: "beckyschmidt.me", href: "/colophon", description: "My personal site. Learn more about how it's built.", icon: "/favicon.svg", external: false },
 ];
 
