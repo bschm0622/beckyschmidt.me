@@ -107,7 +107,7 @@ const proseInputBehavior = EditorView.contentAttributes.of({
   spellcheck: 'true',
 });
 
-export default function NoteEditor() {
+export default function NoteEditor({ repo }: { repo: string }) {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
@@ -190,8 +190,14 @@ export default function NoteEditor() {
     window.setTimeout(() => setSuccessMessage(''), 6000);
   };
 
+  // Read by the image renderer below, which is built once.
+  const sessionBranchRef = useRef(sessionBranch);
+  sessionBranchRef.current = sessionBranch;
+
   // Built once. Images added this session aren't on the site yet, so the
-  // preview shows the local copy; others load from the site as usual.
+  // preview shows the local copy; others load from the site as usual. An image
+  // that only exists on an unmerged PR branch 404s on the site, so on error it
+  // retries the branch's copy on GitHub before hiding.
   const mdParser = useMemo(() => {
     const md = new MarkdownIt();
     const defaultRender =
@@ -203,9 +209,17 @@ export default function NoteEditor() {
       const token = tokens[idx];
       const srcIndex = token.attrIndex('src');
       if (srcIndex >= 0) {
-        const local = previewUrlsRef.current.get(token.attrs![srcIndex][1]);
+        const src = token.attrs![srcIndex][1];
+        const local = previewUrlsRef.current.get(src);
         if (local) token.attrs![srcIndex][1] = local;
-        token.attrPush(['onerror', "this.style.display='none'"]);
+        const branch = sessionBranchRef.current;
+        const hide = "this.style.display='none'";
+        if (!local && branch && src.startsWith('/')) {
+          const branchUrl = encodeURI(`https://raw.githubusercontent.com/${repo}/${branch}/public${src}`);
+          token.attrPush(['onerror', `if(this.dataset.retried){${hide}}else{this.dataset.retried='1';this.src='${branchUrl}'}`]);
+        } else {
+          token.attrPush(['onerror', hide]);
+        }
         token.attrPush(['loading', 'lazy']);
       }
       return defaultRender(tokens, idx, options, env, self);
