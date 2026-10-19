@@ -1,5 +1,5 @@
 ---
-title: "Everyone gets the same idea from AI"
+title: "Finding untapped niches with Claude Code"
 pubDate: "2026-10-18"
 description: "How I built CEO Paycheck and steered Claude to find the niche."
 author: "Becky Schmidt"
@@ -44,6 +44,6 @@ That taught me the difference between one-way and two-way doors. A two-way door 
 
 So far, I'm seeing modest success from the site. As you can see in the screenshot below, impressions and clicks are picking up: 11.7K impressions last week at an average position of 7.7, and about 18 clicks a day. That's roughly 550 visits a month from Google, a little over halfway to Journey's requirement of 1,000. Pages are still being indexed, and I have a plan to add more pages, but it will be a while until I qualify.
 
-![Screenshot of Google Search Console results](/notes-images/everyone-same-idea-ai/screenshot-2026-10-18-mvemplx30.jpg)
+![Screenshot of Google Search Console results](/notes-images/finding-untapped-niches-claude-code/screenshot-2026-10-18-mvemplx30.jpg)
 
 If I started another site tomorrow, I wouldn't ask Claude for a niche. I'd give it examples of sites that are already winning, the list of every idea I've ruled out, and the bar an idea has to clear: a keyword family that can reach 100K searches, data that takes some work to clean, and a winnable page 1 I've checked by hand.
