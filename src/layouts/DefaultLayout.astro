@@ -11,8 +11,7 @@
  *   content (homepage only); other pages keep bottom padding instead.
  * - `wide`: a wider column (navbar included) for tools that need room,
  *   e.g. /cleanshot.
- * Slots: default (main content), "head" (extra <head> tags),
- * "before-nav" (e.g. the note scroll-progress bar).
+ * Slots: default (main content), "head" (extra <head> tags).
  */
 import BaseLayout from "@/layouts/BaseLayout.astro";
 import Navbar from "@/components/Navbar.astro";
@@ -60,7 +59,6 @@ const mainClass = fullWidth
     noindex={noindex}
 >
     <slot name="head" slot="head" />
-    <slot name="before-nav" />
     {!noNav && <Navbar wide={wide} />}
     <main class={mainClass}>
         <slot />

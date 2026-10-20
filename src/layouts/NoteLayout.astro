@@ -55,8 +55,6 @@ const blogPostingSchema = {
     {/* BlogPosting Schema.org Structured Data */}
     <script slot="head" is:inline type="application/ld+json" set:html={JSON.stringify(blogPostingSchema)} />
 
-    <div slot="before-nav" id="scroll-progress" class="fixed top-0 left-0 z-50 h-1 bg-primary"></div>
-
     {/* Main Content */}
     <h1 class="mt-0 mb-3">{frontmatter.title}</h1>
     <div class="flex flex-wrap items-center gap-3 text-sm text-muted-foreground mb-8">
@@ -70,25 +68,6 @@ const blogPostingSchema = {
 </DefaultLayout>
 
 <script>
-    /** scroll progress bar — throttled to one update per animation frame */
-    let ticking = false;
-    function updateScrollProgress() {
-        const scrollableHeight =
-            document.documentElement.scrollHeight - window.innerHeight;
-        const progressBar = document.getElementById("scroll-progress");
-        if (progressBar) {
-            const progress = scrollableHeight > 0 ? (window.scrollY / scrollableHeight) * 100 : 0;
-            progressBar.style.width = progress + "%";
-        }
-        ticking = false;
-    }
-    window.addEventListener("scroll", () => {
-        if (!ticking) {
-            ticking = true;
-            requestAnimationFrame(updateScrollProgress);
-        }
-    });
-
     /** Attach copy buttons to code blocks */
     function attachCopyButtons() {
         const copyButtonLabel = "Copy";
