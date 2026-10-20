@@ -14,7 +14,7 @@ const {
 const { tags } = frontmatter as { tags?: string[] };
 
 const origin = siteOrigin(Astro.site);
-const articleUrl = new URL(`/notes/${slug}`, origin).toString();
+const articleUrl = new URL(`/notes/${slug}/`, origin).toString();
 const imageUrl = image ? new URL(image, origin).toString() : new URL(SITE.ogImage, origin).toString();
 
 const blogPostingSchema = {

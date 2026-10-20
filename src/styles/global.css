@@ -6,6 +6,12 @@
 
 html {
   scrollbar-gutter: stable;
+  /* Native scrollbars and form controls follow the site theme */
+  color-scheme: light;
+  -webkit-tap-highlight-color: transparent;
+}
+html.dark {
+  color-scheme: dark;
 }
 
 /* Global type scale. Every text size is multiplied by this one value, so a
@@ -74,7 +80,7 @@ html:not(.light):not(.dark) {
   --color-primary: #d0d6e0;
   --color-muted: #23252a;
   --color-muted-foreground: #8a8f98;
-  --color-faint-foreground: #62666d;
+  --color-faint-foreground: #767b83; /* 4.6:1 on the background (AA) */
   --color-surface: #0f1011;
   --color-focus: #60a5fa;
   --color-secondary: #1c1c1f;
@@ -296,10 +302,20 @@ html:not(.light):not(.dark) {
   margin-top: 0;
 }
 
+/* No single-word last lines: balanced headings, and paragraphs that avoid orphans */
+.typography :is(h1, h2, h3),
+.type-standard :is(h1, h2) {
+  text-wrap: balance;
+}
+.typography :is(p, li, blockquote) {
+  text-wrap: pretty;
+}
+
 /* Command palette scroll area: a thin scrollbar that spans the full height.
    (Styling the scrollbar replaces the macOS overlay one, which otherwise
    floats inset from the top and bottom of the track.) */
 .palette-scroll {
+  overscroll-behavior: contain;
   scrollbar-width: thin;
   scrollbar-color: color-mix(in srgb, var(--color-foreground) 25%, transparent) transparent;
 }
@@ -365,9 +381,12 @@ html:not(.light):not(.dark) {
   filter: grayscale(var(--icon-gray, 1)) var(--icon-dark-filter, );
   transition: filter 150ms ease;
 }
-.icon-links a:hover > img,
-a:hover .brand-icon {
-  --icon-gray: 0;
+/* Hover-capable devices only, or a tap leaves the icon in color on phones */
+@media (hover: hover) {
+  .icon-links a:hover > img,
+  a:hover .brand-icon {
+    --icon-gray: 0;
+  }
 }
 /* Black-on-transparent icons would vanish on the dark background.
    hue-rotate after invert keeps Astro's colored flame roughly its own color. */
@@ -402,9 +421,15 @@ html.dark .astro-code span {
   text-decoration: var(--shiki-dark-text-decoration) !important;
 }
 
-/* Inline <code> styling */
-code {
-  @apply text-foreground text-base;
+/* Inline <code>: keeps the surrounding text color (full white stood out
+   against gray prose in dark mode), sized to sit with the prose font, on a
+   light tint in both themes. */
+:not(pre) > code {
+  color: inherit;
+  font-size: 0.875em;
+  padding: 0.125em 0.35em;
+  border-radius: 0.25rem;
+  background: color-mix(in srgb, var(--color-foreground) 6%, transparent);
 }
 
 /* Code blocks smaller font */
@@ -414,11 +439,6 @@ code {
 
 .astro-code code {
   @apply text-base;
-}
-
-/* Dark mode inline code */
-html.dark code {
-  @apply bg-secondary;
 }
 
 /* Consistent, on-brand keyboard focus ring for interactive elements. Form

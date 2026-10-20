@@ -5,6 +5,7 @@ import react from '@astrojs/react';
 import { unified } from '@astrojs/markdown-remark';
 import rehypeExternalLinks from 'rehype-external-links';
 import { remarkReadingTime } from './src/lib/remark-reading-time.mjs';
+import { rehypeImageSize } from './src/lib/rehype-image-size.mjs';
 
 
 import tailwindcss from '@tailwindcss/vite';
@@ -105,11 +106,12 @@ export default defineConfig({
     },
     // Astro 7 defaults to the native Sätteri pipeline, which has no remark/rehype
     // support and no built-in external-link handling. Stay on the unified
-    // (remark/rehype) processor so both plugins below keep working unchanged.
+    // (remark/rehype) processor so the plugins below keep working unchanged.
     processor: unified({
       remarkPlugins: [remarkReadingTime],
       rehypePlugins: [
         [rehypeExternalLinks, { target: '_blank', rel: ['noopener', 'noreferrer'] }],
+        rehypeImageSize,
       ],
     }),
   },

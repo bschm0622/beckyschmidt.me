@@ -26,7 +26,7 @@ function withUtm(href: string) {
 // to the colophon.
 const projectRows = [
   ...projects.map((p) => ({ name: p.name, href: withUtm(p.href), description: p.description, icon: p.icon, external: true })),
-  { name: "beckyschmidt.me", href: "/colophon", description: "My personal site. Learn more about how it's built.", icon: "/favicon.svg", external: false },
+  { name: "beckyschmidt.me", href: "/colophon/", description: "My personal site. Learn more about how it's built.", icon: "/favicon-96x96.png", external: false },
 ];
 
 // All homepage copy lives in src/story/*.md.
@@ -87,7 +87,7 @@ const projectRows = [
       <div class="flex items-baseline justify-between">
         <h2>Notes</h2>
         {noteCount > 5 && (
-          <a href="/notes" class="text-sm text-muted-foreground! hover:text-foreground! transition-colors no-underline!">View all ({noteCount}) →</a>
+          <a href="/notes/" class="text-sm text-muted-foreground! hover:text-foreground! transition-colors no-underline!">View all ({noteCount}) →</a>
         )}
       </div>
       <NotesReel preview={true} showTags={false} />

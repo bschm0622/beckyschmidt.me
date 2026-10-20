@@ -13,18 +13,10 @@ const isHome = path === "/";
 ---
 
 <script>
-    function initSearchTriggers() {
-        document.querySelectorAll<HTMLElement>("[data-search-trigger]").forEach((btn) => {
-            btn.addEventListener("click", () => window.openSearchModal?.());
-        });
-    }
-
-    if (document.readyState === "loading") {
-        document.addEventListener("DOMContentLoaded", initSearchTriggers);
-    } else {
-        initSearchTriggers();
-    }
-    document.addEventListener("astro:page-load", initSearchTriggers);
+    // Bundled scripts run once per session; delegate so new pages need no rebinding.
+    document.addEventListener("click", (event) => {
+        if ((event.target as Element).closest("[data-search-trigger]")) window.openSearchModal?.();
+    });
 </script>
 
 <nav class={`px-6 md:px-4 py-6 flex items-center justify-between w-full mx-auto ${wide ? "max-w-[68rem]" : "max-w-[38rem]"}`}>
