@@ -8,7 +8,7 @@ tags: ["side project"]
 
 I launched Remote PM Jobs in April of 2026. I built it as I started wondering what other jobs might be out there, and found that the current remote product manager job boards were either sparse, not 100% remote, or not product manager focused. I also was getting more interested in local AI and had recently acquired a Mac Mini, so I had the compute available to start testing new capabilities.
 
-## Product Overview
+## Product overview
 
 Remote PM Jobs is a job board for product managers. Every night it scrapes 1,000+ company job boards for product manager positions. Using Gemma e12:b (more on that in the building section), it enriches up to 200 jobs per night, and then rebuilds the entire site each day so it's fresh for the next morning. I also built a resume matcher that reviews an uploaded resume against all the live job postings and returns the top 10 matches compared to experience.
 
@@ -20,7 +20,7 @@ Originally the site was hosted on Netlify using Convex, which I was familiar wit
 
 Perhaps the most interesting part of this project is the nightly Gemma enrichment. Every night my Mac mini scrapes the ATS's and the postings go through Gemma - to determine if they are remote, and then to enrich them with tags & write the short descriptions. The amazing thing about local AI is that it gives you virtually unlimited AI capabilities. This has allowed me to experiment with many different prompting techniques, and put the job descriptions through 4+ passes in order to get the highest quality data without paying a compute provider.
 
-## User Acquisition and Activation
+## User acquisition and activation
 
 Remote PM Jobs has a few acquisition channels. Most traffic comes from AI citations (mostly ChatGPT) and organic search. SEO has not been a great channel, mostly because I honestly have changed the site structure so many times and recently realized that quite a bit of the homepage was not crawlable by Google.
 

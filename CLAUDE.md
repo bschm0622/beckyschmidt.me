@@ -1,11 +1,10 @@
 # CLAUDE.md
 
-Personal site for Becky Schmidt (beckyschmidt.me). Astro 7 + Tailwind 4 + React islands, deployed to **Cloudflare Workers** (not Netlify — older docs/history may say otherwise). Includes a GitHub-API-backed admin CMS at `/admin` and Convex-powered note reactions.
+Personal site for Becky Schmidt (beckyschmidt.me). Astro 7 + Tailwind 4 + React islands, deployed to **Cloudflare Workers** (not Netlify — older docs/history may say otherwise). Includes a GitHub-API-backed admin CMS at `/admin`.
 
 ## Commands
 
-- `npm run astro-dev` — Astro dev server only (**prefer this for agents**)
-- `npm run dev` — also spawns `convex dev` in the background
+- `npm run dev` — Astro dev server
 - `npm run check` — `astro check` (typecheck; there are no tests or linter — this is the verification step)
 - `npm run build` — production build
 - `npm run deploy` — build + `wrangler deploy` (**never run unless explicitly asked**)
@@ -25,7 +24,7 @@ Personal site for Becky Schmidt (beckyschmidt.me). Astro 7 + Tailwind 4 + React 
 
 ## Architecture
 
-- **Layouts** (3): `BaseLayout` (html shell + `BaseHead`) → `DefaultLayout` (Navbar + main + SearchModal; props `proseClass`, `fullWidth`, `noSearch`) → `NoteLayout` (composes DefaultLayout; article header, JSON-LD, reactions).
+- **Layouts** (3): `BaseLayout` (html shell + `BaseHead`) → `DefaultLayout` (Navbar + main + SearchModal; props `proseClass`, `fullWidth`, `noSearch`) → `NoteLayout` (composes DefaultLayout; article header, JSON-LD).
 - **Note URLs**: `post.id` (the filename) is the only source of truth — there is no `slug` frontmatter field. Helpers: `getSortedNotes()` / `noteUrl()` in `src/lib/notes.ts` (server-only).
 - **`src/lib/`** is the shared-code home (there is no `src/utils/`):
   - `notes.ts` — note fetching/sorting/URLs (server-only; imports `astro:content`)
@@ -38,7 +37,6 @@ Personal site for Becky Schmidt (beckyschmidt.me). Astro 7 + Tailwind 4 + React 
   - `cms-api.ts` — typed client for `/api/github/*`; the single client↔server contract, plus `publishNote()` / `deleteNotePipeline()` flows
   - `images.ts` — image validation/optimization constants + helpers
 - **Admin CMS**: pages in `src/pages/admin/`, React islands `AdminDashboard.tsx` and `NoteEditor.tsx` (UI only — all IO goes through `cms-api.ts`). API routes in `src/pages/api/github/` are each a thin `githubRoute()` handler; auth is enforced by the wrapper. CMS edits create `cms/…` branches and PRs against `master`.
-- **Convex**: functions in `convex/` (`reactions.ts`, `schema.ts`); `convex/_generated/` is generated — never hand-edit.
 - **Starwind UI** (CleanShot only so far): components in `src/components/starwind/`, theme in `src/styles/starwind.css`, which maps Starwind's tokens onto the site palette and is imported by `global.css` (not a second Tailwind entry). Starwind buttons own their disabled state: use `createButton(el).setDisabled()` from `@starwind-ui/runtime/button`, never `el.disabled =`.
 - **Machine-readable endpoints**: `rss.xml.ts`, `robots.txt.ts`, `llms.txt.ts`, `llms-full.txt.ts`, `search-index.json.ts` in `src/pages/` — keep their facts in sync with `siteConfig.ts` when identity/stack details change.
 
@@ -62,7 +60,7 @@ When to use an icon instead of the outbound arrow:
 
 - Headings: on standard pages (`.type-standard`: home, notes index, tag pages, 404) a plain `<h1>`/`<h2>` is 20px regular in full foreground, one step above everything else; body text is muted gray. The whole site uses regular weight; only `<strong>` in notes is bold — don't add size classes. Notes and the colophon use `.typography`, which keeps large headings.
 - Path alias `@/*` → `src/*`. Tailwind 4 via the Vite plugin — there is no `tailwind.config`; design tokens live in `src/styles/global.css`.
-- Env vars are declared in `astro.config.mjs` `env.schema` and read via `astro:env/client|server`. Local values in `.env.local` (gitignored; never print it). `convex dev` writes `CONVEX_DEPLOYMENT`/`CONVEX_SITE_URL` there automatically.
+- Env vars are declared in `astro.config.mjs` `env.schema` and read via `astro:env/client|server`. Local values in `.env.local` (gitignored; never print it).
 - Client components (`.tsx` islands) must not import server-only modules (`astro:content`, `src/lib/github.ts`, `src/lib/notes.ts`).
 - Dev-server "The file does not exist at node_modules/.vite/deps_ssr/…" or "Invalid hook call" errors mean Vite found a package late and re-bundled mid-session. The fix is to add that package to the `optimizeDeps.include` lists in `astro.config.mjs` (browser list, or `environments.ssr` for server-rendered imports), not to restart. Check `npx astro dev logs` for "dependency optimized: …" to see which one.
 - `NoteEditor.tsx` contains delicate mobile-viewport/scroll workarounds (see its inline comments) — edit conservatively.

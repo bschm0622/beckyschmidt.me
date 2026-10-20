@@ -9,7 +9,7 @@ tags:
 
 I originally launched BiblePlan in January 2025. It was created partially to scratch an itch - there is no way to create a truly customizable Bible reading plan (choose your own books, timeline, and skip days). I also created it to try out AI coding for the first time.
 
-## Product Overview
+## Product overview
 
 BiblePlan is an app for building a Bible reading plan around your actual life: pick any book or grouping of books, set your own timeline, and skip days of the week for sustainability or general life rhythms. From there, the BiblePlan [algorithm](https://www.bibleplan.app/algorithm) assigns reading across the remaining days as evenly as possible.
 
@@ -21,7 +21,7 @@ BiblePlan was built using a variety of tools, including GitHub Copilot, Cursor, 
 
 Since this project was created using early 2025 models, it's been pretty amazing to revisit the project as the models have gotten better and better. When I started the project I was fighting GPT 3.5 at every step to get simple tweaks to the algorithm to better balance plans. Fast forward to a few months ago using Opus 4.7 to better split verses at chapter breaks, and the model basically one-shot my desired change, and tested the change itself with browser use.
 
-## User Acquisition and Activation
+## User acquisition and activation
 
 BiblePlan's only user acquisition channel is SEO. The beauty of SEO is that it's mostly set and forget, and free, which is why this is the only way I'm marketing so far. And as you can see, it's been growing nicely over the past 20 months.
 

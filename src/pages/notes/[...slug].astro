@@ -1,7 +1,6 @@
 ---
 import { getCollection, render } from "astro:content";
 import NoteLayout from "@/layouts/NoteLayout.astro";
-import ReactionApp from "@/components/ReactionApp";
 import AllNotesLink from "@/components/AllNotesLink.astro";
 
 export async function getStaticPaths() {
@@ -19,6 +18,5 @@ const minutesRead = remarkPluginFrontmatter?.minutesRead ?? "";
 
 <NoteLayout minutesRead={minutesRead} frontmatter={post.data} slug={post.id}>
     <Content />
-    <ReactionApp client:visible postId={post.id} />
     <AllNotesLink />
 </NoteLayout>

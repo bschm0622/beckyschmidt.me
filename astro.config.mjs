@@ -28,10 +28,6 @@ export default defineConfig({
 
   env: {
     schema: {
-      CONVEX_URL: envField.string({
-        access: "public",
-        context: "client",
-      }),
       ADMIN_PASSWORD: envField.string({
         access: "secret",
         context: "server",
@@ -83,7 +79,6 @@ export default defineConfig({
             "@starwind-ui/astro/toggle-group",
             "@starwind-ui/astro/tooltip",
             "tailwind-variants",
-            "convex/react",
             "fuse.js",
             "markdown-it",
             "@octokit/rest",

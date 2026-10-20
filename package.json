@@ -3,8 +3,7 @@
   "type": "module",
   "version": "0.0.1",
   "scripts": {
-    "astro-dev": "astro dev",
-    "dev": "npx convex dev & astro dev",
+    "dev": "astro dev",
     "build": "astro build",
     "preview": "astro build && wrangler dev",
     "check": "astro check",
@@ -26,7 +25,6 @@
     "@tailwindcss/vite": "^4.3.3",
     "@uiw/react-codemirror": "^4.21.24",
     "astro": "^7.2.9",
-    "convex": "^1.25.4",
     "fuse.js": "^7.1.0",
     "markdown-it": "^14.1.0",
     "mdast-util-to-string": "^4.0.0",
