@@ -6,7 +6,7 @@ author: "Becky Schmidt"
 tags: ["side project"]
 ---
 
-Over the past 18 months I've launched about a dozen websites built with Claude Code. Most recently I've been experimenting with programmatic SEO. In this case, programmatic means that you can produce large amounts of content at scale using a template, instead of writing every page individually. By publishing hundreds or thousands of webpages, you can chase what SEOs call the longtail. I love this site, [longtail.com](http://longtail.com), which beautifully explains it:
+Over the past 18 months I've launched about a dozen websites built with Claude Code. Most recently I've been experimenting with programmatic SEO. In this case, programmatic means that you can produce large amounts of content at scale using a template, instead of writing every page individually. By publishing hundreds or thousands of webpages, you can chase what SEOs call the longtail. I love this site, [longtail.com](https://longtail.com), which beautifully explains it:
 
 > The concept was elegantly simple yet profoundly powerful—the internet enables niche products and interests to find their audiences at scale. Better still, these niches are often far less competitive than mainstream markets, creating fertile ground for creative entrepreneurs willing to go deep rather than broad.
 
