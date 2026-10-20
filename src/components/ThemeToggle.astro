@@ -1,11 +1,9 @@
 ---
 import { SITE } from "@/siteConfig";
 
-const uniqueId = `themeToggle-${crypto.randomUUID().slice(0, 8)}`;
 ---
 
 <button
-    id={uniqueId}
     type="button"
     aria-label="Toggle theme"
     class="theme-toggle-btn relative flex items-center justify-center w-10 h-10 rounded-lg transition-[background-color] cursor-pointer hover:bg-foreground/13 text-foreground"
@@ -22,58 +20,50 @@ const uniqueId = `themeToggle-${crypto.randomUUID().slice(0, 8)}`;
     <span class="sr-only">Toggle theme</span>
 </button>
 
-<script is:inline define:vars={{ buttonId: uniqueId, themeColors: SITE.themeColors }}>
-    const updateThemeColor = (isDark) => {
-        const meta = document.getElementById("theme-color-meta");
-        if (meta) meta.setAttribute("content", isDark ? themeColors.dark : themeColors.light);
-    };
+<script is:inline define:vars={{ themeColors: SITE.themeColors }}>
+    // This inline script re-runs on every client-side navigation, so everything
+    // is bound once and the click is delegated: per-button listeners piled up on
+    // revisited pages and made one click toggle twice.
+    if (!window.__themeBound) {
+        window.__themeBound = true;
 
-    const applyThemeFromLocalStorage = () => {
-        const theme = localStorage.getItem("theme");
-        if (theme === "dark") {
-            document.documentElement.classList.remove("light");
-            document.documentElement.classList.add("dark");
-            updateThemeColor(true);
-        } else if (theme === "light") {
-            document.documentElement.classList.remove("dark");
-            document.documentElement.classList.add("light");
-            updateThemeColor(false);
-        }
-    };
+        // Only an explicit toggle is stored; otherwise follow the system setting.
+        // Keep the key in sync with the init script in BaseHead.astro.
+        const KEY = "theme-preference";
+        const systemDark = window.matchMedia("(prefers-color-scheme: dark)");
+        const currentTheme = () =>
+            localStorage.getItem(KEY) || (systemDark.matches ? "dark" : "light");
 
-    const handleToggleClick = () => {
-        document.documentElement.classList.toggle("dark");
-        const isDark = document.documentElement.classList.contains("dark");
-        document.documentElement.classList.toggle("light", !isDark);
-        localStorage.setItem("theme", isDark ? "dark" : "light");
-        updateThemeColor(isDark);
-    };
+        const applyTheme = (root, theme) => {
+            root.classList.remove("light", "dark");
+            root.classList.add(theme);
+        };
+        const updateThemeColor = (theme) => {
+            const meta = document.getElementById("theme-color-meta");
+            if (meta) meta.setAttribute("content", theme === "dark" ? themeColors.dark : themeColors.light);
+        };
 
-    const setupThemeToggleButton = () => {
-        const toggleButton = document.getElementById(buttonId);
-        if (toggleButton) {
-            toggleButton.removeEventListener("click", handleToggleClick); // Prevent duplicate listeners
-            toggleButton.addEventListener("click", handleToggleClick);
-        }
-    };
+        document.addEventListener("click", (event) => {
+            if (!event.target.closest(".theme-toggle-btn")) return;
+            const next = document.documentElement.classList.contains("dark") ? "light" : "dark";
+            localStorage.setItem(KEY, next);
+            applyTheme(document.documentElement, next);
+            updateThemeColor(next);
+        });
 
-    // For View Transitions: set the theme on the *incoming* document before it's
-    // swapped in, so the transition snapshot never captures the wrong theme (no flash).
-    document.addEventListener("astro:before-swap", (event) => {
-        const theme = localStorage.getItem("theme") === "dark" ? "dark" : "light";
-        const root = event.newDocument.documentElement;
-        root.classList.remove("light", "dark");
-        root.classList.add(theme);
-    });
+        // Set the theme on the *incoming* document before it's swapped in, so the
+        // transition snapshot never captures the wrong theme (no flash).
+        document.addEventListener("astro:before-swap", (event) => {
+            applyTheme(event.newDocument.documentElement, currentTheme());
+        });
 
-    // After swap, sync the theme-color meta tag (its element is replaced on swap).
-    document.addEventListener("astro:after-swap", applyThemeFromLocalStorage);
+        // The theme-color meta element is replaced on swap, so sync it after.
+        document.addEventListener("astro:after-swap", () => updateThemeColor(currentTheme()));
 
-    // For initial load and re-attaching button listener after page transitions:
-    if (document.readyState === "loading") {
-        document.addEventListener("DOMContentLoaded", setupThemeToggleButton);
-    } else {
-        setupThemeToggleButton();
+        systemDark.addEventListener("change", () => {
+            if (localStorage.getItem(KEY)) return;
+            applyTheme(document.documentElement, currentTheme());
+            updateThemeColor(currentTheme());
+        });
     }
-    document.addEventListener("astro:page-load", setupThemeToggleButton);
 </script>

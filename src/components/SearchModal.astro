@@ -8,11 +8,11 @@ const key =
 {/* Modal Backdrop */}
 <div
     id="search-modal-backdrop"
-    class="fixed inset-0 bg-foreground/20 backdrop-blur-sm z-50 hidden opacity-0 transition-opacity duration-200"
+    class="fixed inset-0 bg-black/25 dark:bg-black/60 backdrop-blur-sm z-50 hidden opacity-0 transition-opacity duration-200"
     aria-hidden="true"
 >
     {/* Modal Container */}
-    <div id="search-modal-container" class="fixed inset-0 overflow-y-auto">
+    <div id="search-modal-container" class="fixed inset-0 overflow-y-auto overscroll-contain">
         {/* Anchored near the top, not centered: results change height as you
              type, and a centered box would move the search field with them. */}
         <div class="flex min-h-full items-start justify-center p-4 md:pt-[12vh]">
@@ -60,6 +60,9 @@ const key =
 
         if (!backdrop || !container || !content) return;
 
+        // A result can navigate away with the modal still open; release the scroll lock.
+        document.documentElement.style.overflow = "";
+
         const ANIMATION_DURATION = 200;
         const FOCUS_DELAY = 100;
 
@@ -72,6 +75,8 @@ const key =
 
         function openModal() {
             previouslyFocused = document.activeElement as HTMLElement | null;
+            // Lock page scroll; scrollbar-gutter keeps the layout from shifting.
+            document.documentElement.style.overflow = "hidden";
             elements.backdrop.classList.remove("hidden");
             elements.backdrop.setAttribute("aria-hidden", "false");
             void elements.backdrop.offsetHeight;
@@ -88,6 +93,7 @@ const key =
         }
 
         function closeModal() {
+            document.documentElement.style.overflow = "";
             elements.backdrop.classList.add("opacity-0");
             elements.backdrop.setAttribute("aria-hidden", "true");
             elements.content.classList.remove("scale-100");
@@ -129,28 +135,31 @@ const key =
             closeModal();
         });
 
-        document.addEventListener("keydown", (e) => {
-            const isModalOpen = !elements.backdrop.classList.contains("hidden");
-
-            if (e.key === "Escape" && isModalOpen) {
-                closeModal();
-            }
-
-            if (isModalOpen) {
-                trapFocus(e);
-            }
-
-            if ((e.metaKey || e.ctrlKey) && e.key === "k") {
-                e.preventDefault();
-                openModal();
-            }
-        });
+        isModalOpen = () => !elements.backdrop.classList.contains("hidden");
+        trapFocusInModal = trapFocus;
     }
 
-    if (document.readyState === "loading") {
-        document.addEventListener("DOMContentLoaded", initSearchModal);
-    } else {
-        initSearchModal();
-    }
+    // Set by initSearchModal for the current page's modal.
+    let isModalOpen = () => false;
+    let trapFocusInModal: (e: KeyboardEvent) => void = () => {};
+
+    // Bound once: this script runs once per session, while initSearchModal runs
+    // on every page load, so a listener added there would pile up per navigation.
+    document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape" && isModalOpen()) {
+            window.closeSearchModal?.();
+        }
+
+        if (isModalOpen()) {
+            trapFocusInModal(e);
+        }
+
+        if ((e.metaKey || e.ctrlKey) && e.key === "k") {
+            e.preventDefault();
+            window.openSearchModal?.();
+        }
+    });
+
+    // astro:page-load also fires on the first load (ClientRouter is on every page).
     document.addEventListener("astro:page-load", initSearchModal);
 </script>
