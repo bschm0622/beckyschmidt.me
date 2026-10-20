@@ -16,21 +16,19 @@ There are many ways to monetize high-traffic websites. One of the easiest is by 
 
 I started by asking Claude to find me a high-volume, low-difficulty keyword, and it suggested "paid family leave by state calculator".
 
-Then I had Claude check who was already ranking for paid leave calculators. Two of the sites in the top 10 had been registered that same year, and when I clicked through, they had the same AI-generated design I'd seen a hundred times. Claude explained it well: "The rush exists because the barrier is only the idea. Anyone with AI coding and a public dataset can ship a state-by-state calculator in a weekend."
+Then I had Claude check who was already ranking for paid leave calculators. Two of the sites in the top 10 had been registered that same year, and when I clicked through, they had the same AI-generated design I'd seen a hundred times. Everyone is asking AI to give them niche ideas, everyone is getting the same ideas, and everyone is building them.
 
-Everyone is asking AI to give them niche ideas, everyone is getting the same ideas, and everyone is building them.
-
-Turns out you can also find all of the sites that ad networks pay. When I had Claude review that list, it showed hundreds of sites following the same playbook. I had Claude filter it down to new sites with low domain authority and found a bunch of copies of the same types of sites: school calendar aggregators, take-home pay calculators, and menu nutrition calculators, just to name a few.
+Turns out you can also find all of the sites that are using ad networks. When I had Claude review that list, it showed hundreds of sites following the same playbook. I had Claude filter it down to new sites with low domain authority and found a bunch of copies of the same types of sites: school calendar aggregators, take-home pay calculators, and menu nutrition calculators, just to name a few.
 
 I tried asking Claude to use these sites as a "golden dataset" of what's working and generate new ideas from them, but it just kept spitting back even more niches that were heavily dominated by AI-generated sites covering hundreds or thousands of pages and already ranking on page one of Google.
 
-One of the niches I tried was yarn. After running through dozens of niches with Claude, I finally settled on this one because it had potential to grow ("grandma" hobbies are rising on Google Trends) and already had good search volume (about 100K monthly searches across low-difficulty terms like "crochet hook size chart").
+One of the niches I tried was yarn. After running through dozens of niches with Claude, I finally settled on this one because it had potential to grow ("grandma" hobbies are rising on Google Trends), already had good search volume (about 100K monthly searches across low-difficulty terms like "crochet hook size chart"), and only had two vibe coded competitors that weren't even ranking on Google.
 
 At this point I had spent a few weeks trying to find a niche, so once I found one I was satisfied with, I let Claude go wild. I asked it to spin up subagents to build the whole site, and went to bed. In under two hours it had built 70 pages and 11 tools.
 
 When I checked it the next morning, the site was a complete mess of information I couldn't verify, because I'm not into knitting at all. The site itself was ugly because I hadn't given it any design references to work off of. It felt like a PDF dump rather than a website.
 
-I could have published the site as is and hoped for the best, but I scrapped it. I was no longer confident I was providing value, and to be honest I don't care about knitting at all so it was hard to get excited about the build.
+I could have published the site as is and hoped for the best, but I scrapped it. I was no longer confident I was providing value, and since I am not a knitter it was hard to get excited about the build.
 
 After the yarn site failure, I decided that my workflow with Claude was not working well and needed a reset. I started by going back to first principles: what are we building, and why? I went back to the "golden dataset" of the new sites on ad networks and used it as a guide, rather than a template. The PSEO sites fell into four broad categories: public-data lookups, spec databases, salary and money data, and directories. My requirements were: a keyword family that could reach 100K monthly searches, the ability to win page 1 of Google, a clean dataset as the underlying data, and a topic I could understand and get excited about. Claude also included a list of topics I had already rejected to prevent suggesting them again.
 
@@ -40,7 +38,7 @@ Next came building the site itself. With the data in place and parseable, the ne
 
 I did make a few missteps by trusting Claude too much during the build. I got overconfident in Claude's ability to parse the 990 forms, and one of the pages went live with the wrong figure. Claude caught its own error a day later and corrected it, but by then I had already sent an email with the wrong number in it.
 
-That taught me the difference between one-way and two-way doors. A two-way door is easy to go in and out of. A figure on the site can be corrected and pushed live again in minutes. An email can't be unsent. For the site build I'm fine letting Claude run on its own and check its own work, but anything that's a one-way door gets checked by hand first. After that, I had Claude check every figure on the site against the original 990 filings: 797 values, 0 mismatches.
+That taught me a valuable lesson in one-way vs. two-way doors. A two-way door is easy to go in and out of - a number on the site can be corrected and pushed live again quickly before anyone notices. An email can't be unsent. For the site build I'm fine letting Claude run on its own and check its own work, but now anything that's a one-way door gets checked by hand first. After that, I had Claude check every figure on the site against the original 990 filings: 797 values, 0 mismatches.
 
 So far, I'm seeing modest success from the site. As you can see in the screenshot below, impressions and clicks are picking up: 11.7K impressions last week at an average position of 7.7, and about 18 clicks a day. That's roughly 550 visits a month from Google, a little over halfway to Journey's requirement of 1,000. Pages are still being indexed, and I have a plan to add more pages, but it will be a while until I qualify.
 
