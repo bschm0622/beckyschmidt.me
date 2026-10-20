@@ -79,7 +79,7 @@ html:not(.light):not(.dark) {
 .dark {
   --color-primary: #d0d6e0;
   --color-muted: #23252a;
-  --color-muted-foreground: #8a8f98;
+  --color-muted-foreground: #9ca0a8; /* 7.6:1 on the background; body text in notes */
   --color-faint-foreground: #767b83; /* 4.6:1 on the background (AA) */
   --color-surface: #0f1011;
   --color-focus: #60a5fa;
