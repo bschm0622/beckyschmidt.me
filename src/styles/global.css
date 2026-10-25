@@ -307,8 +307,13 @@ html:not(.light):not(.dark) {
 .type-standard :is(h1, h2) {
   text-wrap: balance;
 }
-.typography :is(p, li, blockquote) {
-  text-wrap: pretty;
+/* Phones get plain wrapping: Safari applies `pretty` to the whole paragraph,
+   and on a narrow column that pulls words down early and leaves a ragged
+   gap down the right edge. */
+@media (min-width: 640px) {
+  .typography :is(p, li, blockquote) {
+    text-wrap: pretty;
+  }
 }
 
 /* Command palette scroll area: a thin scrollbar that spans the full height.
