@@ -22,6 +22,7 @@ export interface SiteConfiguration {
     socials: {
         linkedin: string;
         x: string;
+        github: string;
     };
 
     /** Headshot path (homepage avatar and schema.org Person image). */
@@ -51,6 +52,7 @@ export const SITE: SiteConfiguration = {
     socials: {
         linkedin: "https://www.linkedin.com/in/becky--schmidt/",
         x: "https://x.com/bschm0622",
+        github: "https://github.com/bschm0622",
     },
 
     headshot: "/becky.png",

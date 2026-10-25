@@ -393,7 +393,8 @@ html:not(.light):not(.dark) {
 .dark .icon-links img[src$="/astro.svg"],
 .dark .icon-links img[src$="/umami.png"],
 .dark .icon-links img[src$="/email.svg"],
-.dark .icon-links img[src$="/x.svg"] {
+.dark .icon-links img[src$="/x.svg"],
+.dark .icon-links img[src$="/github.svg"] {
   --icon-dark-filter: invert(1) hue-rotate(180deg);
 }
 /* Logos with an official light-on-dark version: swap the file instead of inverting. */
