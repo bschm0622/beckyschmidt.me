@@ -1,10 +1,3 @@
-/**
- * Shared content for /llms.txt and /llms-full.txt (server-only).
- *
- * Nothing here is hand-written: every fact comes from the same sources the
- * pages render (siteConfig, src/data/career.ts, src/story/*.md, the projects
- * and notes collections), so the llms files change whenever the site does.
- */
 import { getCollection } from "astro:content";
 import { SITE } from "@/siteConfig";
 import { getSortedNotes, noteUrl, formatDate, type Note } from "@/lib/notes";
@@ -12,12 +5,6 @@ import * as hero from "@/story/hero.md";
 import * as colophon from "@/story/colophon.md";
 import { ROLES, SKILLS, EDUCATION } from "@/data/career";
 
-/**
- * Turn site markdown into llms-friendly markdown: drop inline icon images
- * (`[![](/tool-icons/x.png)Name](url)` → `[Name](url)`), make root-relative
- * links absolute, optionally remove the leading H1, and push headings down
- * `demote` levels so they nest under the file's own sections.
- */
 export function toLlmsMarkdown(md: string, origin: URL, { stripH1 = false, demote = 0 } = {}): string {
     let out = md
         .replace(/!\[\]\([^)]*\)/g, "")
@@ -27,7 +14,6 @@ export function toLlmsMarkdown(md: string, origin: URL, { stripH1 = false, demot
     return out.trim();
 }
 
-/** "2025-09" → "Sep 2025" */
 const monthYear = (ym: string) =>
     new Date(`${ym}-01T00:00:00Z`).toLocaleDateString("en-US", { month: "short", year: "numeric", timeZone: "UTC" });
 

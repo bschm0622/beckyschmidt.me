@@ -10,8 +10,6 @@ import {
 
 export const prerender = false;
 
-// Session check: the client uses this on load to confirm the cookie is still
-// valid, rather than trusting a stale localStorage flag.
 export const GET: APIRoute = async ({ request }) => {
   return json({ authenticated: isAuthenticated(request) });
 };
@@ -42,7 +40,6 @@ export const POST: APIRoute = async ({ request }) => {
   }
 };
 
-// Logout: clear the session cookie.
 export const DELETE: APIRoute = async () => {
   return new Response(JSON.stringify({ success: true }), {
     status: 200,

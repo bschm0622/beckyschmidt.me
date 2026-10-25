@@ -1,18 +1,4 @@
 ---
-/**
- * Standard page shell: Navbar + centered <main> + search modal.
- * Variants:
- * - `proseClass`: typography class applied to <main> (default "type-standard";
- *   NoteLayout passes "typography").
- * - `fullWidth`: drop the max-width/prose styling (admin pages).
- * - `noSearch`: omit the search modal (admin pages).
- * - `noNav`: omit the navbar (404, whose own links cover home and search).
- * - `skylineFooter`: show the Indy skyline illustration flush under the
- *   content (homepage only); other pages keep bottom padding instead.
- * - `wide`: a wider column (navbar included) for tools that need room,
- *   e.g. /cleanshot.
- * Slots: default (main content), "head" (extra <head> tags).
- */
 import BaseLayout from "@/layouts/BaseLayout.astro";
 import Navbar from "@/components/Navbar.astro";
 import SearchModal from "@/components/SearchModal.astro";

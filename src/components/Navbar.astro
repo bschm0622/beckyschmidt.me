@@ -2,7 +2,6 @@
 import ThemeToggle from "@/components/ThemeToggle.astro";
 
 interface Props {
-    /** Match DefaultLayout's wide column. */
     wide?: boolean;
 }
 
@@ -20,7 +19,6 @@ const isHome = path === "/";
 </script>
 
 <nav class={`px-6 md:px-4 py-6 flex items-center justify-between w-full mx-auto ${wide ? "max-w-[68rem]" : "max-w-[38rem]"}`}>
-    {/* Back to home (hidden on homepage) */}
     {!isHome && (
         <a
             href="/"
@@ -31,9 +29,7 @@ const isHome = path === "/";
         </a>
     )}
 
-    {/* Right side controls */}
     <div class="flex items-center gap-2 ml-auto">
-        {/* Command palette trigger (⌘K shown inside the palette + on hover) */}
         <button
             type="button"
             data-search-trigger

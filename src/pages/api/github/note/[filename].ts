@@ -3,7 +3,6 @@ import { json } from '@/lib/http';
 
 export const prerender = false;
 
-// Serves a single note file from src/notes/ (content + sha) for the editor.
 export const GET = githubRoute(async ({ octokit, owner, repo }, { params, url }) => {
   const filename = params.filename;
   const branch = url.searchParams.get('branch') || DEFAULT_BRANCH;

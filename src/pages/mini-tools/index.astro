@@ -1,5 +1,4 @@
 ---
-/** Mini tools index: every small tool on the site. The list lives in src/data/mini-tools.json. */
 import DefaultLayout from "@/layouts/DefaultLayout.astro";
 import { getCollection } from "astro:content";
 
@@ -7,7 +6,6 @@ const tools = (await getCollection("miniTools"))
     .map((t) => t.data)
     .sort((a, b) => a.order - b.order);
 
-// Same row treatment as the homepage Projects list.
 const row = "group flex items-start gap-3 py-2 no-underline!";
 const icon = "brand-icon size-5 shrink-0 mt-px rounded";
 ---

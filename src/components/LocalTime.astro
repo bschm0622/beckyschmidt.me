@@ -1,8 +1,5 @@
 ---
-/**
- * Becky's local time, e.g. "Indianapolis · 3:42 PM ET". Rendered as the city
- * alone and filled in by the browser, since cached HTML would show a stale time.
- */
+// Time is filled in client-side; cached HTML would show a stale time.
 import { SITE } from "@/siteConfig";
 
 const { class: className } = Astro.props;

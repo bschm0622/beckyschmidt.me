@@ -5,18 +5,14 @@ const key =
     "rounded-sm border border-muted bg-muted px-1.5 py-0.5 text-[calc(0.7rem*var(--type-scale))] font-medium leading-none text-muted-foreground";
 ---
 
-{/* Modal Backdrop */}
 <div
     id="search-modal-backdrop"
     class="fixed inset-0 bg-black/25 dark:bg-black/60 backdrop-blur-sm z-50 hidden opacity-0 transition-opacity duration-200"
     aria-hidden="true"
 >
-    {/* Modal Container */}
     <div id="search-modal-container" class="fixed inset-0 overflow-y-auto overscroll-contain">
-        {/* Anchored near the top, not centered: results change height as you
-             type, and a centered box would move the search field with them. */}
+        {/* Top-anchored, not centered, so the field doesn't move as results change height. */}
         <div class="flex min-h-full items-start justify-center p-4 md:pt-[12vh]">
-            {/* Modal Content */}
             <div
                 id="search-modal-content"
                 class="relative w-full max-w-2xl min-w-0 bg-surface rounded-md border border-muted shadow-lg transform scale-95 transition-transform duration-200"
@@ -24,13 +20,11 @@ const key =
                 aria-modal="true"
                 aria-labelledby="search-modal-title"
             >
-                {/* Command palette */}
                 <div class="p-6">
                     <h2 id="search-modal-title" class="sr-only">Command palette</h2>
                     <CommandPalette maxHeight="60vh" client:visible />
                 </div>
 
-                {/* Keyboard hints (desktop only) */}
                 <div class="hidden md:flex items-center justify-between border-t border-muted px-6 py-3 text-xs text-muted-foreground">
                     <div class="flex items-center gap-4">
                         <span class="flex items-center gap-1.5">
@@ -68,14 +62,12 @@ const key =
 
         const elements = { backdrop, container, content };
 
-        // Remember what had focus before opening, so we can restore it on close.
         let previouslyFocused: HTMLElement | null = null;
 
         const FOCUSABLE = 'a[href], button:not([disabled]), input:not([disabled]), [tabindex]:not([tabindex="-1"])';
 
         function openModal() {
             previouslyFocused = document.activeElement as HTMLElement | null;
-            // Lock page scroll; scrollbar-gutter keeps the layout from shifting.
             document.documentElement.style.overflow = "hidden";
             elements.backdrop.classList.remove("hidden");
             elements.backdrop.setAttribute("aria-hidden", "false");
@@ -99,11 +91,9 @@ const key =
             elements.content.classList.remove("scale-100");
             elements.content.classList.add("scale-95");
             setTimeout(() => elements.backdrop.classList.add("hidden"), ANIMATION_DURATION);
-            // Return focus to whatever triggered the modal (e.g. the search button).
             previouslyFocused?.focus();
         }
 
-        // Keep Tab focus inside the dialog while it's open.
         function trapFocus(e: KeyboardEvent) {
             if (e.key !== "Tab") return;
             const focusable = Array.from(
@@ -139,12 +129,10 @@ const key =
         trapFocusInModal = trapFocus;
     }
 
-    // Set by initSearchModal for the current page's modal.
     let isModalOpen = () => false;
     let trapFocusInModal: (e: KeyboardEvent) => void = () => {};
 
-    // Bound once: this script runs once per session, while initSearchModal runs
-    // on every page load, so a listener added there would pile up per navigation.
+    // Bound here, not in initSearchModal, which runs per navigation and would pile up listeners.
     document.addEventListener("keydown", (e) => {
         if (e.key === "Escape" && isModalOpen()) {
             window.closeSearchModal?.();
@@ -160,6 +148,5 @@ const key =
         }
     });
 
-    // astro:page-load also fires on the first load (ClientRouter is on every page).
     document.addEventListener("astro:page-load", initSearchModal);
 </script>

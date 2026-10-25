@@ -10,7 +10,6 @@ interface Props {
     description?: string;
     image?: URL | string;
     canonicalURL?: URL | string;
-    /** Keep the page out of search results (admin, 404). */
     noindex?: boolean;
 }
 
@@ -24,7 +23,6 @@ const {
 
 const origin = siteOrigin(Astro.site);
 
-// <title> carries the brand for tabs/bookmarks; social cards get it via og:site_name instead.
 const fullTitle = title
     ? `${title} | ${SITE.name}`
     : `${SITE.name} | ${SITE.jobTitle}`;
@@ -47,11 +45,9 @@ const shouldLoadAnalytics = import.meta.env.PROD;
 {/* Theme color meta must come before the init script so the script can find it */}
 <meta id="theme-color-meta" name="theme-color" content={SITE.themeColors.light} />
 
-{/* Theme mode initialization */}
+{/* Inline so the theme class is set before first paint. */}
 <script is:inline define:vars={{ themeColors: SITE.themeColors }}>
     (function () {
-        // Only an explicit toggle is stored (see ThemeToggle.astro); otherwise
-        // follow the system setting, so it keeps tracking automatic dark mode.
         var theme =
             localStorage.getItem("theme-preference") ||
             (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
@@ -62,7 +58,6 @@ const shouldLoadAnalytics = import.meta.env.PROD;
     })();
 </script>
 
-{/* Meta Basics */}
 <meta charset="UTF-8" />
 <meta http-equiv="X-UA-Compatible" content="IE=edge" />
 <meta
@@ -74,14 +69,12 @@ const shouldLoadAnalytics = import.meta.env.PROD;
 <meta name="referrer" content="no-referrer-when-downgrade" />
 <meta name="generator" content={Astro.generator} />
 
-{/* Primary Meta Tags */}
 <title>{fullTitle}</title>
 <meta name="title" content={fullTitle} />
 <meta name="description" content={description} />
 <meta name="robots" content={noindex ? "noindex, nofollow" : "index, follow"} />
 <meta name="author" content={SITE.author} />
 
-{/* Open Graph / Facebook */}
 <meta property="og:type" content="website" />
 <meta property="og:site_name" content={SITE.name} />
 <meta property="og:title" content={socialTitle} />
@@ -90,16 +83,13 @@ const shouldLoadAnalytics = import.meta.env.PROD;
 <meta property="og:url" content={canonicalStr} />
 <meta property="og:locale" content={SITE.locale} />
 
-{/* Twitter */}
 <meta name="twitter:card" content="summary_large_image" />
 <meta name="twitter:title" content={socialTitle} />
 <meta name="twitter:description" content={description} />
 <meta name="twitter:image" content={imageUrl} />
 
-{/* Canonical */}
 <link rel="canonical" href={canonicalStr} />
 
-{/* Schema.org JSON-LD Structured Data */}
 <script is:inline type="application/ld+json" set:html={JSON.stringify({
     "@context": "https://schema.org",
     "@graph": [
@@ -174,14 +164,12 @@ const shouldLoadAnalytics = import.meta.env.PROD;
     ]
 })} />
 
-{/* Sitemap (manifest link lives in Favicons.astro) */}
 <link rel="sitemap" href="/sitemap-index.xml" />
 
 <Font cssVariable="--font-cal-sans" preload={[{ style: "normal" }]} />
 <Favicons />
 <ClientRouter />
 
-{/* Umami Analytics (only loaded in production) */}
 {shouldLoadAnalytics && (
   <script>
     import { SITE } from "@/siteConfig";

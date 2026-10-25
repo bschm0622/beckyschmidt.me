@@ -15,13 +15,11 @@ export const POST = githubRoute(async ({ octokit, owner, repo }, { request }) =>
   const message = formData.get('message') as string || 'Add note image';
   const providedFilename = formData.get('filename') as string | null;
 
-  // Validation
   if (!file || !slug) {
     return json({ error: 'Missing required fields: file, slug' }, 400);
   }
 
-  // Validate slug — it becomes a directory path segment, so reject anything
-  // that could escape public/notes-images/ (e.g. "../src/pages").
+  // The slug becomes a path segment; reject anything that could escape public/notes-images/.
   if (!SLUG_PATTERN.test(slug)) {
     return json(
       { error: 'Invalid slug. Use lowercase letters, numbers, and hyphens only.' },
@@ -29,7 +27,6 @@ export const POST = githubRoute(async ({ octokit, owner, repo }, { request }) =>
     );
   }
 
-  // Validate provided filename similarly (no slashes or path traversal).
   if (providedFilename && !FILENAME_PATTERN.test(providedFilename)) {
     return json(
       { error: 'Invalid filename. Use letters, numbers, dots, underscores, and hyphens only.' },
@@ -37,7 +34,6 @@ export const POST = githubRoute(async ({ octokit, owner, repo }, { request }) =>
     );
   }
 
-  // Validate file type
   if (!ALLOWED_TYPES.includes(file.type)) {
     return json(
       { error: 'Invalid file type. Allowed types: JPG, PNG, WEBP, GIF', allowedTypes: ALLOWED_TYPES },
@@ -45,7 +41,6 @@ export const POST = githubRoute(async ({ octokit, owner, repo }, { request }) =>
     );
   }
 
-  // Validate file size
   if (file.size > MAX_FILE_SIZE) {
     return json(
       { error: `File too large. Maximum size is ${MAX_FILE_SIZE / 1024 / 1024}MB`, maxSize: MAX_FILE_SIZE },
@@ -53,22 +48,18 @@ export const POST = githubRoute(async ({ octokit, owner, repo }, { request }) =>
     );
   }
 
-  // Use provided filename or generate new one with timestamp
   const filename = providedFilename || (() => {
     const timestamp = Date.now();
     const originalName = file.name.replace(/[^a-zA-Z0-9.-]/g, '-');
     return `${slug}-${timestamp}-${originalName}`;
   })();
 
-  // Convert file to base64
   const arrayBuffer = await file.arrayBuffer();
   const base64Content = Buffer.from(arrayBuffer).toString('base64');
 
-  // Upload to GitHub in public/notes-images/{slug}/
   const filePath = `public/notes-images/${slug}/${filename}`;
 
-  // If this exact file is already on the branch (a save that failed partway
-  // and is being retried), overwrite it instead of failing for lack of a sha.
+  // A retried save may have already uploaded this file; overwrite it instead of failing for lack of a sha.
   let existingSha: string | undefined;
   try {
     const { data } = await octokit.rest.repos.getContent({ owner, repo, path: filePath, ref: branch });
@@ -87,7 +78,6 @@ export const POST = githubRoute(async ({ octokit, owner, repo }, { request }) =>
     ...(existingSha && { sha: existingSha }),
   });
 
-  // Public files are accessible at /notes-images/...
   return json({
     success: true,
     path: `/notes-images/${slug}/${filename}`,

@@ -10,7 +10,6 @@ export const GET = githubRoute(async ({ octokit, owner, repo }, { url }) => {
     return json({ error: 'Branch parameter is required' }, 400);
   }
 
-  // Check for existing PR from this branch
   const response = await octokit.rest.pulls.list({
     owner,
     repo,

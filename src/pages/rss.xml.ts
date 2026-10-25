@@ -14,7 +14,6 @@ export async function GET(context: any) {
             description: post.data.description,
             pubDate: post.data.pubDate,
             link: noteUrl(post),
-            // optional: you can add author, content, etc here too
         })),
         customData: `<language>${SITE.rss.language}</language>`,
     });

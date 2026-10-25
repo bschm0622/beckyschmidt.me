@@ -5,10 +5,8 @@ export interface NavLink {
 }
 
 export interface SiteConfiguration {
-    /** Site + person name, used in titles, meta author, and schema.org. */
     name: string;
     description: string;
-    /** Canonical origin, used as fallback when Astro.site is unset. */
     href: string;
     author: string;
     locale: string;
@@ -16,7 +14,6 @@ export interface SiteConfiguration {
     email: string;
     jobTitle: string;
     employer: { name: string; url: string };
-    /** `timeZone` is an IANA zone, used for the homepage local-time clock. */
     location: { locality: string; region: string; country: string; timeZone: string };
 
     socials: {
@@ -25,9 +22,7 @@ export interface SiteConfiguration {
         github: string;
     };
 
-    /** Headshot path (homepage avatar and schema.org Person image). */
     headshot: string;
-    /** Default Open Graph image path. */
     ogImage: string;
     analytics: { umamiWebsiteId: string };
     rss: { title: string; description: string; language: string };
@@ -71,7 +66,6 @@ export const SITE: SiteConfiguration = {
     ],
 };
 
-/** The site origin as a URL, falling back to SITE.href when Astro.site is unset. */
 export function siteOrigin(site?: URL): URL {
     return site ?? new URL(SITE.href);
 }

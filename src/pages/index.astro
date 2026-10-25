@@ -9,7 +9,6 @@ import { SITE } from "@/siteConfig";
 const notes = await getSortedNotes();
 const noteCount = notes.length;
 
-// Projects list lives in src/data/projects.json.
 const projects = (await getCollection("projects"))
   .map((p) => p.data)
   .sort((a, b) => a.order - b.order);
@@ -22,21 +21,16 @@ function withUtm(href: string) {
   return url.toString();
 }
 
-// External projects (UTM-tagged, new tab) followed by this site, which links
-// to the colophon.
 const projectRows = [
   ...projects.map((p) => ({ name: p.name, href: withUtm(p.href), description: p.description, icon: p.icon, external: true })),
   { name: "beckyschmidt.me", href: "/colophon/", description: "My personal site. Learn more about how it's built.", icon: "/favicon-96x96.png", external: false },
 ];
-
-// All homepage copy lives in src/story/*.md.
 
 ---
 
 <DefaultLayout skylineFooter={true}>
   <div class="mx-auto w-full space-y-16 pb-16">
 
-    {/* Intro. Copy: src/story/hero.md; the closing line is here so contact links come from siteConfig. */}
     <section>
       <div class="flex items-center gap-4 mb-6">
         <img
@@ -60,7 +54,6 @@ const projectRows = [
       </div>
     </section>
 
-    {/* Projects */}
     <section id="projects" class="space-y-4">
       <h2>Projects</h2>
       <div>
@@ -83,7 +76,6 @@ const projectRows = [
       </div>
     </section>
 
-    {/* Notes */}
     <section class="space-y-4">
       <div class="flex items-baseline justify-between">
         <h2>Notes</h2>

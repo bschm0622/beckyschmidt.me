@@ -12,11 +12,6 @@ export interface GithubContext {
   repo: string;
 }
 
-/**
- * Returns a configured Octokit client plus the repo owner/name, or `null`
- * if the server has no GITHUB_TOKEN configured. Centralizes the setup that
- * every /api/github/* route used to duplicate.
- */
 export function getGithub(): GithubContext | null {
   const token = getSecret('GITHUB_TOKEN');
   if (!token) return null;
@@ -32,11 +27,6 @@ type GithubHandler = (
   ctx: Pick<APIContext, 'request' | 'url' | 'params'>
 ) => Promise<Response>;
 
-/**
- * Wraps a /api/github/* handler with the boilerplate every route shares:
- * auth check, GitHub client setup, and a catch-all error response. Handlers
- * may still return their own special-status Responses (e.g. 404, 409).
- */
 export function githubRoute(handler: GithubHandler, errorMessage: string): APIRoute {
   return async ({ request, url, params }) => {
     const unauthorized = requireAuth(request);

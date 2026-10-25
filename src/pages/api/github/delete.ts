@@ -11,7 +11,6 @@ export const POST = githubRoute(async ({ octokit, owner, repo }, { request }) =>
     return json({ error: 'Missing required fields: filename, sha' }, 400);
   }
 
-  // Refuse to delete directly on protected branches, matching the save flow.
   if (['master', 'main'].includes(branch)) {
     return json({ error: 'Cannot delete on a protected branch. Select a feature branch.' }, 400);
   }

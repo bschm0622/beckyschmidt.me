@@ -1,7 +1,3 @@
-// Isomorphic, dependency-free frontmatter handling for the simple YAML subset
-// the notes use: flat `key: value` pairs plus an inline tags array literal.
-// Shared by the API routes, the React editor, and the search index.
-
 export interface ParsedFrontmatter {
   data: Record<string, string | string[]>;
   body: string;
@@ -9,9 +5,6 @@ export interface ParsedFrontmatter {
 
 const FRONTMATTER_REGEX = /^---\s*\r?\n([\s\S]*?)\r?\n---\s*\r?\n?([\s\S]*)$/;
 
-/** Strip one layer of surrounding quotes, undoing YAML escapes: `\"` and
- *  `\\` inside double quotes (what serializeFrontmatter writes), `''` inside
- *  single quotes. */
 function unquote(value: string): string {
   if (value.length >= 2 && value.startsWith('"') && value.endsWith('"')) {
     try {
@@ -26,12 +19,6 @@ function unquote(value: string): string {
   return value;
 }
 
-/**
- * Parses a raw markdown document into frontmatter data and body. CRLF-tolerant.
- * Values are unquoted strings, except inline array literals (e.g. tags), which
- * become string arrays. Documents without frontmatter return `data: {}` and
- * the whole input as `body`.
- */
 export function parseFrontmatter(raw: string): ParsedFrontmatter {
   const match = raw.match(FRONTMATTER_REGEX);
   if (!match) return { data: {}, body: raw };
@@ -54,22 +41,17 @@ export function parseFrontmatter(raw: string): ParsedFrontmatter {
   return { data, body };
 }
 
-/** Serializes data + body back into a markdown document with quoted values. */
 export function serializeFrontmatter(
   data: Record<string, string | string[]>,
   body: string
 ): string {
   const lines = Object.entries(data).map(([key, value]) =>
-    // JSON string syntax is valid YAML double-quoted syntax, so quotes and
-    // backslashes in a title or description are escaped instead of breaking
-    // the frontmatter (and the site build).
+    // JSON string syntax is valid YAML double-quoted syntax, so quotes and backslashes stay escaped.
     Array.isArray(value) ? `${key}: ${tagsToLiteral(value)}` : `${key}: ${JSON.stringify(value)}`
   );
   return `---\n${lines.join('\n')}\n---\n\n${body.trim()}\n`;
 }
 
-// Tags are edited as a friendly comma list but stored as the array literal the
-// existing notes use (e.g. ["ai","product"]). These convert between the two.
 export function parseTagsValue(raw: string | string[]): string[] {
   if (Array.isArray(raw)) return raw.map((x) => String(x).trim()).filter(Boolean);
   if (!raw) return [];

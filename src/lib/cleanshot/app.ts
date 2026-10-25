@@ -1,8 +1,3 @@
-/**
- * CleanShot page behavior: input, controls, crop/redact/pick modes, undo,
- * export. Wires the markup in src/pages/cleanshot.astro to the pure modules
- * (render.ts, analyze.ts, backgrounds.ts). Client-only.
- */
 import { PRESETS, DEFAULT_PRESET, findPreset, type Background } from "./backgrounds";
 import {
     SIZES,
@@ -42,7 +37,6 @@ const FORMATS = { png: "image/png", jpeg: "image/jpeg", webp: "image/webp" } as 
 type Format = keyof typeof FORMATS;
 const SCALES = { "1": 1, "2": 2, "3": 3 } as const;
 
-/** Look settings: remembered across visits. */
 interface Settings {
     background: string;
     size: string;
@@ -73,7 +67,6 @@ const DEFAULTS: Settings = {
     scale: "2",
 };
 
-/** Which values each toggle group accepts (also validates saved settings). */
 const VALID: Record<Exclude<keyof Settings, "picked">, readonly string[]> = {
     background: PRESETS.map((p) => p.id),
     size: SIZES.map((s) => s.id),
@@ -99,7 +92,6 @@ export function initCleanShot() {
     const preview = $<HTMLCanvasElement>("[data-preview]");
     const overlay = $<HTMLElement>("[data-overlay]");
     const sizeNote = $<HTMLElement>("[data-size-note]");
-    // One status line per state (empty and loaded); messages go to both.
     const statuses = document.querySelectorAll<HTMLElement>("[data-status]");
     const fileInput = $<HTMLInputElement>("[data-file]");
     const shareBtn = $<HTMLButtonElement>("[data-share]");
@@ -111,16 +103,12 @@ export function initCleanShot() {
     const modeReset = $<HTMLButtonElement>("[data-mode-reset]");
     const redactStyles = $<HTMLElement>("[data-redact-styles]");
     const annotateTools = $<HTMLElement>("[data-annotate-tools]");
-    // Text annotations use the site's own font.
     const fontFamily = getComputedStyle(document.body).fontFamily;
     const groups = new Map<GroupKey, HTMLElement>();
     document.querySelectorAll<HTMLElement>("[data-group]").forEach((g) => groups.set(g.dataset.group as GroupKey, g));
 
-    // --- State ------------------------------------------------------------
-
     const settings: Settings = { ...DEFAULTS, ...loadSettings() };
 
-    /** The current screenshot. Crop and redactions belong to it. */
     const doc = {
         image: null as ImageBitmap | null,
         crop: { x: 0, y: 0, w: 1, h: 1 } as Rect,
@@ -132,15 +120,10 @@ export function initCleanShot() {
     };
 
     let mode: Mode = "normal";
-    /** While picking: the color under the pointer, previewed live. */
     let hover: string | null = null;
-    /** The background to go back to if picking is cancelled with nothing picked. */
     let beforePick = settings.background;
-    /** True while the UI is being synced to state (ignore the change events it fires). */
     let syncing = false;
-    /** The annotation selected in annotate mode (index into doc.annotations). */
     let selected: number | null = null;
-    /** The text annotation being typed, if any. */
     let editing: { index: number; el: HTMLElement } | null = null;
 
     function loadSettings(): Partial<Settings> {
@@ -186,7 +169,6 @@ export function initCleanShot() {
         };
     }
 
-    // Redacted copy of the source, rebuilt only when the boxes change.
     let redactedKey = "";
     let redacted: CanvasImageSource | null = null;
     function source(): CanvasImageSource {
@@ -199,14 +181,11 @@ export function initCleanShot() {
         return redacted;
     }
 
-    // --- Undo -------------------------------------------------------------
-
     const past: string[] = [];
     const future: string[] = [];
     const snapshot = () =>
         JSON.stringify({ settings, crop: doc.crop, redactions: doc.redactions, annotations: doc.annotations });
 
-    /** Record `before` as an undo step if anything changed since. */
     function record(before: string) {
         if (snapshot() === before) return;
         past.push(before);
@@ -243,8 +222,7 @@ export function initCleanShot() {
         restore(next);
     }
 
-    // Starwind's button controller owns the disabled state (and swallows
-    // clicks while disabled), so go through it rather than setting .disabled.
+    // Starwind's button controller owns disabled state (and swallows clicks), so don't set .disabled.
     function updateHistoryButtons() {
         createButton(undoBtn).setDisabled(!past.length);
         createButton(redoBtn).setDisabled(!future.length);
@@ -252,8 +230,6 @@ export function initCleanShot() {
 
     undoBtn.addEventListener("click", undo);
     redoBtn.addEventListener("click", redo);
-
-    // --- Input ------------------------------------------------------------
 
     async function load(file: File | Blob | null | undefined) {
         if (!file) return;
@@ -296,7 +272,6 @@ export function initCleanShot() {
     });
     $("[data-replace]").addEventListener("click", () => fileInput.click());
 
-    // Dropping a new image anywhere replaces the current one.
     document.addEventListener("dragover", (e) => {
         if (!loaded.hidden) e.preventDefault();
     });
@@ -306,7 +281,6 @@ export function initCleanShot() {
         load(e.dataTransfer?.files[0]);
     });
 
-    // A Paste button for phones and browsers where ⌘V isn't handy.
     $("[data-paste]").addEventListener("click", async () => {
         try {
             for (const item of await navigator.clipboard.read()) {
@@ -319,14 +293,11 @@ export function initCleanShot() {
         }
     });
 
-    // --- Controls ---------------------------------------------------------
-
     for (const [key, group] of groups) {
         group.addEventListener("starwind:value-change", (e) => {
             const d = (e as CustomEvent).detail;
             if (syncing) return;
-            // Single-select: clicking the selected item again would clear the
-            // group, so keep it pressed.
+            // Clicking the selected chip again would clear the group; cancel to keep it pressed.
             const again = !d.value.length;
             if (again) d.cancel();
             const id: string = again ? d.toggleValue : d.value[0];
@@ -344,7 +315,6 @@ export function initCleanShot() {
                 if (key === "background" && mode === "pick") setMode("normal");
                 const before = snapshot();
                 (settings as unknown as Record<string, string>)[key] = id;
-                // A new color also recolors the selected arrow or text.
                 if (key === "color" && selected !== null) {
                     doc.annotations = doc.annotations.map((a, i) =>
                         i === selected ? { ...a, color: ANNOTATION_COLORS[settings.color] } : a,
@@ -365,7 +335,6 @@ export function initCleanShot() {
         if (item && item.getAttribute("aria-pressed") !== "true") item.click();
     }
 
-    /** Make every toggle group show the current settings. */
     function syncControls() {
         syncing = true;
         for (const key of groups.keys()) select(key, String(settings[key]));
@@ -373,8 +342,6 @@ export function initCleanShot() {
     }
     // Wait a frame so the toggle-group controllers exist.
     requestAnimationFrame(syncControls);
-
-    // --- Modes: crop, redact, pick ----------------------------------------
 
     const HINTS: Record<Exclude<Mode, "normal" | "annotate">, string> = {
         crop: "Drag the edges or corners to crop.",
@@ -437,7 +404,6 @@ export function initCleanShot() {
 
     function cancelPick() {
         setMode("normal");
-        // Nothing picked yet: go back to the background they had before.
         if (!settings.picked) {
             settings.background = beforePick;
             syncControls();
@@ -446,7 +412,6 @@ export function initCleanShot() {
         }
     }
 
-    // Canvas pixel <-> CSS pixel within the overlay/preview.
     const toCanvas = (clientX: number, clientY: number) => {
         const box = preview.getBoundingClientRect();
         return {
@@ -456,10 +421,8 @@ export function initCleanShot() {
     };
     const pct = (v: number, of: number) => `${(v / of) * 100}%`;
 
-    /** Where the screenshot's pixels land on the preview canvas, in canvas px. */
     const imageRect = () => layout(renderState(), doc.crop, preview.width, preview.height).image;
 
-    /** Canvas point -> source-image point (normal/redact view). */
     function canvasToSource(p: { x: number; y: number }) {
         const im = imageRect();
         return {
@@ -468,8 +431,6 @@ export function initCleanShot() {
             inside: p.x >= im.x && p.y >= im.y && p.x < im.x + im.w && p.y < im.y + im.h,
         };
     }
-
-    // Pick from image ------------------------------------------------------
 
     const sampler = document.createElement("canvas");
     sampler.width = sampler.height = 1;
@@ -510,8 +471,6 @@ export function initCleanShot() {
         draw();
     });
 
-    // Crop -----------------------------------------------------------------
-
     function drawCropOverlay() {
         const img = doc.image!;
         const c = doc.crop;
@@ -534,12 +493,8 @@ export function initCleanShot() {
         overlay.append(box);
     }
 
-    // Shared helpers for the redact and annotate overlays ------------------
-
-    /** Client point -> source-image point. */
     const clientToSource = (x: number, y: number) => canvasToSource(toCanvas(x, y));
 
-    /** Source rect -> CSS position (percent of the overlay), clipped to the crop. */
     function sourceRectToPct(r: Rect) {
         const im = imageRect();
         const x0 = Math.max(r.x, doc.crop.x);
@@ -556,14 +511,12 @@ export function initCleanShot() {
         };
     }
 
-    /** Source point -> CSS position (percent of the overlay). */
     function sourcePointToPct(x: number, y: number) {
         const im = imageRect();
         const s = im.w / doc.crop.w;
         return { left: pct(im.x + (x - doc.crop.x) * s, preview.width), top: pct(im.y + (y - doc.crop.y) * s, preview.height) };
     }
 
-    /** CSS pixels per source pixel in the preview. */
     function cssPerSource() {
         const im = imageRect();
         return (im.w / doc.crop.w) * (preview.getBoundingClientRect().width / preview.width);
@@ -589,8 +542,6 @@ export function initCleanShot() {
         }
     }
 
-    // Redact ---------------------------------------------------------------
-
     function drawRedactOverlay() {
         overlay.innerHTML = "";
         doc.redactions.forEach((r, i) => {
@@ -614,8 +565,6 @@ export function initCleanShot() {
         });
     }
 
-    // Annotate -------------------------------------------------------------
-
     function measureText(a: Extract<Annotation, { kind: "text" }>) {
         const unit = annotationUnit(doc.image!.width, doc.image!.height);
         const size = textSize(unit);
@@ -623,7 +572,6 @@ export function initCleanShot() {
         return { w: samplerCtx.measureText(a.text).width, h: size * 1.2, size };
     }
 
-    /** The topmost annotation under a source point, if any. */
     function hitTest(p: { x: number; y: number }): number | null {
         const tol = 8 / cssPerSource();
         for (let i = doc.annotations.length - 1; i >= 0; i--) {
@@ -651,7 +599,6 @@ export function initCleanShot() {
     }
 
     function drawAnnotateOverlay() {
-        // Keep the live text editor; rebuild everything else.
         overlay.querySelectorAll(":scope > :not([data-text-editor])").forEach((el) => el.remove());
         if (selected === null || !doc.annotations[selected]) return;
         const a = doc.annotations[selected];
@@ -681,7 +628,6 @@ export function initCleanShot() {
         }
     }
 
-    /** Start typing a text annotation: a new one at a point, or an existing one. */
     function openTextEditor(index: number) {
         commitText();
         const a = doc.annotations[index] as Extract<Annotation, { kind: "text" }>;
@@ -718,7 +664,6 @@ export function initCleanShot() {
         });
     }
 
-    /** Save (or, with `cancel`, drop) the text being typed. Empty text removes the annotation. */
     let editBefore = "";
     function commitText(cancel = false) {
         if (!editing) return;
@@ -729,7 +674,6 @@ export function initCleanShot() {
         const a = doc.annotations[index];
         if (a?.kind === "text") {
             if (cancel || !text) {
-                // Cancelling a brand-new text, or leaving it empty, removes it.
                 if (!text || !a.text) {
                     doc.annotations = doc.annotations.filter((_, j) => j !== index);
                     selected = null;
@@ -742,16 +686,12 @@ export function initCleanShot() {
         draw();
     }
 
-    // Drag handling: crop, redact (draw, move, resize), annotate --------
-
     let drag: {
         before: string;
         start: { x: number; y: number };
-        /** Source point where the drag started. */
         startSrc: { x: number; y: number };
         handle: string;
         startCrop: Rect;
-        /** Redaction or annotation being edited, and its state before the drag. */
         index?: number;
         orig?: Rect | Annotation;
         draft?: HTMLElement;
@@ -781,9 +721,7 @@ export function initCleanShot() {
         } else if (mode === "annotate") {
             commitText();
             const hit = hitTest(src);
-            // Second click on the same text within a moment: edit it. (The
-            // overlay is rebuilt on every click, so the browser's dblclick
-            // never fires here.)
+            // Second click on the same text: edit it. The overlay is rebuilt per click, so dblclick never fires.
             const now = performance.now();
             const again = hit !== null && lastDown.index === hit && now - lastDown.time < 450;
             lastDown = { index: hit, time: now };
@@ -794,7 +732,6 @@ export function initCleanShot() {
                 return;
             }
             if (handle && selected !== null) {
-                // Dragging an arrow end or the selected text.
                 drag = { ...base, index: selected, orig: { ...doc.annotations[selected] } };
             } else {
                 if (hit !== null) {
@@ -812,7 +749,6 @@ export function initCleanShot() {
                     selected = doc.annotations.length - 1;
                     drag = { ...base, handle: "a2", index: selected, orig: { ...doc.annotations[selected] } };
                 } else {
-                    // Text: place it at the click, slightly up so the caret sits on the pointer.
                     e.preventDefault();
                     editBefore = base.before;
                     const color = ANNOTATION_COLORS[settings.color];
@@ -882,7 +818,6 @@ export function initCleanShot() {
                 doc.redactions = [...doc.redactions, { x: Math.floor(x0), y: Math.floor(y0), w: Math.ceil(x1 - x0), h: Math.ceil(y1 - y0) }];
             }
         }
-        // A click without a drag doesn't make an arrow.
         if (mode === "annotate" && drag.index !== undefined) {
             const a = doc.annotations[drag.index];
             if (a?.kind === "arrow" && Math.hypot(a.x2 - a.x1, a.y2 - a.y1) * cssPerSource() < 8) {
@@ -897,7 +832,6 @@ export function initCleanShot() {
     overlay.addEventListener("pointerup", endDrag);
     overlay.addEventListener("pointercancel", endDrag);
 
-    /** Show a selected annotation's color in the color chips (without recording a change). */
     function syncColorTo(hex: string) {
         const id = (Object.keys(ANNOTATION_COLORS) as AnnotationColor[]).find((k) => ANNOTATION_COLORS[k] === hex);
         if (!id || id === settings.color) return;
@@ -906,16 +840,12 @@ export function initCleanShot() {
         syncControls();
     }
 
-    // --- Drawing ----------------------------------------------------------
-
     function draw() {
         if (!doc.image) return;
         const rs = renderState();
-        // Render the preview at the size it's shown, so it stays sharp and fast.
         const shown = stage.clientWidth * devicePixelRatio;
 
         if (mode === "crop") {
-            // The whole screenshot, so there's something to crop back out to.
             const img = doc.image;
             preview.width = Math.round(shown);
             preview.height = Math.round((shown * img.height) / img.width);
@@ -959,7 +889,6 @@ export function initCleanShot() {
                 for (let y = 0; y < 4; y++) for (let x = 0; x < 4; x++) if ((x + y) % 2) ctx.fillRect(x * 12, y * 12, 12, 12);
                 return;
             }
-            // Dots and glass need the canvas-to-swatch ratio to look right.
             if ((bg.kind === "dots" || bg.kind === "glass") && doc.image) {
                 const big = document.createElement("canvas");
                 const base = baseSize(rs, doc.crop);
@@ -976,8 +905,6 @@ export function initCleanShot() {
 
     new ResizeObserver(() => draw()).observe(stage);
     drawSwatches();
-
-    // --- Export -----------------------------------------------------------
 
     function exportBlob(type: string = FORMATS[settings.format]): Promise<Blob> {
         setMode("normal");
@@ -1010,8 +937,7 @@ export function initCleanShot() {
     async function copy() {
         if (!doc.image) return;
         try {
-            // Clipboards take PNG only. Safari needs the Promise passed
-            // straight into ClipboardItem.
+            // Clipboards take PNG only; Safari needs the Promise passed straight into ClipboardItem.
             await navigator.clipboard.write([new ClipboardItem({ "image/png": exportBlob("image/png") })]);
             say("Copied. Paste it into your post.");
         } catch {
@@ -1025,18 +951,14 @@ export function initCleanShot() {
         try {
             await navigator.share({ files: [new File([blob], filename(), { type: blob.type })] });
         } catch {
-            /* dismissed */
         }
     }
 
     $("[data-copy]").addEventListener("click", copy);
     $("[data-download]").addEventListener("click", download);
     shareBtn.addEventListener("click", share);
-    // Share only where the native sheet can take an image (mostly mobile).
     const probe = new File([new Blob()], "x.png", { type: "image/png" });
     shareBtn.hidden = !(matchMedia("(pointer: coarse)").matches && navigator.canShare?.({ files: [probe] }));
-
-    // --- Keyboard ---------------------------------------------------------
 
     document.addEventListener("keydown", (e) => {
         if (e.key === "Escape" && mode !== "normal") {
@@ -1075,7 +997,6 @@ export function initCleanShot() {
     }
 }
 
-/** Move or resize a rect by a drag delta (source px), kept inside the image and at least `min` px. */
 function resizeRect(start: Rect, handle: string, dx: number, dy: number, W: number, H: number, min: number): Rect {
     let x0 = start.x;
     let y0 = start.y;
@@ -1098,7 +1019,6 @@ function luminance(hex: string) {
     return (0.299 * (n >> 16) + 0.587 * ((n >> 8) & 255) + 0.114 * (n & 255)) / 255;
 }
 
-/** Distance from a point to an arrow's line segment, in source px. */
 function distanceToSegment(p: { x: number; y: number }, a: { x1: number; y1: number; x2: number; y2: number }) {
     const dx = a.x2 - a.x1;
     const dy = a.y2 - a.y1;

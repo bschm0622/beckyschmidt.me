@@ -4,7 +4,6 @@ import { parseFrontmatter } from '@/lib/frontmatter';
 
 export const prerender = false;
 
-// Lists the notes in src/notes/ with the frontmatter fields the dashboard shows.
 export const GET = githubRoute(async ({ octokit, owner, repo }, { url }) => {
   const branch = url.searchParams.get('branch') || DEFAULT_BRANCH;
 
@@ -25,7 +24,6 @@ export const GET = githubRoute(async ({ octokit, owner, repo }, { url }) => {
       .map(async (file) => {
         const base = { name: file.name, path: file.path, sha: file.sha };
         try {
-          // Fetch the file content to extract frontmatter
           const { data: fileContent } = await octokit.rest.repos.getContent({
             owner,
             repo,

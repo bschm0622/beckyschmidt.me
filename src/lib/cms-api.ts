@@ -1,20 +1,11 @@
-// Typed client for the CMS API routes. This is the single client↔server
-// contract: every interface here matches exactly what the corresponding
-// route in src/pages/api/ returns.
-
 import { CMS_BRANCH_PREFIX, DEFAULT_BRANCH } from '@/lib/constants';
 
-// ---------------------------------------------------------------------------
-// Shared types
-
-/** Commit object as returned by GitHub's contents API. */
 export interface CommitInfo {
   sha: string;
   html_url?: string;
   [key: string]: unknown;
 }
 
-/** GET /api/github/notes — one entry per note file. */
 export interface NoteListItem {
   name: string;
   path: string;
@@ -24,7 +15,6 @@ export interface NoteListItem {
   description: string | null;
 }
 
-/** GET /api/github/note/[filename] — a single note's raw content. */
 export interface NoteFile {
   content: string;
   sha: string;
@@ -32,14 +22,12 @@ export interface NoteFile {
   name: string;
 }
 
-/** POST /api/github/commit */
 export interface CommitResult {
   success: true;
   commit: CommitInfo;
   content: { sha: string; [key: string]: unknown } | null;
 }
 
-/** POST /api/github/create-branch */
 export interface BranchResult {
   success: true;
   branch: { name: string; sha: string; ref: string };
@@ -52,20 +40,17 @@ export interface PrInfo {
   state: string;
 }
 
-/** POST /api/github/create-pr */
 export interface CreatePrResult {
   success: true;
   pullRequest: PrInfo;
 }
 
-/** GET /api/github/pr-status */
 export interface PrStatusResult {
   success: true;
   hasPR: boolean;
   pullRequest: PrInfo | null;
 }
 
-/** GET /api/github/pending — an open cms/ PR awaiting merge. */
 export interface PendingPR {
   number: number;
   url: string;
@@ -76,13 +61,11 @@ export interface PendingPR {
   isDelete: boolean;
 }
 
-/** POST /api/github/delete */
 export interface DeleteResult {
   success: true;
   commit: CommitInfo;
 }
 
-/** POST /api/github/upload-image */
 export interface UploadImageResult {
   success: true;
   path: string;
@@ -91,13 +74,8 @@ export interface UploadImageResult {
   commit: CommitInfo;
 }
 
-// ---------------------------------------------------------------------------
-// Request helper
-
 const JSON_HEADERS = { 'Content-Type': 'application/json' };
 
-/** Error thrown for non-2xx responses; carries the HTTP status for callers
- *  that need to branch on it (e.g. 401 → back to the login form). */
 export class ApiError extends Error {
   status: number;
   constructor(message: string, status: number) {
@@ -121,9 +99,6 @@ async function request<T>(path: string, init: RequestInit, fallback: string): Pr
   }
   return res.json() as Promise<T>;
 }
-
-// ---------------------------------------------------------------------------
-// One function per endpoint
 
 export function listNotes(branch = DEFAULT_BRANCH): Promise<{ files: NoteListItem[] }> {
   return request(
@@ -206,8 +181,6 @@ export function uploadImage(input: {
   return request('/api/github/upload-image', { method: 'POST', body: formData }, 'Failed to upload image');
 }
 
-// Auth
-
 export function checkSession(): Promise<{ authenticated: boolean }> {
   return request('/api/auth', { method: 'GET' }, 'Failed to check session');
 }
@@ -220,10 +193,6 @@ export function logout(): Promise<{ success: true }> {
   return request('/api/auth', { method: 'DELETE' }, 'Failed to log out');
 }
 
-// ---------------------------------------------------------------------------
-// Higher-level pipelines
-
-/** Creates a cms/ branch off master, tolerating "already exists" (409). */
 async function ensureCmsBranch(branch: string): Promise<void> {
   const res = await fetch('/api/github/create-branch', {
     method: 'POST',
@@ -236,55 +205,35 @@ async function ensureCmsBranch(branch: string): Promise<void> {
 }
 
 export interface PublishNoteInput {
-  /** Note slug — used for branch naming and image paths. */
   slug: string;
-  /** Target filename inside src/notes/ (e.g. "my-note.md"). */
   filename: string;
-  /** Full markdown document (frontmatter + body). */
   content: string;
-  /** Note title, used for the PR title. */
   title: string;
-  /** Note description, used as the PR body. */
   description?: string;
-  /** True when updating an existing note (changes the commit message). */
   isUpdate?: boolean;
-  /** Existing session branch to reuse; a new cms/ branch is created if omitted. */
   branch?: string | null;
-  /** Blob SHA of the file on the branch, when updating. */
   sha?: string | null;
-  /** Existing PR number to reuse; a new PR is opened if omitted. */
   prNumber?: number | null;
-  /** Staged images to upload to the branch before committing. `folder` is the
-   *  public/notes-images/ subfolder the note's markdown already points at. */
   images?: Array<{ file: File; filename: string; folder: string }>;
 }
 
 export interface PublishNoteResult {
   branch: string;
-  /** Blob SHA of the committed file — pass back as `sha` on the next publish. */
   sha: string | null;
   commit: CommitInfo;
-  /** The PR for this branch; `created` is false when an existing PR was reused. */
   pullRequest: PrInfo | null;
   createdPr: boolean;
 }
 
-/**
- * One-click publish: auto-branch off master (first time), upload staged
- * images, commit, and open a PR. Repeat publishes with the same branch/pr
- * update the existing PR instead of opening a new one.
- */
 export async function publishNote(input: PublishNoteInput): Promise<PublishNoteResult> {
   const { slug, filename, images = [] } = input;
 
-  // 1. Branch (once per session).
   let branch = input.branch || null;
   if (!branch) {
     branch = `${CMS_BRANCH_PREFIX}${slug}-${Date.now().toString(36)}`;
     await ensureCmsBranch(branch);
   }
 
-  // 2. Upload any staged images to the branch.
   for (const img of images) {
     await uploadImage({
       file: img.file,
@@ -297,7 +246,6 @@ export async function publishNote(input: PublishNoteInput): Promise<PublishNoteR
     });
   }
 
-  // 3. Commit the note.
   const commitData = await commit({
     content: input.content,
     filename,
@@ -306,7 +254,6 @@ export async function publishNote(input: PublishNoteInput): Promise<PublishNoteR
     ...(input.sha ? { sha: input.sha } : {}),
   });
 
-  // 4. Open the PR (once).
   if (!input.prNumber) {
     const prData = await createPr({
       title: `Add/Update: ${input.title || filename}`,
@@ -332,10 +279,6 @@ export async function publishNote(input: PublishNoteInput): Promise<PublishNoteR
   };
 }
 
-/**
- * Deletion follows the same one-click-PR flow as publishing: auto-branch off
- * master, remove the file, open a PR. Master is untouched until it's merged.
- */
 export async function deleteNotePipeline(note: {
   filename: string;
   sha: string;

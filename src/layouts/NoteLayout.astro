@@ -52,10 +52,8 @@ const blogPostingSchema = {
     canonicalURL={canonicalURL}
     proseClass="typography"
 >
-    {/* BlogPosting Schema.org Structured Data */}
     <script slot="head" is:inline type="application/ld+json" set:html={JSON.stringify(blogPostingSchema)} />
 
-    {/* Main Content */}
     <h1 class="mt-0 mb-3">{frontmatter.title}</h1>
     <div class="flex flex-wrap items-center gap-3 text-sm text-muted-foreground mb-8">
         {frontmatter.pubDate && <FormattedDate date={frontmatter.pubDate} />}
@@ -68,7 +66,6 @@ const blogPostingSchema = {
 </DefaultLayout>
 
 <script>
-    /** Attach copy buttons to code blocks */
     function attachCopyButtons() {
         const copyButtonLabel = "Copy";
 
@@ -78,20 +75,16 @@ const blogPostingSchema = {
             const wrapper = document.createElement("div");
             wrapper.style.position = "relative";
 
-            // Wrap <pre> with wrapper
             codeBlock.parentNode?.insertBefore(wrapper, codeBlock);
             wrapper.appendChild(codeBlock);
 
-            // Create copy button
             const copyButton = document.createElement("button");
             copyButton.className =
                 "copy-code absolute end-3 -top-3 rounded bg-muted border border-muted px-2 py-1 text-xs leading-4 text-foreground font-medium";
             copyButton.textContent = copyButtonLabel;
 
-            // Append copy button to wrapper
             wrapper.appendChild(copyButton);
 
-            // Copy button handler
             copyButton.addEventListener("click", async () => {
                 const code = codeBlock.querySelector("code");
                 const text = code?.innerText ?? "";

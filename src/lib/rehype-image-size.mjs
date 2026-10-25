@@ -1,12 +1,6 @@
 import { visit } from 'unist-util-visit';
 import sharp from 'sharp';
 
-/**
- * Give markdown images that live in public/ their real width and height, so the
- * browser reserves their space and text doesn't jump when they load, and lazy-load
- * them. Images that aren't on disk (external URLs, not-yet-merged CMS uploads)
- * are left as they are.
- */
 export function rehypeImageSize() {
     return async function (tree) {
         const jobs = [];

@@ -6,7 +6,6 @@
 
 html {
   scrollbar-gutter: stable;
-  /* Native scrollbars and form controls follow the site theme */
   color-scheme: light;
   -webkit-tap-highlight-color: transparent;
 }
@@ -14,9 +13,6 @@ html.dark {
   color-scheme: dark;
 }
 
-/* Global type scale. Every text size is multiplied by this one value, so a
-   font with a smaller or larger x-height can be evened out in one place.
-   Spacing is unaffected. Cal Sans needs no adjustment. */
 :root {
   --type-scale: 1;
 }
@@ -32,8 +28,7 @@ body {
   font-size: calc(1rem * var(--type-scale));
 }
 
-/* Prevent flash of unstyled content: hide until the theme class is applied
-   by the inline script in BaseHead. */
+/* Hidden until BaseHead's inline script sets the theme class (no flash). */
 html:not(.light):not(.dark) {
   visibility: hidden;
 }
@@ -41,8 +36,6 @@ html:not(.light):not(.dark) {
 @theme {
   --font-sans: var(--font-cal-sans);
 
-  /* Tailwind's default text sizes, run through --type-scale. Line heights stay
-     as Tailwind's ratios, so they scale along with the text. */
   --text-xs: calc(0.75rem * var(--type-scale));
   --text-sm: calc(0.875rem * var(--type-scale));
   --text-base: calc(1rem * var(--type-scale));
@@ -61,8 +54,6 @@ html:not(.light):not(.dark) {
   --color-background: #faf9f6;
   --color-link: #2563eb;
 
-  /* Semantic status colors (used by admin banners). Each has a text color, a
-     subtle surface fill, and a border, so a banner is one class trio. */
   --color-danger: #dc2626;
   --color-danger-surface: #fef2f2;
   --color-danger-border: #fecaca;
@@ -74,13 +65,11 @@ html:not(.light):not(.dark) {
   --color-warning-border: #fde68a;
 }
 
-/* Dark neutrals follow Linear's dark theme (linear.app): near-black
-   background, near-white text, and a clearly dimmer gray for secondary text. */
 .dark {
   --color-primary: #d0d6e0;
   --color-muted: #23252a;
-  --color-muted-foreground: #9ca0a8; /* 7.6:1 on the background; body text in notes */
-  --color-faint-foreground: #767b83; /* 4.6:1 on the background (AA) */
+  --color-muted-foreground: #9ca0a8;
+  --color-faint-foreground: #767b83;
   --color-surface: #0f1011;
   --color-focus: #60a5fa;
   --color-secondary: #1c1c1f;
@@ -88,8 +77,6 @@ html:not(.light):not(.dark) {
   --color-background: #08090a;
   --color-link: #93c5fd;
 
-  /* Dark-mode status colors: brighter text, deep-tinted surfaces so banners
-     read correctly against the near-black background instead of glowing white. */
   --color-danger: #f87171;
   --color-danger-surface: #2b1414;
   --color-danger-border: #7f1d1d;
@@ -101,23 +88,12 @@ html:not(.light):not(.dark) {
   --color-warning-border: #78350f;
 }
 
-/* Shared admin UI primitives. These codify the button / input / panel patterns
-   already used across the admin islands so the three components stay consistent
-   and theme-aware. Focus rings use the indigo accent to match the global
-   :focus-visible ring. */
 @layer components {
-  /* Admin primitives, kept deliberately minimal to match the homepage's
-     card-less look: no panels, no fills, borders only where an input needs
-     the affordance. */
-
-  /* The one solid action button (Publish). High-contrast foreground/background
-     inverse — crisp and quiet, like the rest of the site. */
   .btn-primary {
     @apply inline-flex items-center justify-center gap-2 rounded-md bg-foreground
       text-background px-4 py-2 text-sm font-medium transition-opacity
       hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed;
   }
-  /* Everything else is a quiet text action (Back, Log out, Cancel, toggles). */
   .btn-ghost {
     @apply inline-flex items-center gap-1.5 text-sm text-muted-foreground
       hover:text-foreground transition-colors disabled:opacity-40 disabled:cursor-not-allowed;
@@ -126,16 +102,12 @@ html:not(.light):not(.dark) {
   .field-label {
     @apply block text-sm font-medium text-muted-foreground mb-1.5;
   }
-  /* Matches the CommandPalette input idiom: border + border-on-focus, no ring.
-     Placeholders are italic + lighter so hint text is unmistakable from real,
-     typed-in values. */
   .field-input {
     @apply w-full px-3 py-2 rounded-md border border-muted bg-surface text-foreground
       placeholder:text-muted-foreground/60 placeholder:italic
       focus:outline-none focus:border-foreground/30 transition-colors;
   }
 
-  /* Transient status text — a soft tinted pill, no border, so it stays flat. */
   .status-error {
     @apply rounded-md bg-danger-surface text-danger px-3 py-2 text-sm;
   }
@@ -150,9 +122,6 @@ html:not(.light):not(.dark) {
 .typography {
   @apply text-base leading-[1.75] text-foreground;
 
-  /* Headings. Sized to sit with the homepage: the note title is one step
-     above the homepage's 20px headings, and in-note section headings (h2)
-     match them. Regular weight, like everything else. */
   h1 {
     @apply text-2xl font-normal leading-[1.25] mb-4 mt-12 tracking-[-0.02em];
   }
@@ -170,7 +139,6 @@ html:not(.light):not(.dark) {
     @apply text-sm font-normal leading-[1.5] mt-4;
   }
 
-  /* Body & lists — lighter gray is the default body color site-wide */
   p {
     @apply text-base leading-[1.75] mb-5 text-muted-foreground;
   }
@@ -184,17 +152,14 @@ html:not(.light):not(.dark) {
     @apply mb-1;
   }
 
-  /* Links: prose links are underlined, not colored */
   a {
     @apply text-inherit underline decoration-1 underline-offset-2 decoration-foreground/30 hover:text-foreground hover:decoration-foreground transition-all;
   }
 
-  /* Blockquote */
   blockquote {
     @apply border-l-2 border-foreground/20 pl-4 italic text-muted-foreground text-base leading-[1.75] my-6;
   }
 
-  /* Misc */
   hr {
     @apply border-muted my-8;
   }
@@ -225,11 +190,6 @@ html:not(.light):not(.dark) {
 .type-standard {
   @apply text-base leading-normal text-foreground;
 
-  /* Headings. On the quiet (non-note) pages the page title and section
-     headings are 20px regular in full foreground, one step above everything
-     else. Below them: list titles in --color-primary (softer), body text in
-     muted gray, and descriptions/dates in the faintest gray. Notes and the
-     colophon use .typography, which keeps large headings. */
   h1,
   h2 {
     @apply text-xl font-normal leading-tight tracking-[-0.01em] text-foreground;
@@ -247,7 +207,6 @@ html:not(.light):not(.dark) {
     @apply text-sm font-normal uppercase tracking-wide text-muted-foreground leading-[1.5];
   }
 
-  /* Lists */
   ul {
     @apply list-disc pl-5;
   }
@@ -259,14 +218,10 @@ html:not(.light):not(.dark) {
     @apply mb-1;
   }
 
-  /* Links — same treatment as .typography a so content links read identically
-     everywhere. See "Link vocabulary" in CLAUDE.md: this resting underline is
-     the CONTENT-link role; titles and meta-links opt out with no-underline!. */
   a {
     @apply text-inherit underline decoration-1 underline-offset-2 decoration-foreground/30 hover:text-foreground hover:decoration-foreground transition-all;
   }
 
-  /* Quotes, separators, tables, etc. */
   blockquote {
     @apply border-l-2 border-foreground/20 pl-4 italic text-muted-foreground;
   }
@@ -294,31 +249,22 @@ html:not(.light):not(.dark) {
   }
 }
 
-/* Prose reset: the first element in a prose block never adds a top margin,
-   so a leading heading butts cleanly against the layout's own top spacing
-   instead of stacking .typography h1's mt-12 on top of it. */
 .typography > :first-child,
 .type-standard > :first-child {
   margin-top: 0;
 }
 
-/* No single-word last lines: balanced headings, and paragraphs that avoid orphans */
 .typography :is(h1, h2, h3),
 .type-standard :is(h1, h2) {
   text-wrap: balance;
 }
-/* Phones get plain wrapping: Safari applies `pretty` to the whole paragraph,
-   and on a narrow column that pulls words down early and leaves a ragged
-   gap down the right edge. */
+/* Phones only get plain wrapping: Safari applies `pretty` per paragraph and leaves a ragged right edge. */
 @media (min-width: 640px) {
   .typography :is(p, li, blockquote) {
     text-wrap: pretty;
   }
 }
 
-/* Command palette scroll area: a thin scrollbar that spans the full height.
-   (Styling the scrollbar replaces the macOS overlay one, which otherwise
-   floats inset from the top and bottom of the track.) */
 .palette-scroll {
   overscroll-behavior: contain;
   scrollbar-width: thin;
@@ -338,13 +284,7 @@ html:not(.light):not(.dark) {
   background-color: color-mix(in srgb, var(--color-foreground) 40%, transparent);
 }
 
-/* External & mailto links in prose get a small ↗, echoing the external-link
-   arrow in the Projects list. Internal (relative) links are unaffected.
-   The arrow is a mask tinted with currentColor, so it tracks the link color
-   and inherits hover/dark-mode changes for free.
-   It's drawn on an inline word joiner (U+2060) rather than an inline-block,
-   because browsers may wrap on either side of an inline-block: the arrow
-   could drop to its own line, or leave a period stranded after it. */
+/* Drawn on a U+2060 word joiner, not an inline-block, so the arrow and trailing punctuation never wrap away from the link. */
 .typography a[href^="http"]::after,
 .typography a[href^="mailto"]::after {
   content: "\2060";
@@ -354,10 +294,6 @@ html:not(.light):not(.dark) {
   mask: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%3E%3Cpath%20fill='%23000'%20d='M10%206v2H5v11h11v-5h2v6a1%201%200%200%201-1%201H4a1%201%200%200%201-1-1V7a1%201%200%200%201%201-1zm11-3v8h-2V6.413l-7.793%207.794l-1.414-1.414L17.585%205H13V3z'/%3E%3C/svg%3E") right 0 top calc(50% - 0.09em) / 0.8em 0.8em no-repeat;
 }
 
-/* Icon links: inside an .icon-links wrapper, a link that starts with an
-   <img> (a favicon from public/tool-icons/) shows it at text height in place
-   of the trailing outbound icon. Used on the colophon and the homepage contact links.
-   In markdown: [![](/tool-icons/name.png)Name](https://…) */
 .icon-links a > img {
   display: inline;
   width: 1em;
@@ -366,34 +302,28 @@ html:not(.light):not(.dark) {
   vertical-align: -0.125em;
   border-radius: 0.2em;
 }
-/* Keep the icon and its name together on one line. */
 .icon-links a:has(> img) {
   white-space: nowrap;
 }
-/* A logo that is itself the name (X) stands alone (add class="icon-only"), with no gap after it. */
 .icon-links a.icon-only > img {
   margin-right: 0;
 }
 .icon-links a[href]:has(> img)::after {
   content: none;
 }
-/* Brand icons sit in grayscale and show their color on hover. Applies to
-   icon links and to anything marked .brand-icon (the homepage project list).
-   --icon-dark-filter carries the per-icon dark-mode fix below. */
 .icon-links a > img,
 .brand-icon {
   filter: grayscale(var(--icon-gray, 1)) var(--icon-dark-filter, );
   transition: filter 150ms ease;
 }
-/* Hover-capable devices only, or a tap leaves the icon in color on phones */
+/* Hover devices only, or a tap leaves the icon in color on phones. */
 @media (hover: hover) {
   .icon-links a:hover > img,
   a:hover .brand-icon {
     --icon-gray: 0;
   }
 }
-/* Black-on-transparent icons would vanish on the dark background.
-   hue-rotate after invert keeps Astro's colored flame roughly its own color. */
+/* Black icons invert in dark mode; hue-rotate keeps Astro's flame roughly its own color. */
 .dark .icon-links img[src$="/astro.svg"],
 .dark .icon-links img[src$="/umami.png"],
 .dark .icon-links img[src$="/email.svg"],
@@ -401,7 +331,6 @@ html:not(.light):not(.dark) {
 .dark .icon-links img[src$="/github.svg"] {
   --icon-dark-filter: invert(1) hue-rotate(180deg);
 }
-/* Logos with an official light-on-dark version: swap the file instead of inverting. */
 .dark .icon-links img[src$="/octane11.png"] {
   content: url("/tool-icons/octane11-white.png");
 }
@@ -416,7 +345,6 @@ html:not(.light):not(.dark) {
   text-decoration: var(--shiki-dark-text-decoration) !important;
 }
 
-/* Also support explicit .dark class on html (Tailwind style) */
 html.dark .astro-code,
 html.dark .astro-code span {
   color: var(--shiki-dark) !important;
@@ -426,9 +354,6 @@ html.dark .astro-code span {
   text-decoration: var(--shiki-dark-text-decoration) !important;
 }
 
-/* Inline <code>: keeps the surrounding text color (full white stood out
-   against gray prose in dark mode), sized to sit with the prose font, on a
-   light tint in both themes. */
 :not(pre) > code {
   color: inherit;
   font-size: 0.875em;
@@ -437,7 +362,6 @@ html.dark .astro-code span {
   background: color-mix(in srgb, var(--color-foreground) 6%, transparent);
 }
 
-/* Code blocks smaller font */
 .astro-code {
   @apply text-base leading-relaxed;
 }
@@ -446,19 +370,13 @@ html.dark .astro-code span {
   @apply text-base;
 }
 
-/* Consistent, on-brand keyboard focus ring for interactive elements. Form
-   fields are excluded: they signal focus with their own border-color change
-   (see .field-input). This rule is unlayered, so without the :not() it would
-   override an input's layered outline:none and re-introduce the accent ring. */
+/* Unlayered, so without the :not() it would override form fields' layered outline:none. */
 :focus-visible:not(input):not(textarea):not(select) {
   outline: 2px solid var(--color-focus);
   outline-offset: 2px;
 }
 
-/* Respect the OS "reduce motion" setting. Reduce motion ≠ no animation: we
-   kill keyframe animations and smooth scroll, and limit transitions to
-   non-motion properties (opacity, color) so gentle cross-fades survive while
-   actual movement — transform-based rotate/scale/slide — snaps instantly. */
+/* Transitions are limited to non-motion properties, not removed, so cross-fades survive. */
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

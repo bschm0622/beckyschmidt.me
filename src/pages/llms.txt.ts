@@ -2,7 +2,6 @@ import type { APIRoute } from 'astro';
 import { siteOrigin } from '@/siteConfig';
 import { getLlmsContent } from '@/lib/llms';
 
-// Built entirely from live site content; see src/lib/llms.ts.
 export const GET: APIRoute = async ({ site }) => {
     const origin = siteOrigin(site);
     const c = await getLlmsContent(origin);

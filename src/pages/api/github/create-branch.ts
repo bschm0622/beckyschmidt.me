@@ -11,7 +11,6 @@ export const POST = githubRoute(async ({ octokit, owner, repo }, { request }) =>
     return json({ error: 'Missing required field: branchName' }, 400);
   }
 
-  // Get the SHA of the source branch
   const { data: refData } = await octokit.rest.git.getRef({
     owner,
     repo,
@@ -35,7 +34,6 @@ export const POST = githubRoute(async ({ octokit, owner, repo }, { request }) =>
       },
     });
   } catch (error: any) {
-    // Handle branch already exists error
     if (error.status === 422 && error.message.includes('already exists')) {
       return json(
         {

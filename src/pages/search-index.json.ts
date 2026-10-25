@@ -8,13 +8,13 @@ export const prerender = true;
 
 function stripMarkdown(content: string): string {
     return parseFrontmatter(content).body
-        .replace(/!\[[^\]]*\]\([^)]*\)/g, "")  // images (incl. icons inside links)
-        .replace(/^#{1,6}\s+/gm, "")         // headings
-        .replace(/\*{1,3}([^*]+)\*{1,3}/g, "$1") // bold/italic
-        .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1")  // links → label only
-        .replace(/`[^`]+`/g, "")             // inline code
-        .replace(/```[\s\S]*?```/g, "")      // code blocks
-        .replace(/^[-*]\s+/gm, "")           // list markers
+        .replace(/!\[[^\]]*\]\([^)]*\)/g, "")
+        .replace(/^#{1,6}\s+/gm, "")
+        .replace(/\*{1,3}([^*]+)\*{1,3}/g, "$1")
+        .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1")
+        .replace(/`[^`]+`/g, "")
+        .replace(/```[\s\S]*?```/g, "")
+        .replace(/^[-*]\s+/gm, "")
         .replace(/\s+/g, " ")
         .trim();
 }
@@ -32,8 +32,6 @@ export const GET: APIRoute = async () => {
         body: stripMarkdown(post.body ?? ""),
     }));
 
-    // Standalone pages, searchable by their copy (the palette lists them under
-    // "Go to", never as notes). pubDate is empty: pages aren't dated.
     const colophon = parseFrontmatter(colophonSource).data;
     const pageItems = [
         {

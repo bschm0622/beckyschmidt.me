@@ -4,11 +4,8 @@ import TagList from "@/components/TagList.astro";
 import { getSortedNotes, noteUrl, type Note } from "@/lib/notes";
 
 interface Props {
-    /** Notes to render, newest first (e.g. from getSortedNotes()). Defaults to all notes. */
     posts?: Note[];
-    /** Show only the 5 most recent notes. */
     preview?: boolean;
-    /** Show tag chips next to titles. Off in compact contexts (homepage). */
     showTags?: boolean;
 }
 

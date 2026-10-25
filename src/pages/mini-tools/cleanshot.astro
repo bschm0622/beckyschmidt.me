@@ -1,5 +1,4 @@
 ---
-/** CleanShot: frame a screenshot for sharing, entirely in the browser. Behavior lives in src/lib/cleanshot/app.ts. */
 import DefaultLayout from "@/layouts/DefaultLayout.astro";
 import { Button } from "@/components/starwind/button";
 import ToggleGroup from "@/components/starwind/toggle-group";
@@ -21,7 +20,6 @@ const title = "CleanShot";
 const description = "Put a screenshot on a clean background, sized for X, LinkedIn or Instagram. Free, and it runs in your browser, so your image is never uploaded.";
 const accept = "image/png,image/jpeg,image/webp,image/gif,image/heic";
 
-/** Rows under "More options": each is one single-select chip group. */
 const optionRows: { key: string; label: string; choices: Choice[] }[] = [
     { key: "padding", label: "Padding", choices: PADDING_CHOICES },
     { key: "radius", label: "Corners", choices: RADIUS_CHOICES },
@@ -47,7 +45,6 @@ const redactStyles: Choice[] = [
     { id: "box", label: "Box" },
     { id: "pixelate", label: "Pixelate" },
 ];
-// Controls sit in a narrow side column: label above, chips below.
 const row = "space-y-2";
 const rowLabel = "text-sm text-muted-foreground";
 ---
@@ -59,7 +56,6 @@ const rowLabel = "text-sm text-muted-foreground";
             <p class="text-muted-foreground">Frame a screenshot for sharing.</p>
         </header>
 
-        {/* Empty state */}
         <div data-empty class="space-y-3">
             <Dropzone accept={accept} aria-label="Choose a screenshot" class="py-28">
                 <DropzoneUploadIndicator>
@@ -73,7 +69,6 @@ const rowLabel = "text-sm text-muted-foreground";
             <p data-status role="status" aria-live="polite" class="text-sm text-muted-foreground min-h-5"></p>
         </div>
 
-        {/* Loaded state: preview on the left (pinned), controls on the right. */}
         <div data-loaded hidden class="space-y-8 lg:grid lg:grid-cols-[minmax(0,1fr)_19rem] lg:items-start lg:gap-12 lg:space-y-0">
             <div class="sticky top-0 z-10 -mx-1 space-y-2 bg-background px-1 pt-3 pb-1 lg:top-4 lg:pt-0">
                 <div data-stage>
@@ -218,12 +213,10 @@ const rowLabel = "text-sm text-muted-foreground";
 </DefaultLayout>
 
 <style is:global>
-    /* Shows through the Transparent background in the preview only. */
     .checker {
         background: repeating-conic-gradient(var(--color-muted) 0 25%, transparent 0 50%) 0 0 / 16px 16px;
     }
 
-    /* Crop: a bright box over the dimmed screenshot, with eight handles. */
     .crop-box {
         position: absolute;
         cursor: move;
@@ -239,7 +232,6 @@ const rowLabel = "text-sm text-muted-foreground";
         background: #fff;
         box-shadow: 0 0 0 1px rgb(0 0 0 / 0.25);
     }
-    /* Larger touch targets on phones. */
     @media (pointer: coarse) {
         .crop-handle {
             width: 20px;
@@ -256,7 +248,6 @@ const rowLabel = "text-sm text-muted-foreground";
     .crop-nw, .crop-se { cursor: nwse-resize; }
     .crop-ne, .crop-sw { cursor: nesw-resize; }
 
-    /* Redact: drawn boxes, each movable, resizable, and removable. */
     [data-overlay][data-mode="redact"],
     [data-overlay][data-mode="annotate"][data-tool="arrow"] {
         cursor: crosshair;
@@ -270,7 +261,6 @@ const rowLabel = "text-sm text-muted-foreground";
         outline: 1.5px dashed rgb(255 255 255 / 0.95);
         box-shadow: 0 0 0 1px rgb(0 0 0 / 0.3);
     }
-    /* Handles show on hover, so a page of boxes stays calm. */
     .redact-box .crop-handle {
         opacity: 0;
         transition: opacity 120ms;
@@ -297,7 +287,6 @@ const rowLabel = "text-sm text-muted-foreground";
         cursor: pointer;
     }
 
-    /* Annotate: arrow end handles, the selected text's box, the text editor. */
     .arrow-handle {
         position: absolute;
         width: 14px;

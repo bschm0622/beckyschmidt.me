@@ -3,9 +3,6 @@ import { json } from '@/lib/http';
 
 export const prerender = false;
 
-// Lists the CMS's open pull requests — notes that have been published but not yet
-// merged to master. These live only on their `cms/…` branch, so the dashboard
-// needs this to show them as "In review" and let you keep editing the same PR.
 export const GET = githubRoute(async ({ octokit, owner, repo }) => {
   const { data: pulls } = await octokit.rest.pulls.list({
     owner,
@@ -18,8 +15,6 @@ export const GET = githubRoute(async ({ octokit, owner, repo }) => {
 
   const pending = await Promise.all(
     cmsPulls.map(async (pr) => {
-      // Find the note file this PR touches so we can label it and reopen it in
-      // the editor pointed at the PR's branch.
       let filename: string | null = null;
       let isDelete = false;
       try {
@@ -37,7 +32,6 @@ export const GET = githubRoute(async ({ octokit, owner, repo }) => {
           isDelete = note.status === 'removed';
         }
       } catch {
-        // If we can't read the files, still surface the PR by title.
       }
 
       return {
@@ -52,7 +46,6 @@ export const GET = githubRoute(async ({ octokit, owner, repo }) => {
     })
   );
 
-  // Most recently updated first.
   pending.sort((a, b) => (b.updatedAt || '').localeCompare(a.updatedAt || ''));
 
   return json({ pending });

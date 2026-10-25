@@ -12,12 +12,10 @@ import tailwindcss from '@tailwindcss/vite';
 
 import cloudflare from "@astrojs/cloudflare";
 
-// https://astro.build/config
 export default defineConfig({
   site: "https://beckyschmidt.me",
 
-  // Astro 7 changed the default to 'jsx' (React-style whitespace stripping).
-  // Pinned to `true` to keep v6's HTML output byte-for-byte.
+  // Astro 7 defaults to 'jsx' whitespace stripping; true keeps v6's HTML output.
   compressHTML: true,
 
   integrations: [
@@ -51,14 +49,8 @@ export default defineConfig({
 
   vite: {
     plugins: [tailwindcss()],
-    // Pre-bundle every package the server-rendered pages import. Without this,
-    // Vite discovers some of them only when a page that uses them is first
-    // visited (e.g. the Starwind components on CleanShot), re-bundles, and the
-    // already-loaded worker keeps pointing at the old bundle hashes, failing
-    // with "The file does not exist at node_modules/.vite/deps_ssr/...".
-    // When a page starts importing a new package, add it here.
-    // Same for the browser bundle: a late re-bundle there reloads the page
-    // mid-session and can load two copies of React ("Invalid hook call").
+    // Pre-bundle every imported package; a late Vite re-bundle breaks dev ("file does not exist at
+    // .vite/deps_ssr", "Invalid hook call"). Add any newly imported package here.
     optimizeDeps: {
       include: [
         "@starwind-ui/runtime/button",
@@ -99,9 +91,7 @@ export default defineConfig({
       },
       wrap: true,
     },
-    // Astro 7 defaults to the native Sätteri pipeline, which has no remark/rehype
-    // support and no built-in external-link handling. Stay on the unified
-    // (remark/rehype) processor so the plugins below keep working unchanged.
+    // Astro 7's default Sätteri pipeline has no remark/rehype support; stay on unified.
     processor: unified({
       remarkPlugins: [remarkReadingTime],
       rehypePlugins: [
@@ -111,9 +101,6 @@ export default defineConfig({
     }),
   },
 
-  // Cal Sans (cal-sans npm package, OFL), trimmed to Latin characters with
-  // a fixed optical size; weights 400-700 stay variable. Upright is
-  // preloaded; italic only downloads on pages that use it.
   fonts: [{
     provider: fontProviders.local(),
     name: "Cal Sans",

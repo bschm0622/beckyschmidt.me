@@ -1,16 +1,9 @@
-/**
- * CleanShot renderer: one pure function draws the framed screenshot onto a
- * canvas. The preview calls it at a small scale, export at full scale, so
- * what you see is what you export. Client-safe, no DOM beyond canvas.
- */
 import type { Background } from "./backgrounds";
 
 export interface SizePreset {
     id: string;
     label: string;
-    /** Shown under the chips, e.g. "X and LinkedIn". */
     use: string;
-    /** Canvas size at 1×; null = fit to the screenshot. */
     width: number | null;
     height: number | null;
 }
@@ -28,11 +21,8 @@ export interface Choice {
     label: string;
 }
 
-/** Padding as a share of the canvas width. */
 export const PADDINGS = { none: 0, s: 0.03, m: 0.06, l: 0.1 } as const;
-/** Corner radius as a share of the screenshot width. */
 export const RADII = { none: 0, s: 0.006, m: 0.013, l: 0.026 } as const;
-/** Shadow blur and offset as shares of the screenshot width. */
 export const SHADOWS = {
     none: null,
     soft: { blur: 0.045, y: 0.018, alpha: 0.28 },
@@ -68,7 +58,6 @@ export const FRAME_CHOICES: Choice[] = [
 export const DEFAULT_SIZE = "16x9";
 export const MAX_SIDE = 8192;
 
-/** A rectangle in source-image pixels (crop, redaction boxes). */
 export interface Rect {
     x: number;
     y: number;
@@ -84,19 +73,13 @@ export interface RenderState {
     radius: Radius;
     shadow: Shadow;
     frame: Frame;
-    /** The screenshot is mostly dark (picks the window bar and outline colors). */
     dark: boolean;
-    /** Arrows and text drawn on the screenshot, in source-image pixels. */
     annotations?: Annotation[];
-    /** Size unit for annotations, in source pixels (see annotationUnit). */
     unit?: number;
-    /** CSS font-family for text annotations. */
     font?: string;
-    /** Index of an annotation to leave out (it's being edited in place). */
     skip?: number;
 }
 
-/** Colors for arrows and text. */
 export const ANNOTATION_COLORS = {
     red: "#ef4444",
     yellow: "#facc15",
@@ -111,7 +94,6 @@ export type Annotation =
     | { kind: "arrow"; x1: number; y1: number; x2: number; y2: number; color: string }
     | { kind: "text"; x: number; y: number; text: string; color: string };
 
-/** Annotation sizes follow the screenshot's own size, so they look the same at any export scale. */
 export function annotationUnit(imageW: number, imageH: number) {
     return Math.max(imageW, imageH) / 1000;
 }
@@ -119,21 +101,17 @@ export const arrowWidth = (unit: number) => Math.max(2, unit * 4);
 export const textSize = (unit: number) => Math.max(14, unit * 28);
 export const textFont = (sizePx: number, family: string) => `600 ${sizePx}px ${family}`;
 
-/** Window title bar height, as a share of the screenshot width. */
 const BAR = 0.04;
 
-/** The framed content's size in source pixels: the crop, plus the title bar when framed as a window. */
 function contentSize(state: RenderState, crop: Crop) {
     const bar = state.frame === "window" ? Math.round(crop.w * BAR) : 0;
     return { w: crop.w, h: crop.h + bar, bar };
 }
 
-/** Canvas size at 1× for the current size preset. */
 export function baseSize(state: RenderState, crop: Crop): { width: number; height: number } {
     const { size } = state;
     if (size.width && size.height) return { width: size.width, height: size.height };
-    // Auto: the screenshot at its own size, with padding around it. Very
-    // large screenshots are treated as 2× captures so the canvas stays sane.
+    // Captures wider than 1600px are treated as 2× so the canvas stays a sane size.
     const c = contentSize(state, crop);
     const shrink = c.w > 1600 ? 0.5 : 1;
     const p = PADDINGS[state.padding];
@@ -143,17 +121,12 @@ export function baseSize(state: RenderState, crop: Crop): { width: number; heigh
     return { width: Math.round(w + pad * 2), height: Math.round(h + pad * 2) };
 }
 
-/** The export scale actually used, clamped so no side exceeds MAX_SIDE. */
 export function exportScale(state: RenderState, crop: Crop, wanted: number): { scale: number; clamped: boolean } {
     const { width, height } = baseSize(state, crop);
     const max = MAX_SIDE / Math.max(width, height);
     return wanted > max ? { scale: max, clamped: true } : { scale: wanted, clamped: false };
 }
 
-/**
- * Where things sit on a W×H canvas: `frame` is the whole window (screenshot
- * plus title bar), `image` is where the screenshot's pixels land.
- */
 export function layout(state: RenderState, crop: Crop, W: number, H: number) {
     const c = contentSize(state, crop);
     const pad = W * PADDINGS[state.padding];
@@ -171,7 +144,6 @@ export function render(
     image: CanvasImageSource,
     crop: Crop,
     scale: number,
-    /** Fill transparent areas (JPEG has no alpha). */
     matte?: string,
 ): HTMLCanvasElement {
     const base = baseSize(state, crop);
@@ -193,8 +165,7 @@ export function render(
     const r = f.w * RADII[state.radius];
     const shadow = SHADOWS[state.shadow];
 
-    // Shadow from a filled rounded rect, so transparent pixels in the
-    // screenshot don't cast odd shapes.
+    // Cast the shadow from a filled rect, not the image, so transparent pixels don't make odd shapes.
     if (shadow) {
         ctx.save();
         ctx.shadowColor = `rgba(15, 12, 10, ${shadow.alpha})`;
@@ -217,8 +188,6 @@ export function render(
     ctx.restore();
 
     if (state.frame !== "none") {
-        // A hairline just inside the edge; keeps white screenshots from
-        // melting into light backgrounds.
         const lw = Math.max(1, f.w / 900);
         ctx.save();
         ctx.lineWidth = lw;
@@ -231,7 +200,6 @@ export function render(
     return canvas;
 }
 
-/** Arrows and text, mapped from source pixels onto the screenshot's spot on the canvas. */
 function drawAnnotations(ctx: CanvasRenderingContext2D, state: RenderState, crop: Crop, im: Rect) {
     const s = im.w / crop.w;
     const X = (x: number) => im.x + (x - crop.x) * s;
@@ -246,7 +214,6 @@ function drawAnnotations(ctx: CanvasRenderingContext2D, state: RenderState, crop
             const size = textSize(unit) * s;
             ctx.font = textFont(size, state.font ?? "sans-serif");
             ctx.textBaseline = "top";
-            // A soft halo in the opposite tone keeps text readable on any screenshot.
             ctx.lineJoin = "round";
             ctx.lineWidth = size * 0.22;
             ctx.strokeStyle = isLight(a.color) ? "rgba(0, 0, 0, 0.55)" : "rgba(255, 255, 255, 0.85)";
@@ -278,7 +245,6 @@ function drawArrow(ctx: CanvasRenderingContext2D, x1: number, y1: number, x2: nu
     ctx.moveTo(x1, y1);
     ctx.lineTo(x2 - cos * head * 0.8, y2 - sin * head * 0.8);
     ctx.stroke();
-    // Head: a filled triangle with slightly rounded corners.
     const bx = x2 - cos * head;
     const by = y2 - sin * head;
     const half = head * 0.62;
@@ -311,7 +277,6 @@ function drawWindowBar(ctx: CanvasRenderingContext2D, x: number, y: number, w: n
     });
 }
 
-/** Pixel block size for pixelated redactions: one size for the whole image. */
 function redactBlock(W: number, H: number) {
     return Math.max(8, Math.round(Math.max(W, H) / 70));
 }
@@ -319,16 +284,6 @@ function redactBlock(W: number, H: number) {
 export const REDACT_STYLES = ["box", "pixelate"] as const;
 export type RedactStyle = (typeof REDACT_STYLES)[number];
 
-/**
- * The source image with redaction boxes applied. Every later step (the
- * screenshot, the Glass background) draws from this, so hidden pixels can't
- * leak through anywhere.
- * - "box": a solid rounded box in a shade of the surrounding color. Nothing
- *   of the original survives, so it can't be reversed.
- * - "pixelate": the whole image is pixelated once on a single grid and each
- *   box shows that grid, grown outward to whole blocks, so blocks are the
- *   same size everywhere and line up across boxes.
- */
 export function redact(
     image: CanvasImageSource & { width: number; height: number },
     boxes: Rect[],
@@ -348,8 +303,7 @@ export function redact(
         return out;
     }
 
-    // Read every box's surroundings before drawing any, so overlapping
-    // boxes don't sample each other.
+    // Sample every box's surroundings before drawing any, so overlapping boxes don't sample each other.
     const fills = boxes.map((b) => boxColor(ctx, b, W, H));
     const radius = Math.max(4, Math.round(Math.max(W, H) / 160));
     boxes.forEach((b, i) => {
@@ -382,8 +336,7 @@ function pixelate(ctx: CanvasRenderingContext2D, image: CanvasImageSource, boxes
         sh = half.height;
     }
 
-    // One pixel per block. The last row/column may be partial, so fill
-    // underneath first to keep edge blocks opaque.
+    // The last row/column may be partial: fill underneath first to keep edge blocks opaque.
     const small = document.createElement("canvas");
     small.width = cols;
     small.height = rows;
@@ -393,7 +346,6 @@ function pixelate(ctx: CanvasRenderingContext2D, image: CanvasImageSource, boxes
     s.drawImage(src, 0, 0, sw, sh, 0, 0, W / block, H / block);
 
     for (const b of boxes) {
-        // Grow outward to whole blocks.
         const x0 = Math.floor(b.x / block) * block;
         const y0 = Math.floor(b.y / block) * block;
         const x1 = Math.min(W, Math.ceil((b.x + b.w) / block) * block);
@@ -410,7 +362,6 @@ function pixelate(ctx: CanvasRenderingContext2D, image: CanvasImageSource, boxes
     }
 }
 
-/** A shade of the color just outside the box: a little darker on light areas, lighter on dark ones. */
 function boxColor(ctx: CanvasRenderingContext2D, b: Rect, W: number, H: number): string {
     const o = 3;
     const x0 = Math.max(0, b.x - o);
@@ -423,7 +374,6 @@ function boxColor(ctx: CanvasRenderingContext2D, b: Rect, W: number, H: number):
     let g = 0;
     let bl = 0;
     let n = 0;
-    // Only the ring between the box and the sampled area's edge.
     for (let y = 0; y < y1 - y0; y++) {
         for (let x = 0; x < w; x++) {
             const inside = x + x0 >= b.x && x + x0 < b.x + b.w && y + y0 >= b.y && y + y0 < b.y + b.h;
@@ -500,8 +450,7 @@ export function drawBackground(
         }
         case "glass": {
             if (!image || !crop) return;
-            // Blur by shrinking to a tiny canvas and scaling back up; works in
-            // every browser (Safari has no ctx.filter).
+            // Blur by downscaling and scaling back up: Safari has no ctx.filter.
             const tiny = document.createElement("canvas");
             const tw = 32;
             const th = Math.max(1, Math.round((tw * H) / W));
@@ -509,7 +458,6 @@ export function drawBackground(
             tiny.height = th;
             const t = tiny.getContext("2d")!;
             t.imageSmoothingQuality = "high";
-            // Cover: crop the screenshot to the canvas's aspect ratio.
             const ratio = W / H;
             let cw = crop.w;
             let ch = crop.w / ratio;
@@ -522,7 +470,6 @@ export function drawBackground(
             ctx.imageSmoothingEnabled = true;
             ctx.imageSmoothingQuality = "high";
             ctx.drawImage(tiny, 0, 0, W, H);
-            // Soften toward white so the screenshot stays the focus.
             ctx.fillStyle = "rgba(255, 255, 255, 0.18)";
             ctx.fillRect(0, 0, W, H);
             ctx.restore();
@@ -534,7 +481,6 @@ export function drawBackground(
 
 let grainTile: HTMLCanvasElement | null = null;
 
-/** A light, deterministic noise overlay that stops banding in gradients. */
 function drawGrain(ctx: CanvasRenderingContext2D, W: number, H: number) {
     if (!grainTile) {
         grainTile = document.createElement("canvas");

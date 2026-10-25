@@ -3,7 +3,6 @@ import { siteOrigin } from '@/siteConfig';
 import { noteUrl, formatDate } from '@/lib/notes';
 import { getLlmsContent, toLlmsMarkdown } from '@/lib/llms';
 
-// Built entirely from live site content; see src/lib/llms.ts.
 export const GET: APIRoute = async ({ site }) => {
     const origin = siteOrigin(site);
     const c = await getLlmsContent(origin);

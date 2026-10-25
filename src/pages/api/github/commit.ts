@@ -11,7 +11,6 @@ export const POST = githubRoute(async ({ octokit, owner, repo }, { request }) =>
     return json({ error: 'Missing required fields: content, filename, message' }, 400);
   }
 
-  // Create or update file
   const response = await octokit.rest.repos.createOrUpdateFileContents({
     owner,
     repo,
@@ -19,7 +18,7 @@ export const POST = githubRoute(async ({ octokit, owner, repo }, { request }) =>
     message,
     content: Buffer.from(content).toString('base64'),
     branch,
-    ...(sha && { sha }), // Include SHA if updating existing file
+    ...(sha && { sha }),
   });
 
   return json({

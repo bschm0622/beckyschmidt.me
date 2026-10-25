@@ -1,21 +1,13 @@
-/**
- * Screenshot analysis: auto-trim uniform margins and build the "Match"
- * gradient from the screenshot's own colors. Works on a downscaled copy
- * (≤512px), so it's fast enough to run on the main thread. Client-safe.
- */
 import { MATCH_FALLBACK, type Background } from "./backgrounds";
 import type { Crop } from "./render";
 
 const SAMPLE = 512;
-/** Never trim more than this share of a side. */
 const MAX_TRIM = 0.15;
-/** Per-channel difference that still counts as "the same as the corner". */
 const TOLERANCE = 10;
 
 export interface Analysis {
     crop: Crop;
     match: Background;
-    /** Mostly dark (e.g. a dark-mode app), by average luminance. */
     dark: boolean;
 }
 
@@ -66,8 +58,6 @@ function trim(px: Uint8ClampedArray, w: number, h: number, s: number, fullW: num
     let right = 0;
     while (right < maxX && colSame(w - 1 - right)) right++;
 
-    // A uniform image (or a trim that hit the cap on every side) means there's
-    // no real margin to remove.
     if (top + bottom >= h - 2 || left + right >= w - 2) return { x: 0, y: 0, w: fullW, h: fullH };
 
     const x = Math.round(left / s);
@@ -80,11 +70,6 @@ function trim(px: Uint8ClampedArray, w: number, h: number, s: number, fullW: num
     };
 }
 
-/**
- * Bucket pixels by hue (weighted by saturation), skipping near-white,
- * near-grey and near-black. The two strongest distinct hues become the
- * gradient stops, nudged to a pleasant lightness.
- */
 function matchGradient(px: Uint8ClampedArray): Background {
     const BUCKETS = 24;
     const weight = new Float64Array(BUCKETS);
@@ -111,7 +96,6 @@ function matchGradient(px: Uint8ClampedArray): Background {
         return [sum[b][0] / w, sum[b][1] / w, sum[b][2] / w] as const;
     };
     const first = color(ranked[0]);
-    // Second stop: the strongest hue at least 30° away, else a neighbor hue.
     const secondBucket = ranked.find((b) => hueDistance(color(b)[0], first[0]) >= 30 && weight[b] > total * 0.04);
     const second = secondBucket !== undefined ? color(secondBucket) : ([(first[0] + 40) % 360, first[1], first[2]] as const);
 

@@ -27,7 +27,6 @@ export default function AdminDashboard() {
     window.setTimeout(() => setSuccessMessage(''), 6000);
   };
 
-  // Confirm the session with the server on load.
   useEffect(() => {
     (async () => {
       try {
@@ -37,7 +36,6 @@ export default function AdminDashboard() {
           loadNotes();
         }
       } catch {
-        // Network error — leave the login form up.
       }
     })();
   }, []);
@@ -90,18 +88,13 @@ export default function AdminDashboard() {
       setLoadingNotes(false);
     }
 
-    // Surface published-but-unmerged notes so they can be reopened and re-edited.
-    // Best-effort: a failure here shouldn't block the main list.
     try {
       const data = await api.pending();
       setPending(data.pending || []);
     } catch {
-      // ignore — the "In review" section just won't show
     }
   };
 
-  // A pending PR reopens in the editor pointed at its branch so re-publishing
-  // updates the same PR instead of opening a new one.
   const handleEditPending = (pr: PendingPR) => {
     if (!pr.filename) return;
     const params = new URLSearchParams({
@@ -112,8 +105,6 @@ export default function AdminDashboard() {
     window.location.href = `/admin/edit?${params.toString()}`;
   };
 
-  // If the note already has an edit in review, reopen that PR instead of
-  // starting a second, conflicting one from master.
   const handleEditNote = (filename: string) => {
     const inReview = pending.find((pr) => pr.filename === filename && !pr.isDelete);
     if (inReview) {
@@ -127,9 +118,6 @@ export default function AdminDashboard() {
     window.location.href = '/admin/edit';
   };
 
-  // Deletion follows the same one-click-PR flow as publishing: auto-branch off
-  // master, remove the file, open a PR. Master is untouched until it's merged,
-  // so the note stays in the list until then.
   const handleDelete = async (note: Note) => {
     setDeletingFile(note.filename);
     setError('');
@@ -143,7 +131,6 @@ export default function AdminDashboard() {
 
       setConfirmingDelete(null);
       showSuccess(`Opened PR #${pr.number} to delete "${note.title}". Merge it to remove the note.`);
-      // Show the new delete PR under "In review".
       api.pending().then((data) => setPending(data.pending || [])).catch(() => {});
     } catch (err: any) {
       setError(err.message || 'Failed to delete note');
@@ -152,8 +139,6 @@ export default function AdminDashboard() {
     }
   };
 
-  // Login — a quiet, vertically-centered form. No card, in keeping with the
-  // rest of the site; presence comes from centering and spacing.
   if (!isAuthenticated) {
     return (
       <div className="min-h-[60vh] flex items-center justify-center">
@@ -225,8 +210,7 @@ export default function AdminDashboard() {
                   >
                     PR #{pr.number}
                   </a>
-                  {/* Invisible placeholder matching the Published rows' hover-only
-                      Delete button, so PR #n aligns to the date column. */}
+                  {/* Invisible spacer: aligns PR #n with the Published rows' Delete button. */}
                   <span aria-hidden="true" className="invisible">Delete</span>
                 </div>
               </div>
