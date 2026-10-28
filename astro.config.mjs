@@ -15,6 +15,10 @@ import cloudflare from "@astrojs/cloudflare";
 export default defineConfig({
   site: "https://beckyschmidt.me",
 
+  redirects: {
+    "/notes/building-a-shared-agent-editor": "/notes/how-i-built-a-shared-agent-editor",
+  },
+
   // Astro 7 defaults to 'jsx' whitespace stripping; true keeps v6's HTML output.
   compressHTML: true,
 

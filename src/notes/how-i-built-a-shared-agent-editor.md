@@ -1,5 +1,5 @@
 ---
-title: "Building a shared agent editor"
+title: "How I built a shared agent editor"
 pubDate: "2026-10-28"
 description: "I built a writing editor where my agent suggests rewrites, cuts and new paragraphs right in the doc, and I flip through its versions next to mine and decide what stays."
 author: "Becky Schmidt"
@@ -14,23 +14,23 @@ I was inspired by [Every's Proof](https://github.com/EveryInc/proof-sdk) and Jas
 
 The agent is invited to the doc, and then starts editing.
 
-![The agent connects and its suggestions appear in the doc: dotted underlines on rewritten sentences, a dimmed phrase it suggests cutting, and a new paragraph it drafted](/notes-images/building-a-shared-agent-editor/1-suggestions-arrive.gif)
+![The agent connects and its suggestions appear in the doc: dotted underlines on rewritten sentences, a dimmed phrase it suggests cutting, and a new paragraph it drafted](/notes-images/how-i-built-a-shared-agent-editor/1-suggestions-arrive.gif)
 
 I can flip through the versions of each change. In the margin, I can see how many variations exist and who wrote it, me or the agent.
 
-![Option and the down arrow cycle a sentence through the agent's rewrites and back to the original, with a 1/3 count in the margin](/notes-images/building-a-shared-agent-editor/2-flip-versions.gif)
+![Option and the down arrow cycle a sentence through the agent's rewrites and back to the original, with a 1/3 count in the margin](/notes-images/how-i-built-a-shared-agent-editor/2-flip-versions.gif)
 
 A suggested cut stays on the page, dimmed, so I can read the sentence with and without it.
 
-![A dimmed phrase flips back into the sentence and out again](/notes-images/building-a-shared-agent-editor/3-dimmed-cut.gif)
+![A dimmed phrase flips back into the sentence and out again](/notes-images/how-i-built-a-shared-agent-editor/3-dimmed-cut.gif)
 
 I can compare versions by opening the side panel.
 
-![A panel lists the original sentence and the agent's two rewrites; one is picked and kept](/notes-images/building-a-shared-agent-editor/4-versions-panel.gif)
+![A panel lists the original sentence and the agent's two rewrites; one is picked and kept](/notes-images/how-i-built-a-shared-agent-editor/4-versions-panel.gif)
 
 When I'm done, Accept all keeps the visible version, discards the rest of the changes, and leaves a clean copy.
 
-![The alternatives list shows 2 changes; clicking Accept all leaves plain text with no underlines](/notes-images/building-a-shared-agent-editor/5-accept-all.gif)
+![The alternatives list shows 2 changes; clicking Accept all leaves plain text with no underlines](/notes-images/how-i-built-a-shared-agent-editor/5-accept-all.gif)
 
 Under the hood, the AI agent gets access to the document via a small MCP server that has a few tools to help it read and edit the document in my browser. The server runs on my computer and connects my agent to the browser. The agent has tools to suggest alternatives, dim, and draft, but can't approve final changes.
 
