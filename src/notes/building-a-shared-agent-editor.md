@@ -12,11 +12,11 @@ Collaborative writing is hard enough with humans. Comments work up until a threa
 
 I was inspired by [Every's Proof](https://github.com/EveryInc/proof-sdk) and Jason Fried's [Write_On demo](https://x.com/jasonfried/status/2105403067793584590). Proof is a shared editing space for agents, where the agent joins the document and can leave comments and make edits like a Google Doc. But it suffers from the same inline editing style. Write_On takes a better twist on the inline editing. You can cycle through variations of the same word, grouping of words, or paragraphs, and dim sections that you want to test removing. So I took everything I liked about Jason's editor and added Proof's agent experience on top of it. Here's a short demo of how it works.
 
-The agent's suggestions land right in the doc: rewrites, a dimmed cut, and a paragraph it drafted.
+The agent is invited to the doc, and then starts editing.
 
 ![The agent connects and its suggestions appear in the doc: dotted underlines on rewritten sentences, a dimmed phrase it suggests cutting, and a new paragraph it drafted](/notes-images/building-a-shared-agent-editor/1-suggestions-arrive.gif)
 
-I flip through the versions in place. The count in the margin shows how many there are, but only where my cursor is.
+I can flip through the versions of each change. In the margin, I can see how many variations exist and who wrote it, me or the agent.
 
 ![Option and the down arrow cycle a sentence through the agent's rewrites and back to the original, with a 1/3 count in the margin](/notes-images/building-a-shared-agent-editor/2-flip-versions.gif)
 
@@ -24,11 +24,11 @@ A suggested cut stays on the page, dimmed, so I can read the sentence with and w
 
 ![A dimmed phrase flips back into the sentence and out again](/notes-images/building-a-shared-agent-editor/3-dimmed-cut.gif)
 
-When I want to compare, every version sits side by side, and I keep the one I like.
+I can compare versions by opening the side panel.
 
 ![A panel lists the original sentence and the agent's two rewrites; one is picked and kept](/notes-images/building-a-shared-agent-editor/4-versions-panel.gif)
 
-When I'm done, Accept all keeps the doc exactly as it reads and gives me a clean copy.
+When I'm done, Accept all keeps the visible version, discards the rest of the changes, and leaves a clean copy.
 
 ![The alternatives list shows 2 changes; clicking Accept all leaves plain text with no underlines](/notes-images/building-a-shared-agent-editor/5-accept-all.gif)
 
