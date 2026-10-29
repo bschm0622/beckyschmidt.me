@@ -20,11 +20,12 @@ const sourceLabel = item.title
 
 <article class="quote-card flex flex-col gap-3 rounded-xl bg-foreground/4 px-5 py-4">
     <figure class="m-0 flex flex-col gap-2">
-        <blockquote cite={item.href} class="text-muted-foreground">“{item.quote}”</blockquote>
+        <blockquote cite={item.href}>“{item.quote}”</blockquote>
         <figcaption class="text-sm text-muted-foreground">
             <a href={item.href} target="_blank" rel="noopener noreferrer" class="outbound inline-block py-1">
-                {sourceLabel}<span class="sr-only"> (opens in a new tab)</span>
-            </a>
+                {/* Screen-reader note goes first: after the label it would sit between the last word and the
+                    outbound arrow, and Safari wraps the arrow onto its own line there. */}
+                <span class="sr-only">Opens in a new tab: </span>{sourceLabel}</a>
         </figcaption>
     </figure>
     {item.take && <p class="mt-1 border-t border-foreground/8 pt-4 text-foreground">{item.take}</p>}
