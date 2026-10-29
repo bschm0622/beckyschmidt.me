@@ -289,15 +289,19 @@ html:not(.light):not(.dark) {
   background-color: color-mix(in srgb, var(--color-foreground) 40%, transparent);
 }
 
-/* Drawn on a U+2060 word joiner, not an inline-block, so the arrow and trailing punctuation never wrap away from the link. */
+/* Drawn on a U+2060 word joiner, not an inline-block, so the arrow and trailing punctuation never wrap away from the link.
+   The icon is a background image in the --color-link colors, not a mask: iOS Safari doesn't clip masks on inline boxes and paints a solid block. */
 .typography a[href^="http"]::after,
 .typography a[href^="mailto"]::after,
 a.outbound::after {
   content: "\2060";
   padding-left: 1.08em;
-  background-color: var(--color-link);
-  -webkit-mask: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%3E%3Cpath%20fill='%23000'%20d='M10%206v2H5v11h11v-5h2v6a1%201%200%200%201-1%201H4a1%201%200%200%201-1-1V7a1%201%200%200%201%201-1zm11-3v8h-2V6.413l-7.793%207.794l-1.414-1.414L17.585%205H13V3z'/%3E%3C/svg%3E") right 0 top calc(50% - 0.09em) / 0.8em 0.8em no-repeat;
-  mask: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%3E%3Cpath%20fill='%23000'%20d='M10%206v2H5v11h11v-5h2v6a1%201%200%200%201-1%201H4a1%201%200%200%201-1-1V7a1%201%200%200%201%201-1zm11-3v8h-2V6.413l-7.793%207.794l-1.414-1.414L17.585%205H13V3z'/%3E%3C/svg%3E") right 0 top calc(50% - 0.09em) / 0.8em 0.8em no-repeat;
+  background: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%3E%3Cpath%20fill='%232563eb'%20d='M10%206v2H5v11h11v-5h2v6a1%201%200%200%201-1%201H4a1%201%200%200%201-1-1V7a1%201%200%200%201%201-1zm11-3v8h-2V6.413l-7.793%207.794l-1.414-1.414L17.585%205H13V3z'/%3E%3C/svg%3E") right 0 top calc(50% - 0.09em) / 0.8em 0.8em no-repeat;
+}
+.dark .typography a[href^="http"]::after,
+.dark .typography a[href^="mailto"]::after,
+.dark a.outbound::after {
+  background-image: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%3E%3Cpath%20fill='%2393c5fd'%20d='M10%206v2H5v11h11v-5h2v6a1%201%200%200%201-1%201H4a1%201%200%200%201-1-1V7a1%201%200%200%201%201-1zm11-3v8h-2V6.413l-7.793%207.794l-1.414-1.414L17.585%205H13V3z'/%3E%3C/svg%3E");
 }
 
 .icon-links a > img {
