@@ -1,6 +1,8 @@
 ---
 import DefaultLayout from "@/layouts/DefaultLayout.astro";
 import NotesReel from "@/components/NotesReel.astro";
+import BookmarkCard, { type Bookmark } from "@/components/BookmarkCard.astro";
+import bookmarks from "@/data/bookmarks.json";
 import { Content as Hero } from "@/story/hero.md";
 import { getCollection } from "astro:content";
 import { getSortedNotes } from "@/lib/notes";
@@ -8,6 +10,7 @@ import { SITE } from "@/siteConfig";
 
 const notes = await getSortedNotes();
 const noteCount = notes.length;
+const [firstBookmark] = bookmarks as Bookmark[];
 
 const projects = (await getCollection("projects"))
   .map((p) => p.data)
@@ -85,6 +88,16 @@ const projectRows = [
       </div>
       <NotesReel preview={true} showTags={false} />
     </section>
+
+    {firstBookmark && (
+      <section class="space-y-4">
+        <div class="flex items-baseline justify-between">
+          <h2>Bookmarks</h2>
+          <a href="/bookmarks/" class="text-sm text-muted-foreground! hover:text-foreground! transition-colors no-underline!">View all ({bookmarks.length}) →</a>
+        </div>
+        <BookmarkCard item={firstBookmark} />
+      </section>
+    )}
 
   </div>
 </DefaultLayout>

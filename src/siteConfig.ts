@@ -63,6 +63,7 @@ export const SITE: SiteConfiguration = {
     nav: [
         { label: "Home", href: "/" },
         { label: "Notes", href: "/notes/" },
+        { label: "Bookmarks", href: "/bookmarks/" },
     ],
 };
 

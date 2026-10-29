@@ -1,0 +1,31 @@
+---
+// A quote card for one bookmark (src/data/bookmarks.json). Used on /bookmarks and the homepage.
+export interface Bookmark {
+    title?: string;
+    author: string;
+    href: string;
+    quote: string;
+    // Becky's note; shown only when she has written one.
+    take?: string;
+}
+
+const { item } = Astro.props as { item: Bookmark };
+
+const sourceLabel = item.title
+    ? `${item.author}, ${item.title}`
+    : item.href.startsWith("https://x.com/")
+      ? `${item.author} on X`
+      : item.author;
+---
+
+<article class="quote-card flex flex-col gap-3 rounded-xl bg-foreground/4 px-5 py-4">
+    <figure class="m-0 flex flex-col gap-2">
+        <blockquote cite={item.href} class="text-muted-foreground">“{item.quote}”</blockquote>
+        <figcaption class="text-sm text-muted-foreground">
+            <a href={item.href} target="_blank" rel="noopener noreferrer" class="outbound inline-block py-1">
+                {sourceLabel}<span class="sr-only"> (opens in a new tab)</span>
+            </a>
+        </figcaption>
+    </figure>
+    {item.take && <p class="mt-1 border-t border-foreground/8 pt-4 text-foreground">{item.take}</p>}
+</article>

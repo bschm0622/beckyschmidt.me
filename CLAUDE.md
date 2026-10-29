@@ -18,6 +18,7 @@ Personal site for Becky Schmidt (beckyschmidt.me). Astro 7 + Tailwind 4 + React 
 | Homepage copy | `src/story/*.md` (imported directly by `src/pages/index.astro`) |
 | Projects list | `src/data/projects.json` (schema-validated collection via `file()` loader) |
 | Mini tools | List: `src/data/mini-tools.json` (collection `miniTools`; shown on `/mini-tools` and in search). Each tool is a page in `src/pages/mini-tools/`. CleanShot's logic lives in `src/lib/cleanshot/` (pure canvas modules + `app.ts` for page behavior) |
+| Bookmarks | `src/data/bookmarks.json` → `/bookmarks` (`src/pages/bookmarks.astro`); the first entry also shows on the homepage. Cards render via `src/components/BookmarkCard.astro`. Each entry: `author`, `href`, an exact `quote`, optional `title` (only a real title from the source, in sentence case), and an optional `take` (Becky's note, shown below the quote only when present). Every entry is published. Never write a `take` yourself; only Becky does |
 | Site identity/meta (name, email, socials, job title, OG image, analytics id, theme colors, RSS metadata, nav) | `src/siteConfig.ts` — the single source of truth; don't hardcode these elsewhere |
 | Note images | `public/notes-images/<slug>/` |
 | Prose style guide | `writing-style.md` — follow it when drafting notes or site copy |
@@ -48,6 +49,8 @@ Four link/interaction roles, each with ONE treatment. Don't invent a fifth; when
 2. **Titles of clickable list items** (homepage project rows, NotesReel note titles, mini tools list): regular weight in `text-primary` (a softer white in dark mode), no underline at rest; on hover the title goes to full foreground and underlines (`group-hover:text-foreground group-hover:underline`). Their descriptions and dates are `text-sm text-faint-foreground`. The row itself is `no-underline!`.
 3. **Quiet meta-navigation** ("← all notes" via `AllNotesLink.astro`, "View all (n) →", tag chips): small muted text, `no-underline!`, hover signals by color only — `text-muted-foreground! hover:text-foreground!` (chips use a background tint change instead). The `!` on colors is required to beat the `.typography a` prose rule on note pages.
 4. **Navigation chrome** (navbar icon buttons): pill hover — `rounded-lg hover:bg-foreground/13`. Buttons only, never text links.
+
+**Quote cards** (`BookmarkCard.astro`, on `/bookmarks` and the homepage) are the one place content sits on a tint: `quote-card rounded-xl bg-foreground/4 px-5 py-4`, a gray quote (the `.quote-card blockquote` rule in `global.css` drops the blockquote's rule and italics), a small source line that is one underlined link with the outbound arrow (`class="outbound"`), and, when there is one, Becky's note below a `border-foreground/8` hairline in full foreground. Reuse this card for quoted material; don't invent another.
 
 External links additionally get the outbound icon via `.typography a[href^="http"]` (`global.css`). Inside an `.icon-links` wrapper, a content link that starts with a favicon `<img>` from `public/tool-icons/` shows that icon instead of the outbound one (markdown: `[![](/tool-icons/name.png)Name](https://…)`).
 

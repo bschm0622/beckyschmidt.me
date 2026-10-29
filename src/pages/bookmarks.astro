@@ -1,0 +1,16 @@
+---
+import DefaultLayout from "@/layouts/DefaultLayout.astro";
+import BookmarkCard, { type Bookmark } from "@/components/BookmarkCard.astro";
+import entries from "@/data/bookmarks.json";
+
+const bookmarks: Bookmark[] = entries;
+---
+
+<DefaultLayout title="Bookmarks" description="Lines Becky Schmidt has saved from posts and articles about building products.">
+    <div class="flex flex-col gap-6">
+        <h1>Bookmarks</h1>
+        <div class="flex flex-col gap-6">
+            {bookmarks.map((item) => <BookmarkCard item={item} />)}
+        </div>
+    </div>
+</DefaultLayout>

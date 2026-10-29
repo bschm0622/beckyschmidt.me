@@ -1,0 +1,36 @@
+[
+  {
+    "title": "Output isn’t design",
+    "author": "Karri Saarinen",
+    "href": "https://karrisaarinen.com/posts/output-isnt-design/",
+    "quote": "The hard part of design is rarely generating the form. It is understanding the problem well enough to know what and how something should exist at all."
+  },
+  {
+    "title": "Don’t be a meat proxy",
+    "author": "Niklas Gruhn",
+    "href": "https://gruhn.me/blog/2026-08-03/",
+    "quote": "By all means, prompt AI. But don’t just relay the output. Read it, understand it, validate it, and then write a response in your own words…"
+  },
+  {
+    "title": "Slippery slop",
+    "author": "Max Brodeur-Urbas",
+    "href": "https://x.com/MaxBrodeurUrbas/status/2059736090937081980",
+    "quote": "If something takes less time for you to create than for the recipient to consume, it’s probably slop."
+  },
+  {
+    "author": "Lee Robinson",
+    "href": "https://x.com/leerob/status/2062185992585355297",
+    "quote": "It's easy to pontificate about all roles collapsing but it's actually really nice to have a specific person or team who is an expert in one thing that you can work with."
+  },
+  {
+    "title": "Designing for agents",
+    "author": "Teddy Riker",
+    "href": "https://x.com/teddy_riker/status/2047312986696454584",
+    "quote": "Teaching agents how to succeed, building feedback loops, and minding the context gap all ask the same underlying question: what does your agent’s caller need to do its job well, and are you giving it to them?"
+  },
+  {
+    "author": "Hardik Pandya",
+    "href": "https://x.com/hvpandya/status/2040706500453404910",
+    "quote": "A text box is not the end-all UI for enterprise software."
+  }
+]

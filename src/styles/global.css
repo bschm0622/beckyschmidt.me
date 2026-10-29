@@ -225,6 +225,10 @@ html:not(.light):not(.dark) {
   blockquote {
     @apply border-l-2 border-foreground/20 pl-4 italic text-muted-foreground;
   }
+  /* Quote cards (BookmarkCard.astro): the tinted card already marks the quote, so drop the rule and italics. */
+  .quote-card blockquote {
+    @apply m-0 border-0 p-0 not-italic;
+  }
   hr {
     @apply border-muted my-6;
   }
@@ -286,7 +290,8 @@ html:not(.light):not(.dark) {
 
 /* Drawn on a U+2060 word joiner, not an inline-block, so the arrow and trailing punctuation never wrap away from the link. */
 .typography a[href^="http"]::after,
-.typography a[href^="mailto"]::after {
+.typography a[href^="mailto"]::after,
+a.outbound::after {
   content: "\2060";
   padding-left: 1.08em;
   background-color: var(--color-link);

@@ -3,6 +3,8 @@ import { getSortedNotes, noteUrl } from "@/lib/notes";
 import { parseFrontmatter } from "@/lib/frontmatter";
 import colophonSource from "@/story/colophon.md?raw";
 import miniTools from "@/data/mini-tools.json";
+import bookmarks from "@/data/bookmarks.json";
+import type { Bookmark } from "@/components/BookmarkCard.astro";
 
 export const prerender = true;
 
@@ -51,6 +53,17 @@ export const GET: APIRoute = async () => {
             url: "/mini-tools/",
             pubDate: "",
             body: miniTools.map((t) => `${t.name}. ${t.description}`).join(" "),
+        },
+        {
+            kind: "page",
+            title: "Bookmarks",
+            description: "Lines I’ve saved from posts and articles about building products.",
+            tags: [],
+            url: "/bookmarks/",
+            pubDate: "",
+            body: (bookmarks as Bookmark[])
+                .map((r) => [r.title, r.author, r.quote, r.take].filter(Boolean).join(". "))
+                .join(" "),
         },
     ];
 
