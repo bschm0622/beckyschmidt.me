@@ -58,6 +58,7 @@ export default defineConfig({
     optimizeDeps: {
       include: [
         "@starwind-ui/runtime/button",
+        "fuse.js",
         "astro/virtual-modules/transitions-events.js",
         "astro/virtual-modules/transitions-router.js",
         "astro/virtual-modules/transitions-swap-functions.js",

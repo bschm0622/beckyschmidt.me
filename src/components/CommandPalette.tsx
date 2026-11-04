@@ -69,6 +69,12 @@ const IconX = () => (
         <path d="M4 4L20 20M20 4L4 20" />
     </svg>
 );
+const IconGitHub = () => (
+    <svg className={iconCls} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+        <path d="M10 20.568c-3.429 1.157-6.286 0-8-3.568" />
+        <path d="M10 22v-3.242c0-.598.184-1.118.48-1.588.204-.322.064-.78-.303-.88C7.134 15.452 5 14.107 5 9.645c0-1.16.38-2.25 1.048-3.2.166-.236.25-.354.27-.46.02-.108-.015-.247-.085-.527-.283-1.136-.264-2.343.161-3.43 0 0 .877-.287 2.874.96.456.285.684.428.885.46s.469-.035 1.005-.169A9.5 9.5 0 0 1 13.5 3c.814 0 1.587.106 2.342.302.536.134.804.2 1.005.169.2-.032.43-.175.885-.46 1.997-1.247 2.874-.96 2.874-.96.425 1.087.444 2.294.161 3.43-.07.28-.105.42-.085.526s.104.225.27.461c.669.95 1.048 2.04 1.048 3.2 0 4.462-2.134 5.807-5.177 6.643-.367.101-.507.559-.303.88.296.47.48.99.48 1.589V22" />
+    </svg>
+);
 const IconCopy = () => (
     <svg className={iconCls} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
         <path d="M9 15C9 12.1716 9 10.7574 9.87868 9.87868C10.7574 9 12.1716 9 15 9L16 9C18.8284 9 20.2426 9 21.1213 9.87868C22 10.7574 22 12.1716 22 15V16C22 18.8284 22 20.2426 21.1213 21.1213C20.2426 22 18.8284 22 16 22H15C12.1716 22 10.7574 22 9.87868 21.1213C9 20.2426 9 18.8284 9 16L9 15Z" />
@@ -166,6 +172,13 @@ const STATIC_COMMANDS: Command[] = [
         icon: <IconX />,
         group: "Actions",
         perform: () => goExternal(SITE.socials.x),
+    },
+    {
+        id: "action:github",
+        label: "Go to my GitHub",
+        icon: <IconGitHub />,
+        group: "Actions",
+        perform: () => goExternal(SITE.socials.github),
     },
     {
         id: "action:copy",
