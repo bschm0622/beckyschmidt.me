@@ -15,6 +15,8 @@ interface PageView {
     engagedMs: number;
     visibleSince: number | null;
     sent: string;
+    /** The page view beacon, held until the page is first seen. */
+    pending: Beacon | null;
 }
 
 let current: PageView | null = null;
@@ -32,10 +34,18 @@ function newId(): string {
     return crypto.randomUUID?.() ?? `${Date.now().toString(36)}${Math.random().toString(36).slice(2)}`;
 }
 
+/** How far down the page someone has scrolled: 0 at the top, 100 at the bottom. A page that fits on one
+ *  screen, or that nobody scrolls, stays at 0. */
 function scrollPercent(): number {
-    const doc = document.documentElement;
-    const seen = window.scrollY + window.innerHeight;
-    return Math.min(100, Math.round((seen / Math.max(doc.scrollHeight, 1)) * 100));
+    const scrollable = document.documentElement.scrollHeight - window.innerHeight;
+    if (scrollable <= 0) return 0;
+    return Math.min(100, Math.max(0, Math.round((window.scrollY / scrollable) * 100)));
+}
+
+/** Browsers preload pages (Safari's top hit, Chrome's address-bar prerender) and open background tabs
+ *  without anyone looking; a page view only counts once the page is actually on screen. */
+function onScreen(): boolean {
+    return document.visibilityState === "visible" && !(document as Document & { prerendering?: boolean }).prerendering;
 }
 
 function engagedSeconds(pv: PageView): number {
@@ -44,7 +54,7 @@ function engagedSeconds(pv: PageView): number {
 }
 
 function flush(): void {
-    if (!current) return;
+    if (!current || current.pending) return;
     const s = current.scroll;
     const e = engagedSeconds(current);
     const key = `${s}:${e}`;
@@ -61,13 +71,14 @@ function startPageView(): void {
     current = {
         id: newId(),
         path: location.pathname,
-        scroll: scrollPercent(),
+        scroll: 0,
         engagedMs: 0,
-        visibleSince: document.visibilityState === "visible" ? performance.now() : null,
+        visibleSince: null,
         sent: "",
+        pending: null,
     };
     const query = new URLSearchParams(location.search);
-    send({
+    current.pending = {
         t: "pv",
         id: current.id,
         p: current.path,
@@ -81,12 +92,21 @@ function startPageView(): void {
         l: navigator.language,
         nf: document.querySelector("[data-not-found]") ? 1 : 0,
         tp: navigator.maxTouchPoints > 1 ? 1 : 0,
-    });
+    };
     firstLoad = false;
+    showPageView();
+}
+
+/** Sends the held page view the first time the page is on screen. */
+function showPageView(): void {
+    if (!current?.pending || !onScreen()) return;
+    send(current.pending);
+    current.pending = null;
+    current.visibleSince = performance.now();
 }
 
 function record({ type, name, target }: TrackDetail): void {
-    if (!current) return;
+    if (!current || current.pending) return;
     send({ t: "ev", id: current.id, p: current.path, k: type, n: name, g: target ?? null });
 }
 
@@ -116,7 +136,9 @@ function onScroll(): void {
 
 function onVisibility(): void {
     if (!current) return;
-    if (document.visibilityState === "hidden") {
+    if (current.pending) {
+        showPageView();
+    } else if (document.visibilityState === "hidden") {
         if (current.visibleSince !== null) current.engagedMs += performance.now() - current.visibleSince;
         current.visibleSince = null;
         flush();
@@ -135,5 +157,6 @@ document.addEventListener("copy", () => {
 });
 window.addEventListener("scroll", onScroll, { passive: true });
 document.addEventListener("visibilitychange", onVisibility);
+document.addEventListener("prerenderingchange", showPageView);
 window.addEventListener("pagehide", flush);
 window.addEventListener("analytics", (e) => record((e as CustomEvent<TrackDetail>).detail));
