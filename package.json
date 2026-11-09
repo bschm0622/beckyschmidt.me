@@ -26,6 +26,7 @@
     "@uiw/react-codemirror": "^4.21.24",
     "astro": "^7.2.9",
     "fuse.js": "^7.1.0",
+    "isbot": "^5.2.3",
     "markdown-it": "^14.1.0",
     "mdast-util-to-string": "^4.0.0",
     "react": "^19.1.1",

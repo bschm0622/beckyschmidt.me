@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef, useMemo } from "react";
 import Fuse from "fuse.js";
 import { navigate } from "astro:transitions/client";
+import { track } from "@/lib/analytics/track";
 import { SITE } from "@/siteConfig";
 // Not @/lib/notes or a content collection: both are server-only.
 import { formatDate } from "@/lib/slugify";
@@ -38,10 +39,12 @@ const goInternal = (url: string) => {
     navigate(url);
 };
 const goExternal = (url: string) => {
+    track("outbound", new URL(url).hostname.replace(/^www\./, ""), url);
     closePalette();
     window.open(url, "_blank", "noopener,noreferrer");
 };
 const mailTo = (email: string) => {
+    track("outbound", "email");
     closePalette();
     window.location.href = `mailto:${email}`;
 };
@@ -296,6 +299,14 @@ export default function CommandPalette({ maxHeight }: Props) {
         return { groups: grouped, flat: flatList };
     }, [query, fuse, notes]);
 
+    // A search that finds nothing is still worth knowing about; wait until typing settles.
+    const q = query.trim();
+    useEffect(() => {
+        if (!q || flat.length > 0) return;
+        const timer = window.setTimeout(() => track("search", q), 1500);
+        return () => window.clearTimeout(timer);
+    }, [q, flat.length]);
+
     useEffect(() => {
         setSelected(0);
     }, [groups]);
@@ -307,6 +318,7 @@ export default function CommandPalette({ maxHeight }: Props) {
     }, [selected]);
 
     const runItem = (item: Command) => {
+        if (query.trim()) track("search", query.trim(), item.id);
         item.perform();
         if (item.id === "action:copy") {
             setCopied(true);

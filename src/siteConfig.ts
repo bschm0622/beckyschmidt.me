@@ -24,7 +24,6 @@ export interface SiteConfiguration {
 
     headshot: string;
     ogImage: string;
-    analytics: { umamiWebsiteId: string };
     rss: { title: string; description: string; language: string };
     /** theme-color meta values; keep in sync with src/styles/global.css. */
     themeColors: { light: string; dark: string };
@@ -52,7 +51,6 @@ export const SITE: SiteConfiguration = {
 
     headshot: "/becky.png",
     ogImage: "/og.png",
-    analytics: { umamiWebsiteId: "2d238baf-947c-468a-aac9-1ac81b265110" },
     rss: {
         title: "Becky's notes",
         description: "Becky's notes and writing",

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import * as api from '@/lib/cms-api';
 import { ApiError, type PendingPR } from '@/lib/cms-api';
+import { setTrackingOff } from '@/lib/analytics/track';
 
 interface Note {
   filename: string;
@@ -32,6 +33,8 @@ export default function AdminDashboard() {
       try {
         const data = await api.checkSession();
         if (data.authenticated) {
+          // Any browser Becky signs in on stops counting toward analytics.
+          setTrackingOff(true);
           setIsAuthenticated(true);
           loadNotes();
         }
@@ -46,6 +49,7 @@ export default function AdminDashboard() {
     setError('');
     try {
       await api.login(password);
+      setTrackingOff(true);
       setIsAuthenticated(true);
       loadNotes();
     } catch (err: any) {
@@ -175,6 +179,9 @@ export default function AdminDashboard() {
           <button onClick={handleLogout} className="btn-ghost">
             Log out
           </button>
+          <a href="/admin/analytics" className="btn-ghost">
+            Analytics
+          </a>
           <button onClick={handleCreateNew} className="btn-primary">
             New note
           </button>

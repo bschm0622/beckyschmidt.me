@@ -1,7 +1,19 @@
 ---
+export const prerender = false;
 import DefaultLayout from "@/layouts/DefaultLayout.astro";
 import FormattedDate from "@/components/FormattedDate.astro";
+import TrafficChart from "@/components/TrafficChart.astro";
 import { Content, frontmatter } from "@/story/colophon.md";
+import { publicTraffic } from "@/lib/analytics/stats";
+
+// Rendered per request for the live traffic chart; publicTraffic() caches the query.
+let traffic = null;
+try {
+    traffic = await publicTraffic();
+} catch (error) {
+    console.error("Colophon traffic chart failed:", error);
+}
+Astro.response.headers.set("Cache-Control", "public, max-age=300");
 ---
 
 <DefaultLayout title={frontmatter.title} description={frontmatter.description} proseClass="typography">
@@ -12,5 +24,9 @@ import { Content, frontmatter } from "@/story/colophon.md";
     <div class="icon-links">
         <Content />
     </div>
+    {traffic && (
+        <div class="mt-6">
+            <TrafficChart data={traffic.days} visitors={traffic.visitors} />
+        </div>
+    )}
 </DefaultLayout>
-

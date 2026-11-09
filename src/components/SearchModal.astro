@@ -47,6 +47,8 @@ const key =
 </div>
 
 <script>
+    import { track } from "@/lib/analytics/track";
+
     function initSearchModal() {
         const backdrop = document.getElementById("search-modal-backdrop");
         const container = document.getElementById("search-modal-container");
@@ -67,6 +69,7 @@ const key =
         const FOCUSABLE = 'a[href], button:not([disabled]), input:not([disabled]), [tabindex]:not([tabindex="-1"])';
 
         function openModal() {
+            track("click", "search-open");
             previouslyFocused = document.activeElement as HTMLElement | null;
             document.documentElement.style.overflow = "hidden";
             elements.backdrop.classList.remove("hidden");

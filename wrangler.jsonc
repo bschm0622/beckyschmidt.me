@@ -15,6 +15,15 @@
     "binding": "ASSETS",
     "directory": "./dist"
   },
+  // Self-hosted analytics (src/lib/analytics/). Schema lives in migrations/; apply with
+  // `npx wrangler d1 migrations apply DB --remote` before deploying a schema change.
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "beckyschmidt-analytics",
+      "database_id": "c94f53ca-73c0-46cc-a140-eb3443a9ee7f"
+    }
+  ],
   "observability": {
     "enabled": true
   }

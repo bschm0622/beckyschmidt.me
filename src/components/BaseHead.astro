@@ -39,7 +39,6 @@ const canonicalStr =
         : (canonicalURL?.toString() ??
           new URL(Astro.url.pathname, origin).toString());
 
-const shouldLoadAnalytics = import.meta.env.PROD;
 ---
 
 {/* Theme color meta must come before the init script so the script can find it */}
@@ -170,15 +169,7 @@ const shouldLoadAnalytics = import.meta.env.PROD;
 <Favicons />
 <ClientRouter />
 
-{shouldLoadAnalytics && (
-  <script>
-    import { SITE } from "@/siteConfig";
-    if (document.cookie.indexOf('umami.disabled=true') === -1) {
-      const s = document.createElement('script');
-      s.src = 'https://cloud.umami.is/script.js';
-      s.setAttribute('data-website-id', SITE.analytics.umamiWebsiteId);
-      s.defer = true;
-      document.head.appendChild(s);
-    }
-  </script>
-)}
+<script>
+  import "@/lib/analytics/collector";
+</script>
+

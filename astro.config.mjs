@@ -85,6 +85,7 @@ export default defineConfig({
             "astro/virtual-modules/transitions.js",
             "astro > @oslojs/encoding",
             "@astrojs/rss",
+            "isbot",
           ],
         },
       },
