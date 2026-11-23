@@ -117,7 +117,10 @@ const th = "pb-2 text-xs font-normal uppercase tracking-wide text-muted-foregrou
                         <img src={site.icon} alt="" class="size-5 shrink-0 rounded-md" />
                         <a href={site.url} class="no-underline! hover:underline!">{site.name}</a>
                     </h2>
-                    <a href={site.dashboard} class="shrink-0 text-sm text-muted-foreground! no-underline! hover:text-foreground!">
+                    <a
+                        href={site.dashboard}
+                        {...(site.dashboard.startsWith("http") && { target: "_blank", rel: "noopener" })}
+                        class="shrink-0 text-sm text-muted-foreground! no-underline! hover:text-foreground!">
                         Full dashboard →
                     </a>
                 </div>
