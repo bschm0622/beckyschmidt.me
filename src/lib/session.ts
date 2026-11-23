@@ -3,7 +3,7 @@ import { getSecret } from 'astro:env/server';
 import { json } from '@/lib/http';
 
 const COOKIE_NAME = 'admin_session';
-// 30 days: this is Becky's own browser, and the cookie is HttpOnly, Secure and SameSite=Strict.
+// 30 days: this is Becky's own browser, and the cookie is HttpOnly, Secure and SameSite=Lax (Strict drops it when the site is opened from a link in another app).
 const MAX_AGE = 60 * 60 * 24 * 30;
 
 // Secure cookies are dropped over plain HTTP on the LAN, so relax it only in dev.
@@ -18,11 +18,11 @@ export function createSessionCookie(): string | null {
   if (!secret) return null;
   const exp = String(Date.now() + MAX_AGE * 1000);
   const token = `${exp}.${sign(exp, secret)}`;
-  return `${COOKIE_NAME}=${encodeURIComponent(token)}; HttpOnly;${SECURE} SameSite=Strict; Path=/; Max-Age=${MAX_AGE}`;
+  return `${COOKIE_NAME}=${encodeURIComponent(token)}; HttpOnly;${SECURE} SameSite=Lax; Path=/; Max-Age=${MAX_AGE}`;
 }
 
 export function clearSessionCookie(): string {
-  return `${COOKIE_NAME}=; HttpOnly;${SECURE} SameSite=Strict; Path=/; Max-Age=0`;
+  return `${COOKIE_NAME}=; HttpOnly;${SECURE} SameSite=Lax; Path=/; Max-Age=0`;
 }
 
 export function isAuthenticated(request: Request): boolean {
