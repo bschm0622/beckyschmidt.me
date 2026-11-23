@@ -24,7 +24,7 @@ const max = Math.max(...rows.map((r) => r.count), 1);
         <ul class="space-y-0.5">
             {rows.map((r) => (
                 <li class="relative flex items-baseline justify-between gap-4 rounded-md px-2 py-1.5 text-sm">
-                    <span class="absolute inset-y-0 left-0 rounded-md bg-foreground/10" style={`width: ${(r.count / max) * 100}%`} aria-hidden="true" />
+                    <span class="absolute inset-y-0 left-0 rounded-md bg-foreground/20" style={`width: ${(r.count / max) * 100}%`} aria-hidden="true" />
                     {/* A long label truncates on its own, so the detail after it stays visible. */}
                     <span class="relative flex min-w-0 items-baseline gap-1" title={r.detail ? `${r.label} · ${r.detail}` : r.label}>
                         <span class="min-w-0 truncate text-foreground">{r.label}</span>
