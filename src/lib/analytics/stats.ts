@@ -65,14 +65,16 @@ async function all<T>(sql: string, ...params: unknown[]): Promise<T[]> {
     return (await env.DB.prepare(sql).bind(...params).all<T>()).results;
 }
 
-/** Views and visitors for each of the last `days` days, zero-filled, oldest first. */
-export async function dailyTraffic(days: number): Promise<DayTraffic[]> {
+/**
+ * Views and visitors for each of the last `days` days, zero-filled, oldest first. `db` and `table`
+ * let /admin/sites chart another site that shares this schema.
+ */
+export async function dailyTraffic(days: number, db = env.DB, table = "pageviews"): Promise<DayTraffic[]> {
     const range = lastDays(days);
-    const rows = await all<DayTraffic>(
+    const { results: rows } = await db.prepare(
         `SELECT day, COUNT(*) AS views, COUNT(DISTINCT visitor) AS visitors
-         FROM pageviews WHERE day >= ? AND not_found = 0 GROUP BY day`,
-        range[0],
-    );
+         FROM ${table} WHERE day >= ? AND not_found = 0 GROUP BY day`,
+    ).bind(range[0]).all<DayTraffic>();
     const byDay = new Map(rows.map((r) => [r.day, r]));
     return range.map((day) => byDay.get(day) ?? { day, views: 0, visitors: 0 });
 }

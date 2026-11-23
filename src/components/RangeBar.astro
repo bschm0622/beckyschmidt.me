@@ -1,0 +1,32 @@
+---
+// The date range for an admin analytics page, right-aligned above its data. Picking a range loads ?range=.
+import { Select, SelectContent, SelectItem, SelectTrigger } from "@/components/starwind/select";
+
+interface Props {
+    ranges: readonly { key: string; label: string }[];
+    current: string;
+}
+
+const { ranges, current } = Astro.props;
+---
+
+<div class="flex justify-end">
+    <Select defaultValue={current} data-range-select>
+        <SelectTrigger size="sm" aria-label="Date range" />
+        <SelectContent size="sm">
+            {ranges.map((r) => <SelectItem value={r.key}>{r.label}</SelectItem>)}
+        </SelectContent>
+    </Select>
+</div>
+
+<script>
+    // Bundled scripts run once per session; delegate so new pages need no rebinding.
+    document.addEventListener("starwind:value-change", (event) => {
+        if (!(event.target as Element).closest("[data-range-select]")) return;
+        const { value } = (event as CustomEvent<{ value: string | null }>).detail;
+        if (!value) return;
+        const url = new URL(window.location.href);
+        url.searchParams.set("range", value);
+        window.location.href = url.toString();
+    });
+</script>

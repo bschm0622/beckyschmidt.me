@@ -1,0 +1,20 @@
+---
+// The signed-in admin shell: the wide navbar, a content column the same width, and the admin tabs.
+import DefaultLayout from "@/layouts/DefaultLayout.astro";
+import AdminNav, { type AdminSection } from "@/components/AdminNav.astro";
+
+interface Props {
+    title: string;
+    current: AdminSection;
+}
+
+const { title, current } = Astro.props;
+---
+
+{/* No prose styles: admin pages set their own type. */}
+<DefaultLayout title={title} wide proseClass="" noSearch noindex>
+    <div class="flex flex-col gap-10 pb-8">
+        <AdminNav current={current} />
+        <slot />
+    </div>
+</DefaultLayout>

@@ -40,6 +40,23 @@ export default defineConfig({
         context: "server",
         optional: true,
       }),
+      // remotepmjobs' analytics database (Turso), read by /admin. The token is read-only.
+      RPJ_TURSO_URL: envField.string({
+        access: "secret",
+        context: "server",
+        optional: true,
+      }),
+      RPJ_TURSO_TOKEN: envField.string({
+        access: "secret",
+        context: "server",
+        optional: true,
+      }),
+      // Google service account JSON (one line) that can read Search Console, for /admin.
+      GSC_SERVICE_ACCOUNT: envField.string({
+        access: "secret",
+        context: "server",
+        optional: true,
+      }),
       GITHUB_OWNER: envField.string({
         access: "public",
         context: "server",
@@ -58,6 +75,7 @@ export default defineConfig({
     optimizeDeps: {
       include: [
         "@starwind-ui/runtime/button",
+        "@starwind-ui/runtime/select",
         "fuse.js",
         "astro/virtual-modules/transitions-events.js",
         "astro/virtual-modules/transitions-router.js",
@@ -70,6 +88,7 @@ export default defineConfig({
         optimizeDeps: {
           include: [
             "@starwind-ui/astro/button",
+            "@starwind-ui/astro/select",
             "@starwind-ui/astro/collapsible",
             "@starwind-ui/astro/dropzone",
             "@starwind-ui/astro/toggle",
@@ -82,6 +101,9 @@ export default defineConfig({
             "astro/app/manifest",
             "astro/logger/json",
             "astro/content/runtime",
+            "astro/zod",
+            "astro > zod/v4",
+            "astro/env/runtime",
             "astro/virtual-modules/transitions.js",
             "astro > @oslojs/encoding",
             "@astrojs/rss",

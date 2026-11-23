@@ -1,0 +1,12 @@
+---
+export const prerender = false;
+import AdminLayout from "@/layouts/AdminLayout.astro";
+import AdminDashboard from "@/components/AdminDashboard.tsx";
+import { isAuthenticated } from "@/lib/session";
+
+if (!isAuthenticated(Astro.request)) return Astro.redirect("/admin");
+---
+
+<AdminLayout title="Notes" current="notes">
+    <AdminDashboard client:load />
+</AdminLayout>

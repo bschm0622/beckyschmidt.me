@@ -1,11 +1,149 @@
 ---
 export const prerender = false;
 import DefaultLayout from "@/layouts/DefaultLayout.astro";
-import AdminDashboard from "@/components/AdminDashboard.tsx";
+import AdminLayout from "@/layouts/AdminLayout.astro";
+import RangeBar from "@/components/RangeBar.astro";
+import AdminLogin from "@/components/AdminLogin.tsx";
+import TrafficChart from "@/components/TrafficChart.astro";
+import StatList from "@/components/StatList.astro";
+import { isAuthenticated } from "@/lib/session";
+import { siteSummaries } from "@/lib/analytics/sites";
+import type { SearchSummary } from "@/lib/analytics/search-console";
+
+const signedIn = isAuthenticated(Astro.request);
+
+const RANGES = [
+    { key: "today", label: "Today", days: 1 },
+    { key: "7d", label: "Last 7 days", days: 7 },
+    { key: "30d", label: "Last 30 days", days: 30 },
+    { key: "90d", label: "Last 90 days", days: 90 },
+] as const;
+const range = RANGES.find((r) => r.key === Astro.url.searchParams.get("range")) ?? RANGES[0];
+const sites = signedIn ? await siteSummaries(range.days) : [];
+
+const number = (n: number) => n.toLocaleString("en-US");
+const duration = (seconds: number | null) => {
+    if (!seconds) return "–";
+    const s = Math.round(seconds);
+    return s < 60 ? `${s}s` : `${Math.floor(s / 60)}m ${String(s % 60).padStart(2, "0")}s`;
+};
+
+/** Whole-percent change from the previous span; null when there was nothing to compare against. */
+const change = (now: number, before: number) => (before ? Math.round(((now - before) / before) * 100) : null);
+
+const shortDay = (day: string) =>
+    new Date(`${day}T12:00:00Z`).toLocaleDateString("en-US", { month: "short", day: "numeric", timeZone: "UTC" });
+const searchNote = (s: SearchSummary) =>
+    [
+        `${number(s.clicks)} ${s.clicks === 1 ? "click" : "clicks"}`,
+        `${number(s.impressions)} ${s.impressions === 1 ? "impression" : "impressions"}`,
+        s.position !== null && `avg position ${s.position.toFixed(1)}`,
+        s.through && `through ${shortDay(s.through)}`,
+    ].filter(Boolean).join(" · ");
+
+const th = "pb-2 text-xs font-normal uppercase tracking-wide text-muted-foreground";
 ---
 
-<DefaultLayout title="Admin Dashboard" fullWidth noSearch noindex>
-  <div class="mx-auto w-full max-w-3xl py-8">
-    <AdminDashboard client:load />
-  </div>
-</DefaultLayout>
+{!signedIn ? (
+    <DefaultLayout title="Admin" wide proseClass="" noSearch noindex>
+        <div class="pb-8">
+            <AdminLogin client:load />
+        </div>
+    </DefaultLayout>
+) : (
+    <AdminLayout title="All sites" current="sites">
+        <div class="flex flex-col gap-6">
+            {/* The filled tab already names the page; the heading is for screen readers. */}
+            <h1 class="sr-only">All sites</h1>
+            <RangeBar ranges={RANGES} current={range.key} />
+
+            {/* One row per site: the numbers to compare at a glance. Each name jumps to that site's section. */}
+            <table class="w-full text-sm tabular-nums">
+                <thead class="text-left">
+                    <tr>
+                        <th class={th}>Site</th>
+                        <th class:list={[th, "text-right"]}>Visitors</th>
+                        <th class:list={[th, "hidden text-right sm:table-cell"]}>Views</th>
+                        <th class:list={[th, "hidden text-right sm:table-cell"]}>Time on page</th>
+                        <th class:list={[th, "text-right"]}>Main conversion</th>
+                        <th class:list={[th, "hidden text-right sm:table-cell"]}>Google clicks</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-foreground/8 border-t border-foreground/8">
+                    {sites.map((site) => {
+                        const pct = change(site.totals.visitors, site.previousVisitors);
+                        const [goal] = site.conversions;
+                        return (
+                            <tr>
+                                <td class="py-3 pr-3">
+                                    <a href={`#${site.id}`} class="flex items-center gap-2 text-foreground! no-underline! hover:underline!">
+                                        <img src={site.icon} alt="" class="size-4 shrink-0 rounded-sm" />
+                                        {site.name}
+                                    </a>
+                                </td>
+                                <td class="py-3 pl-3 text-right">
+                                    <span class="text-base text-foreground">{number(site.totals.visitors)}</span>
+                                    {pct !== null && (
+                                        <span
+                                            class:list={["ml-1.5 text-xs", pct > 0 ? "text-success" : pct < 0 ? "text-danger" : "text-muted-foreground"]}
+                                            title={`${number(site.previousVisitors)} in the ${range.days === 1 ? "same part of yesterday" : `${range.days} days before`}`}
+                                        >{pct > 0 ? "↑" : pct < 0 ? "↓" : ""}{Math.abs(pct)}%</span>
+                                    )}
+                                </td>
+                                <td class="hidden py-3 pl-3 text-right text-muted-foreground sm:table-cell">{number(site.totals.views)}</td>
+                                <td class="hidden py-3 pl-3 text-right text-muted-foreground sm:table-cell">{duration(site.totals.engaged)}</td>
+                                <td class="py-3 pl-3 text-right">
+                                    {goal ? (
+                                        <>
+                                            <span class="text-foreground">{number(goal.count)}</span>
+                                            <span class="block text-xs text-faint-foreground">{goal.label.toLowerCase()}</span>
+                                        </>
+                                    ) : "–"}
+                                </td>
+                                <td class="hidden py-3 pl-3 text-right text-muted-foreground sm:table-cell">
+                                    {site.search && !site.search.error ? number(site.search.clicks) : "–"}
+                                </td>
+                            </tr>
+                        );
+                    })}
+                </tbody>
+            </table>
+        </div>
+
+        {sites.map((site) => (
+            <section id={site.id} class="mt-6 flex scroll-mt-6 flex-col gap-8 border-t border-foreground/15 pt-10">
+                <div class="flex items-center justify-between gap-6">
+                    <h2 class="flex items-center gap-2.5 text-xl text-foreground">
+                        <img src={site.icon} alt="" class="size-5 shrink-0 rounded-md" />
+                        <a href={site.url} class="no-underline! hover:underline!">{site.name}</a>
+                    </h2>
+                    <a href={site.dashboard} class="shrink-0 text-sm text-muted-foreground! no-underline! hover:text-foreground!">
+                        Full dashboard →
+                    </a>
+                </div>
+
+                {range.days !== 1 && <TrafficChart data={site.daily} visitors={site.totals.visitors} caption={false} />}
+
+                <div class="grid gap-x-10 gap-y-8 sm:grid-cols-2">
+                    <StatList title="Referrers" rows={site.referrers} level={3} />
+                    <StatList title="Countries" rows={site.countries} level={3} />
+                    <StatList title="Conversions" rows={site.conversions} level={3} />
+                    {site.search && (site.search.error ? (
+                        <section class="space-y-2">
+                            <h3 class="text-xs uppercase tracking-wide text-muted-foreground">Google searches</h3>
+                            <p class="text-sm text-faint-foreground">{site.search.error}</p>
+                        </section>
+                    ) : (
+                        <StatList
+                            title="Google searches (impressions)"
+                            rows={site.search.queries}
+                            empty="No searches in this range."
+                            level={3}
+                            note={searchNote(site.search)}
+                        />
+                    ))}
+                </div>
+            </section>
+        ))}
+    </AdminLayout>
+)}

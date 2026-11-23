@@ -36,6 +36,12 @@
       "version": "2.2.1",
       "framework": "astro",
       "registry": "default"
+    },
+    {
+      "name": "select",
+      "version": "2.2.0",
+      "framework": "astro",
+      "registry": "default"
     }
   ],
   "tailwind": {

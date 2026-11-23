@@ -634,7 +634,7 @@ export default function NoteEditor({ repo }: { repo: string }) {
       setConfirmingLeave(true);
       return;
     }
-    window.location.href = '/admin';
+    window.location.href = '/admin/notes';
   };
 
   if (isLoading) {
@@ -713,7 +713,7 @@ export default function NoteEditor({ repo }: { repo: string }) {
         <div className="status-warning flex flex-wrap items-center justify-between gap-3">
           <span>Leave without saving? Your changes will be discarded.</span>
           <span className="flex gap-4">
-            <button onClick={() => discardAndLeave('/admin')} className="font-medium hover:opacity-80">Discard and leave</button>
+            <button onClick={() => discardAndLeave('/admin/notes')} className="font-medium hover:opacity-80">Discard and leave</button>
             <button onClick={() => setConfirmingLeave(false)} className="hover:opacity-80">Keep editing</button>
           </span>
         </div>

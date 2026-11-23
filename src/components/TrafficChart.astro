@@ -1,14 +1,16 @@
 ---
-// Daily page views as bars; hover or focus a bar for that day's numbers. Used on the colophon and /admin/analytics.
+// Daily page views as bars; hover or focus a bar for that day's numbers. Used on the colophon and the admin analytics pages.
 import type { DayTraffic } from "@/lib/analytics/stats";
 
 interface Props {
     data: DayTraffic[];
     /** Distinct visitors over the whole range; adding up daily counts would count a repeat visitor twice. */
     visitors: number;
+    /** Show the "n views · n visitors" line; off where those totals are already on the page. */
+    caption?: boolean;
 }
 
-const { data, visitors: totalVisitors } = Astro.props;
+const { data, visitors: totalVisitors, caption = true } = Astro.props;
 const max = Math.max(...data.map((d) => d.views), 1);
 const totalViews = data.reduce((sum, d) => sum + d.views, 0);
 const label = (day: string) =>
@@ -17,7 +19,7 @@ const plural = (n: number, word: string) => `${n.toLocaleString("en-US")} ${word
 ---
 
 <figure class="m-0">
-    <figcaption class="mb-3 text-sm text-muted-foreground tabular-nums">
+    <figcaption class:list={[caption ? "mb-3 text-sm text-muted-foreground tabular-nums" : "sr-only"]}>
         {plural(totalViews, "view")} · {plural(totalVisitors, "visitor")}
     </figcaption>
     <div class:list={["flex h-32 items-end", data.length <= 90 && "gap-0.5"]} role="list" aria-label="Page views per day">

@@ -3,7 +3,8 @@ import { getSecret } from 'astro:env/server';
 import { json } from '@/lib/http';
 
 const COOKIE_NAME = 'admin_session';
-const MAX_AGE = 60 * 60 * 12;
+// 30 days: this is Becky's own browser, and the cookie is HttpOnly, Secure and SameSite=Strict.
+const MAX_AGE = 60 * 60 * 24 * 30;
 
 // Secure cookies are dropped over plain HTTP on the LAN, so relax it only in dev.
 const SECURE = import.meta.env.PROD ? ' Secure;' : '';

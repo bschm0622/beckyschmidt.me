@@ -5,8 +5,9 @@ import NoteEditor from '@/components/NoteEditor.tsx';
 import { GITHUB_OWNER, GITHUB_REPO } from 'astro:env/server';
 ---
 
-<DefaultLayout title="Note Editor" fullWidth noSearch noindex>
-  <div class="mx-auto w-full max-w-3xl py-8">
+{/* Same wide column as the navbar, like the other admin pages. */}
+<DefaultLayout title="Note Editor" wide proseClass="" noSearch noindex>
+  <div class="pb-8">
     <NoteEditor client:load repo={`${GITHUB_OWNER}/${GITHUB_REPO}`} />
   </div>
 </DefaultLayout>

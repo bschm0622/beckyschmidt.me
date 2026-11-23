@@ -1,0 +1,41 @@
+---
+// Tabs across the admin pages, plus sign-out.
+import { Button } from "@/components/starwind/button";
+
+export type AdminSection = "sites" | "analytics" | "notes";
+
+interface Props {
+    current: AdminSection;
+}
+
+const { current } = Astro.props;
+const TABS: { key: AdminSection; label: string; href: string }[] = [
+    { key: "sites", label: "All sites", href: "/admin" },
+    { key: "analytics", label: "Personal site", href: "/admin/analytics" },
+    { key: "notes", label: "Notes", href: "/admin/notes" },
+];
+---
+
+{/* One wrapping row: on a phone the tabs keep a line to themselves and Log out drops below, right-aligned. */}
+<nav class="flex flex-wrap items-center gap-2" aria-label="Admin">
+    {TABS.map((t) => (
+        <Button
+            href={t.href}
+            size="sm"
+            variant={t.key === current ? "default" : "ghost"}
+            aria-current={t.key === current ? "page" : undefined}
+        >{t.label}</Button>
+    ))}
+    <Button type="button" size="sm" variant="ghost" class="ml-auto" data-admin-logout>Log out</Button>
+</nav>
+
+<script>
+    import { logout } from "@/lib/cms-api";
+
+    // Bundled scripts run once per session; delegate so new pages need no rebinding.
+    document.addEventListener("click", async (event) => {
+        if (!(event.target as Element).closest("[data-admin-logout]")) return;
+        await logout().catch(() => {});
+        window.location.href = "/admin";
+    });
+</script>

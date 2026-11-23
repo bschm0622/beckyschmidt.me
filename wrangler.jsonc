@@ -22,6 +22,15 @@
       "binding": "DB",
       "database_name": "beckyschmidt-analytics",
       "database_id": "c94f53ca-73c0-46cc-a140-eb3443a9ee7f"
+    },
+    // welldesignedsites' analytics, read-only by convention (only SELECTs, in
+    // src/lib/analytics/sites.ts). That site owns the schema and migrations.
+    // `remote` makes `astro dev` read the live database instead of an empty local copy.
+    {
+      "binding": "WDS_DB",
+      "database_name": "welldesignedsites",
+      "database_id": "484bc39a-1403-4584-be4b-cdfd083a083d",
+      "remote": true
     }
   ],
   "observability": {

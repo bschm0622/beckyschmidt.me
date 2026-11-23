@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import * as api from '@/lib/cms-api';
 import { ApiError, type PendingPR } from '@/lib/cms-api';
-import { setTrackingOff } from '@/lib/analytics/track';
 
 interface Note {
   filename: string;
@@ -12,9 +11,6 @@ interface Note {
 }
 
 export default function AdminDashboard() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [password, setPassword] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
   const [notes, setNotes] = useState<Note[]>([]);
@@ -28,44 +24,10 @@ export default function AdminDashboard() {
     window.setTimeout(() => setSuccessMessage(''), 6000);
   };
 
+  // The page only renders for a signed-in session; a 401 here means it expired.
   useEffect(() => {
-    (async () => {
-      try {
-        const data = await api.checkSession();
-        if (data.authenticated) {
-          // Any browser Becky signs in on stops counting toward analytics.
-          setTrackingOff(true);
-          setIsAuthenticated(true);
-          loadNotes();
-        }
-      } catch {
-      }
-    })();
+    loadNotes();
   }, []);
-
-  const handleLogin = async (e: React.SyntheticEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
-    setError('');
-    try {
-      await api.login(password);
-      setTrackingOff(true);
-      setIsAuthenticated(true);
-      loadNotes();
-    } catch (err: any) {
-      setError(err instanceof ApiError ? err.message : 'Authentication failed');
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleLogout = () => {
-    api.logout().catch(() => {});
-    setIsAuthenticated(false);
-    setPassword('');
-    setNotes([]);
-    setPending([]);
-  };
 
   const loadNotes = async () => {
     setLoadingNotes(true);
@@ -83,8 +45,7 @@ export default function AdminDashboard() {
       setNotes(posts);
     } catch (err: any) {
       if (err instanceof ApiError && err.status === 401) {
-        setIsAuthenticated(false);
-        setLoadingNotes(false);
+        window.location.href = '/admin';
         return;
       }
       setError(err.message || 'Failed to load notes');
@@ -143,49 +104,13 @@ export default function AdminDashboard() {
     }
   };
 
-  if (!isAuthenticated) {
-    return (
-      <div className="min-h-[60vh] flex items-center justify-center">
-        <div className="w-full max-w-xs space-y-8">
-          <div className="space-y-1.5 text-center">
-            <h1 className="text-2xl font-medium tracking-tight text-foreground">Admin</h1>
-            <p className="text-sm text-muted-foreground">Sign in to manage your notes.</p>
-          </div>
-          <form onSubmit={handleLogin} className="space-y-3">
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="field-input"
-              placeholder="Password"
-              autoFocus
-              required
-            />
-            {error && <p className="text-sm text-danger text-center">{error}</p>}
-            <button type="submit" disabled={isLoading} className="btn-primary w-full">
-              {isLoading ? 'Signing in…' : 'Sign in'}
-            </button>
-          </form>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="space-y-8">
       <div className="flex items-center justify-between gap-6">
         <h1 className="text-2xl font-medium leading-[1.3] tracking-tight text-foreground">Notes</h1>
-        <div className="flex items-center gap-5 shrink-0">
-          <button onClick={handleLogout} className="btn-ghost">
-            Log out
-          </button>
-          <a href="/admin/analytics" className="btn-ghost">
-            Analytics
-          </a>
-          <button onClick={handleCreateNew} className="btn-primary">
-            New note
-          </button>
-        </div>
+        <button onClick={handleCreateNew} className="btn-primary shrink-0">
+          New note
+        </button>
       </div>
 
       {successMessage && <p className="status-success">{successMessage}</p>}
@@ -193,7 +118,7 @@ export default function AdminDashboard() {
 
       {pending.length > 0 && (
         <section className="space-y-3">
-          <h2 className="text-sm font-medium text-muted-foreground">In review</h2>
+          <h2 className="text-xs uppercase tracking-wide text-muted-foreground">In review</h2>
           <div className="divide-y divide-muted">
             {pending.map((pr) => (
               <div key={pr.number} className="group flex items-center justify-between gap-6 py-3.5">
@@ -232,7 +157,7 @@ export default function AdminDashboard() {
         <p className="text-muted-foreground text-sm">No notes yet. Create your first one.</p>
       ) : (
         <section className="space-y-3">
-          <h2 className="text-sm font-medium text-muted-foreground">Published</h2>
+          <h2 className="text-xs uppercase tracking-wide text-muted-foreground">Published</h2>
           <div className="divide-y divide-muted">
           {notes.map((post) => (
             <div key={post.filename} className="group flex items-center justify-between gap-6 py-3.5">
