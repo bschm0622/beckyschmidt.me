@@ -14,7 +14,8 @@ export interface SiteSummary {
     /** Square icon shown beside the name. */
     icon: string;
     url: string;
-    dashboard: string;
+    /** The site's own analytics page, when it has one. */
+    dashboard?: string;
     totals: { views: number; visitors: number; returning: number; engaged: number | null };
     /** Visitors in the same span just before this one (for Today: yesterday up to this time). */
     previousVisitors: number;
@@ -299,10 +300,102 @@ async function remotepmjobs(days: number): Promise<Omit<SiteSummary, "search">> 
     };
 }
 
+/**
+ * BiblePlan keeps its analytics in its own Supabase (Postgres) project: `events` has one row per page
+ * view or tagged action, with `anon_id` as the visitor (a browser id). Its migrations in the bible-app
+ * repo define the table. Read with a read-only Supabase access token through the Management API, which
+ * runs one SQL statement and refuses writes.
+ */
+const BIBLEPLAN_PROJECT = "szpufgqjhqnfsjdkcrba";
+
+async function bibleplan(days: number): Promise<Omit<SiteSummary, "search">> {
+    const site: Site = {
+        id: "bibleplan",
+        name: "BiblePlan",
+        icon: "/project-icons/bibleplan.png",
+        url: "https://www.bibleplan.app",
+    };
+    const { since, previous } = periods(days);
+    const tz = SITE.location.timeZone.replace(/'/g, "");
+    const at = (ms: number) => `to_timestamp(${Math.floor(ms / 1000)})`;
+    const day = (column: string) => `(${column} at time zone '${tz}')::date`;
+    // The owner and the end-to-end test account aren't readers.
+    const notStaff = (column: string) =>
+        `${column} not in (select user_id from public.app_admins union all select id from auth.users where email = 'e2e-tests@bibleplan.app')`;
+    const top = (rows: string, column: string) => `(select coalesce(json_agg(t), '[]') from (
+          select coalesce(${column}, 'Unknown') as label, count(distinct anon_id)::int as count
+          from ${rows} group by 1 order by 2 desc limit 5) t)`;
+
+    const query = `
+      with views as (select * from public.events where name = 'pageview' and created_at >= ${at(since)}),
+      -- Where a visit came from is stored on its first page view only.
+      visits as (select distinct on (session_id) anon_id, referrer from views order by session_id, created_at)
+      select json_build_object(
+        'views', (select count(*)::int from views),
+        'visitors', (select count(distinct anon_id)::int from views),
+        'returning', (select count(distinct p.anon_id)::int from views p where exists (
+          select 1 from public.events q where q.anon_id = p.anon_id and q.name = 'pageview'
+            and ${day("q.created_at")} < ${day("p.created_at")})),
+        'previousVisitors', (select count(distinct anon_id)::int from public.events
+          where name = 'pageview' and created_at >= ${at(previous.since)} and created_at < ${at(previous.until)}),
+        'daily', (select coalesce(json_agg(d), '[]') from (
+          select ${day("created_at")}::text as day, count(*)::int as views, count(distinct anon_id)::int as visitors
+          from views group by 1) d),
+        'referrers', ${top("visits", "referrer")},
+        'countries', ${top("views", "country")},
+        'signups', (select count(*)::int from auth.users where created_at >= ${at(since)} and ${notStaff("id")}),
+        -- plans.created_at has no time zone; it's UTC.
+        'plans', (select count(*)::int from public.plans
+          where created_at >= ${at(since)} at time zone 'UTC' and ${notStaff("user_id")}),
+        'checked', (select count(*)::int from public.plan_entries e join public.plans p on p.id = e.plan_id
+          where e.is_checked and e.checked_at >= ${at(since)} and ${notStaff("p.user_id")}),
+        'readers', (select count(distinct user_id)::int from public.events
+          where created_at >= ${at(since)} and user_id is not null)
+      ) as summary`;
+
+    const token = getSecret("BIBLEPLAN_SUPABASE_TOKEN");
+    if (!token) throw new Error("BIBLEPLAN_SUPABASE_TOKEN isn't set");
+    const response = await fetch(`https://api.supabase.com/v1/projects/${BIBLEPLAN_PROJECT}/database/query/read-only`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+        body: JSON.stringify({ query }),
+    });
+    if (!response.ok) throw new Error(`supabase http ${response.status}: ${(await response.text()).slice(0, 200)}`);
+    const [{ summary: s }] = (await response.json()) as [{ summary: {
+        views: number; visitors: number; returning: number; previousVisitors: number;
+        daily: DayTraffic[]; referrers: Row[]; countries: Row[];
+        signups: number; plans: number; checked: number; readers: number;
+    } }];
+
+    const byDay = new Map(s.daily.map((d) => [d.day, d]));
+    return {
+        ...site,
+        // No time on page: BiblePlan doesn't measure it.
+        totals: { views: s.views, visitors: s.visitors, returning: s.returning, engaged: null },
+        previousVisitors: s.previousVisitors,
+        daily: lastDays(days).map((d) => byDay.get(d) ?? { day: d, views: 0, visitors: 0 }),
+        referrers: s.referrers.map((r) => (r.label === "Unknown" ? { ...r, label: "Direct" } : r)),
+        countries: s.countries.map((c) => ({ ...c, label: countryName(c.label === "Unknown" ? null : c.label) })),
+        conversions: [
+            { label: "Sign-ups", count: s.signups },
+            { label: "Plans created", count: s.plans },
+            { label: "Readings checked off", count: s.checked },
+            { label: "Signed-in readers", count: s.readers },
+        ],
+    };
+}
+
 /** Every site's summary for the last `days` days, in the order the page shows them. */
 export async function siteSummaries(days: number): Promise<SiteSummary[]> {
-    const sites = [remotepmjobs, welldesignedsites, beckyschmidt].map((summary) => summary(days));
-    const hosts = ["remotepmjobs.com", "welldesignedsites.com", "beckyschmidt.me"];
+    const all = [
+        { summary: remotepmjobs, host: "remotepmjobs.com" },
+        // Shown once its read-only token is set, so a missing token can't break the page.
+        ...(getSecret("BIBLEPLAN_SUPABASE_TOKEN") ? [{ summary: bibleplan, host: "bibleplan.app" }] : []),
+        { summary: welldesignedsites, host: "welldesignedsites.com" },
+        { summary: beckyschmidt, host: "beckyschmidt.me" },
+    ];
+    const sites = all.map(({ summary }) => summary(days));
+    const hosts = all.map(({ host }) => host);
     const [traffic, search] = await Promise.all([
         Promise.all(sites),
         Promise.all(hosts.map((host) => searchSummary(host, days))),

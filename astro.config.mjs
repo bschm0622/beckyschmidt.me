@@ -51,6 +51,12 @@ export default defineConfig({
         context: "server",
         optional: true,
       }),
+      // BiblePlan's analytics (its Supabase project), read by /admin. A read-only Supabase access token.
+      BIBLEPLAN_SUPABASE_TOKEN: envField.string({
+        access: "secret",
+        context: "server",
+        optional: true,
+      }),
       // Google service account JSON (one line) that can read Search Console, for /admin.
       GSC_SERVICE_ACCOUNT: envField.string({
         access: "secret",
