@@ -111,6 +111,7 @@ export default defineConfig({
             "astro > zod/v4",
             "astro/env/runtime",
             "astro/virtual-modules/transitions.js",
+            "astro/virtual-modules/transitions-router.js",
             "astro > @oslojs/encoding",
             "@astrojs/rss",
             "isbot",

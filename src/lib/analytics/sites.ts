@@ -103,6 +103,7 @@ async function welldesignedsites(days: number): Promise<Omit<SiteSummary, "searc
         dashboard: "https://welldesignedsites.com/admin",
     };
     const { all, since, ...summary } = await d1Summary(env.WDS_DB, "people", days);
+    const start = periods(days).since;
     const [clicks, forms] = await Promise.all([
         all<{ visited: number; opened: number; downloads: number }>(
             `SELECT COALESCE(SUM(name LIKE 'visit:%'), 0) AS visited, COALESCE(SUM(name LIKE 'open:%'), 0) AS opened,
@@ -110,11 +111,11 @@ async function welldesignedsites(days: number): Promise<Omit<SiteSummary, "searc
              FROM events WHERE day >= ? AND type = 'click' AND pageview IN (SELECT id FROM people)`,
             since,
         ),
-        // Form rows are stamped in UTC, so the window edge can be a few hours off the site's day.
+        // Form rows are stamped as UTC text, so compare against the range's start in UTC.
         all<{ suggested: number; advertise: number }>(
             `SELECT COALESCE(SUM(kind = 'submit'), 0) AS suggested, COALESCE(SUM(kind = 'advertise'), 0) AS advertise
-             FROM submissions WHERE created_at >= datetime('now', ?)`,
-            `-${days} days`,
+             FROM submissions WHERE created_at >= datetime(? / 1000, 'unixepoch')`,
+            start,
         ),
     ]);
     const c = clicks[0];
@@ -228,7 +229,8 @@ async function remotepmjobs(days: number): Promise<Omit<SiteSummary, "search">> 
     const offset = utcOffsetSeconds();
     const { since, previous } = periods(days);
     const where = "vertical = 'pm' AND is_bot = 0 AND at >= ?";
-    const day = `date(at / 1000 + ${offset}, 'unixepoch')`;
+    const dayOf = (column: string) => `date(${column} / 1000 + ${offset}, 'unixepoch')`;
+    const day = dayOf("at");
 
     const [totals, previousVisitors, engaged, returning, daily, referrers, countries, conversions] = await turso<any>([
         {
@@ -254,7 +256,7 @@ async function remotepmjobs(days: number): Promise<Omit<SiteSummary, "search">> 
             sql: `SELECT COUNT(DISTINCT p.visitor_hash) AS n FROM web_events p
                   WHERE p.vertical = 'pm' AND p.is_bot = 0 AND p.at >= ? AND p.name = 'pageview'
                     AND EXISTS (SELECT 1 FROM web_events q WHERE q.visitor_hash = p.visitor_hash
-                                AND q.name = 'pageview' AND date(q.at / 1000, 'unixepoch') < date(p.at / 1000, 'unixepoch'))`,
+                                AND q.name = 'pageview' AND ${dayOf("q.at")} < ${dayOf("p.at")})`,
             args: [since],
         },
         {
