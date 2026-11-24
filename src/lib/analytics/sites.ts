@@ -323,14 +323,17 @@ async function bibleplan(days: number): Promise<Omit<SiteSummary, "search">> {
     const at = (ms: number) => `to_timestamp(${Math.floor(ms / 1000)})`;
     const day = (column: string) => `(${column} at time zone '${tz}')::date`;
     // The owner and the end-to-end test account aren't readers.
-    const notStaff = (column: string) =>
-        `${column} not in (select user_id from public.app_admins union all select id from auth.users where email = 'e2e-tests@bibleplan.app')`;
+    const notStaff = (column: string) => `${column} not in (select id from staff)`;
     const top = (rows: string, column: string) => `(select coalesce(json_agg(t), '[]') from (
           select coalesce(${column}, 'Unknown') as label, count(distinct anon_id)::int as count
           from ${rows} group by 1 order by 2 desc limit 5) t)`;
 
     const query = `
-      with views as (select * from public.events where name = 'pageview' and created_at >= ${at(since)}),
+      with staff as (select user_id as id from public.app_admins union all select id from auth.users where email = 'e2e-tests@bibleplan.app'),
+      -- Like BiblePlan's own dashboard, drop every browser that has ever been signed in as staff.
+      counted as (select * from public.events where (user_id is null or ${notStaff("user_id")})
+        and anon_id not in (select anon_id from public.events where anon_id is not null and user_id in (select id from staff))),
+      views as (select * from counted where name = 'pageview' and created_at >= ${at(since)}),
       -- Where a visit came from is stored on its first page view only.
       visits as (select distinct on (session_id) anon_id, referrer from views order by session_id, created_at)
       select json_build_object(
@@ -339,7 +342,7 @@ async function bibleplan(days: number): Promise<Omit<SiteSummary, "search">> {
         'returning', (select count(distinct p.anon_id)::int from views p where exists (
           select 1 from public.events q where q.anon_id = p.anon_id and q.name = 'pageview'
             and ${day("q.created_at")} < ${day("p.created_at")})),
-        'previousVisitors', (select count(distinct anon_id)::int from public.events
+        'previousVisitors', (select count(distinct anon_id)::int from counted
           where name = 'pageview' and created_at >= ${at(previous.since)} and created_at < ${at(previous.until)}),
         'daily', (select coalesce(json_agg(d), '[]') from (
           select ${day("created_at")}::text as day, count(*)::int as views, count(distinct anon_id)::int as visitors
@@ -352,7 +355,7 @@ async function bibleplan(days: number): Promise<Omit<SiteSummary, "search">> {
           where created_at >= ${at(since)} at time zone 'UTC' and ${notStaff("user_id")}),
         'checked', (select count(*)::int from public.plan_entries e join public.plans p on p.id = e.plan_id
           where e.is_checked and e.checked_at >= ${at(since)} and ${notStaff("p.user_id")}),
-        'readers', (select count(distinct user_id)::int from public.events
+        'readers', (select count(distinct user_id)::int from counted
           where created_at >= ${at(since)} and user_id is not null)
       ) as summary`;
 
