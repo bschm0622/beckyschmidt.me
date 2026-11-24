@@ -314,6 +314,7 @@ async function bibleplan(days: number): Promise<Omit<SiteSummary, "search">> {
         name: "BiblePlan",
         icon: "/project-icons/bibleplan.png",
         url: "https://www.bibleplan.app",
+        dashboard: "https://www.bibleplan.app/admin/analytics",
     };
     const { since, previous } = periods(days);
     const tz = SITE.location.timeZone.replace(/'/g, "");
