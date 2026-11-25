@@ -1,0 +1,30 @@
+---
+// Shortens a long list to its first rows with a "Show all" button under it. Give each row past `shown` the
+// class `group-data-[state=closed]/more:hidden`, which hides it while this is closed. A list that's only a
+// couple of rows longer renders whole, since hiding one or two rows isn't worth a click.
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/starwind/collapsible";
+
+interface Props {
+    total: number;
+    shown: number;
+    /** Line the button up with rows that are inset (the ranked lists' px-2). */
+    inset?: boolean;
+}
+
+const { total, shown, inset = false } = Astro.props;
+---
+
+{total > shown + 2 ? (
+    <Collapsible class="group/more">
+        <slot />
+        {/* Starwind needs a panel; the rows above show and hide with the open state instead. */}
+        <CollapsibleContent />
+        {/* Quiet meta-navigation, like "View all (n) →": small muted text that darkens on hover. */}
+        <CollapsibleTrigger class:list={["mt-1 cursor-pointer text-sm text-muted-foreground hover:text-foreground", inset && "px-2"]}>
+            <span class="in-aria-expanded:hidden">Show all {total} ↓</span>
+            <span class="hidden in-aria-expanded:inline">Show fewer ↑</span>
+        </CollapsibleTrigger>
+    </Collapsible>
+) : (
+    <slot />
+)}

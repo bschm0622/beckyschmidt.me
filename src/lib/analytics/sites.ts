@@ -4,8 +4,9 @@ import { env } from "cloudflare:workers";
 import { getSecret } from "astro:env/server";
 import { lastDays } from "@/lib/analytics/day";
 import { SITE } from "@/siteConfig";
-import { countryName, dailyTraffic, type DayTraffic, type Row } from "@/lib/analytics/stats";
+import { countryName, traffic, type DayTraffic, type Row } from "@/lib/analytics/stats";
 import { searchSummary, type SearchSummary } from "@/lib/analytics/search-console";
+import { dashboardFor } from "@/lib/analytics/dashboards";
 
 export interface SiteSummary {
     /** Anchor id for the site's section on /admin. */
@@ -13,6 +14,8 @@ export interface SiteSummary {
     name: string;
     /** Square icon shown beside the name. */
     icon: string;
+    /** The site's brand color, for its snapshot's bars on /admin. */
+    accent?: string;
     url: string;
     /** The site's own analytics page, when it has one. */
     dashboard?: string;
@@ -38,6 +41,20 @@ function periods(days: number) {
     const since = Date.parse(`${lastDays(days)[0]}T00:00:00Z`) - utcOffsetSeconds() * 1000;
     const shift = days * 86_400_000;
     return { since, previous: { since: since - shift, until: now - shift } };
+}
+
+/**
+ * The chart's bars from a site's grouped rows, zero-filled: today's 24 hours for Today (rows carry
+ * `hour`), otherwise one per day.
+ */
+function chartBars(days: number, rows: DayTraffic[]): DayTraffic[] {
+    if (days === 1) {
+        const day = lastDays(1)[0];
+        const byHour = new Map(rows.map((r) => [Number(r.hour), r]));
+        return Array.from({ length: 24 }, (_, hour) => ({ day, hour, views: byHour.get(hour)?.views ?? 0, visitors: byHour.get(hour)?.visitors ?? 0 }));
+    }
+    const byDay = new Map(rows.map((r) => [r.day, r]));
+    return lastDays(days).map((day) => ({ day, views: byDay.get(day)?.views ?? 0, visitors: byDay.get(day)?.visitors ?? 0 }));
 }
 
 /**
@@ -74,7 +91,7 @@ async function d1Summary(db: D1Database, table: "pageviews" | "people", days: nu
             previous.since,
             previous.until,
         ),
-        dailyTraffic(days, db, table),
+        traffic(days, db, table),
         top("referrer"),
         top("country"),
     ]);
@@ -99,8 +116,9 @@ async function welldesignedsites(days: number): Promise<Omit<SiteSummary, "searc
         id: "welldesignedsites",
         name: "Well Designed Sites",
         icon: "/project-icons/welldesignedsites.svg",
+        accent: dashboardFor("welldesignedsites").accent,
         url: "https://welldesignedsites.com",
-        dashboard: "https://welldesignedsites.com/admin",
+        dashboard: "/admin/analytics?site=welldesignedsites",
     };
     const { all, since, ...summary } = await d1Summary(env.WDS_DB, "people", days);
     const start = periods(days).since;
@@ -139,8 +157,9 @@ async function ceopaycheck(days: number): Promise<Omit<SiteSummary, "search">> {
         id: "ceopaycheck",
         name: "CEO Paycheck",
         icon: "/project-icons/ceopaycheck.svg",
+        accent: dashboardFor("ceopaycheck").accent,
         url: "https://ceopaycheck.com",
-        dashboard: "https://ceopaycheck.com/admin/",
+        dashboard: "/admin/analytics?site=ceopaycheck",
     };
     const { all, since, ...summary } = await d1Summary(env.CP_DB, "people", days);
     // The search records `search:<org>` when a result is opened and `search-miss:<query>` when nothing matches.
@@ -252,10 +271,10 @@ async function remotepmjobs(days: number): Promise<Omit<SiteSummary, "search">> 
         id: "remotepmjobs",
         name: "Remote PM Jobs",
         icon: "/project-icons/remotepmjobs.png",
+        accent: "#1f6f4e",
         url: "https://remotepmjobs.com",
         dashboard: "https://analytics.remotepmjobs.com",
     };
-    const range = lastDays(days);
     const offset = utcOffsetSeconds();
     const { since, previous } = periods(days);
     const where = "vertical = 'pm' AND is_bot = 0 AND at >= ?";
@@ -290,8 +309,12 @@ async function remotepmjobs(days: number): Promise<Omit<SiteSummary, "search">> 
             args: [since],
         },
         {
-            sql: `SELECT ${day} AS day, COUNT(*) AS views, COUNT(DISTINCT visitor_hash) AS visitors
-                  FROM web_events WHERE ${where} AND name = 'pageview' GROUP BY day`,
+            sql: days === 1
+                ? `SELECT CAST(strftime('%H', at / 1000 + ${offset}, 'unixepoch') AS INTEGER) AS hour,
+                          COUNT(*) AS views, COUNT(DISTINCT visitor_hash) AS visitors
+                   FROM web_events WHERE ${where} AND name = 'pageview' GROUP BY hour`
+                : `SELECT ${day} AS day, COUNT(*) AS views, COUNT(DISTINCT visitor_hash) AS visitors
+                   FROM web_events WHERE ${where} AND name = 'pageview' GROUP BY day`,
             args: [since],
         },
         {
@@ -315,13 +338,12 @@ async function remotepmjobs(days: number): Promise<Omit<SiteSummary, "search">> 
         },
     ]);
 
-    const byDay = new Map((daily as DayTraffic[]).map((d) => [d.day, d]));
     const c = conversions[0];
     return {
         ...site,
         totals: { ...totals[0], returning: returning[0]?.n ?? 0, engaged: engaged[0]?.seconds ?? null },
         previousVisitors: previousVisitors[0]?.n ?? 0,
-        daily: range.map((d) => byDay.get(d) ?? { day: d, views: 0, visitors: 0 }),
+        daily: chartBars(days, daily),
         referrers,
         countries: (countries as Row[]).map((r) => ({ ...r, label: countryName(r.label === "Unknown" ? null : r.label) })),
         conversions: [
@@ -345,6 +367,7 @@ async function bibleplan(days: number): Promise<Omit<SiteSummary, "search">> {
         id: "bibleplan",
         name: "BiblePlan",
         icon: "/project-icons/bibleplan.png",
+        accent: "#5e82ae",
         url: "https://www.bibleplan.app",
         dashboard: "https://www.bibleplan.app/admin/analytics",
     };
@@ -375,8 +398,10 @@ async function bibleplan(days: number): Promise<Omit<SiteSummary, "search">> {
         'previousVisitors', (select count(distinct anon_id)::int from counted
           where name = 'pageview' and created_at >= ${at(previous.since)} and created_at < ${at(previous.until)}),
         'daily', (select coalesce(json_agg(d), '[]') from (
-          select ${day("created_at")}::text as day, count(*)::int as views, count(distinct anon_id)::int as visitors
-          from views group by 1) d),
+          select ${day("created_at")}::text as day,
+            ${days === 1 ? `extract(hour from created_at at time zone '${tz}')::int` : "null"} as hour,
+            count(*)::int as views, count(distinct anon_id)::int as visitors
+          from views group by 1, 2) d),
         'referrers', ${top("visits", "referrer")},
         'countries', ${top("views", "country")},
         'signups', (select count(*)::int from auth.users where created_at >= ${at(since)} and ${notStaff("id")}),
@@ -403,13 +428,12 @@ async function bibleplan(days: number): Promise<Omit<SiteSummary, "search">> {
         signups: number; plans: number; checked: number; readers: number;
     } }];
 
-    const byDay = new Map(s.daily.map((d) => [d.day, d]));
     return {
         ...site,
         // No time on page: BiblePlan doesn't measure it.
         totals: { views: s.views, visitors: s.visitors, returning: s.returning, engaged: null },
         previousVisitors: s.previousVisitors,
-        daily: lastDays(days).map((d) => byDay.get(d) ?? { day: d, views: 0, visitors: 0 }),
+        daily: chartBars(days, s.daily),
         referrers: s.referrers.map((r) => (r.label === "Unknown" ? { ...r, label: "Direct" } : r)),
         countries: s.countries.map((c) => ({ ...c, label: countryName(c.label === "Unknown" ? null : c.label) })),
         conversions: [

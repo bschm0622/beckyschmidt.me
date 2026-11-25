@@ -14,3 +14,10 @@ export function lastDays(count: number, today = siteDay(new Date())): string[] {
         new Date(end.getTime() - (count - 1 - i) * 86_400_000).toISOString().slice(0, 10),
     );
 }
+
+const hourFormat = new Intl.DateTimeFormat("en-US", { timeZone: SITE.location.timeZone, hour: "numeric", hourCycle: "h23" });
+
+/** The hour (0–23) of a timestamp in the site's time zone, for the Today chart. */
+export function siteHour(ts: number): number {
+    return Number(hourFormat.format(new Date(ts))) % 24;
+}

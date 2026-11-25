@@ -63,7 +63,10 @@ const rows = sites.map((site) => {
         time && `${time} on a page`,
         site.search && !site.search.error && plural(site.search.clicks, "Google click", "Google clicks"),
     ].filter(Boolean).join(" · ");
-    return { site, trend, goal, more };
+    // A dashboard on this site opens on the same range.
+    const dashboard = site.dashboard ?? site.url;
+    const href = dashboard.startsWith("/") ? `${dashboard}${dashboard.includes("?") ? "&" : "?"}range=${range.key}` : dashboard;
+    return { site, trend, goal, more, href, external: href.startsWith("http") };
 });
 ---
 
@@ -74,10 +77,10 @@ const rows = sites.map((site) => {
         </div>
     </DefaultLayout>
 ) : (
-    <AdminLayout title="All sites" current="sites">
+    <AdminLayout title="Overview" current="sites">
         <div class="flex flex-col gap-6">
             {/* The filled tab already names the page; the heading is for screen readers. */}
-            <h1 class="sr-only">All sites</h1>
+            <h1 class="sr-only">Overview</h1>
             <RangeBar ranges={RANGES} current={range.key} />
 
             {/*
@@ -99,10 +102,10 @@ const rows = sites.map((site) => {
                     <span class="hidden pl-4 text-right lg:block">Time on page</span>
                     <span class="hidden pl-4 text-right lg:block">Google clicks</span>
                 </div>
-                {rows.map(({ site, trend, goal }) => (
+                {rows.map(({ site, trend, goal, href, external }) => (
                     <a
-                        href={site.dashboard ?? site.url}
-                        {...((site.dashboard ?? site.url).startsWith("http") && { target: "_blank", rel: "noopener" })}
+                        href={href}
+                        {...(external && { target: "_blank", rel: "noopener" })}
                         class="group col-span-full grid grid-cols-subgrid items-center border-t border-foreground/8 py-2.5 no-underline! last:border-b"
                         data-site={site.id}
                         data-visitors={site.totals.visitors}
@@ -139,9 +142,16 @@ const rows = sites.map((site) => {
             </div>
         </div>
 
-        {/* Each site's snapshot, always open, for scrolling through. */}
-        {rows.map(({ site, more }) => (
-            <section class="mt-6 flex flex-col gap-8 border-t border-foreground/15 pt-10" aria-labelledby={`${site.id}-name`}>
+        {/*
+          A snapshot only for the sites whose full dashboard lives elsewhere (BiblePlan, Remote PM Jobs);
+          the others have theirs under Dashboards, Google searches included.
+        */}
+        {rows.filter((r) => r.external).map(({ site, more, href, external }) => (
+            <section
+                class="flex flex-col gap-8 pt-6"
+                aria-labelledby={`${site.id}-name`}
+                style={site.accent ? `--site-accent: ${site.accent}` : undefined}
+            >
                 <div class="flex flex-wrap items-center justify-between gap-3">
                     <div class="space-y-1">
                         <h2 id={`${site.id}-name`} class="flex items-center gap-2.5 text-xl text-foreground">
@@ -151,17 +161,12 @@ const rows = sites.map((site) => {
                         {/* The columns a phone leaves out of the table. */}
                         <p class="text-sm text-muted-foreground sm:hidden">{more}</p>
                     </div>
-                    {site.dashboard && (
-                        <Button
-                            href={site.dashboard}
-                            size="sm"
-                            variant="ghost"
-                            {...(site.dashboard.startsWith("http") && { target: "_blank", rel: "noopener" })}
-                        >Open dashboard <ArrowUpRight aria-hidden="true" /></Button>
-                    )}
+                    <Button href={href} size="sm" variant="ghost" {...(external && { target: "_blank", rel: "noopener" })}>
+                        Open dashboard <ArrowUpRight aria-hidden="true" />
+                    </Button>
                 </div>
 
-                {range.days !== 1 && <TrafficChart data={site.daily} visitors={site.totals.visitors} caption={false} />}
+                <TrafficChart data={site.daily} visitors={site.totals.visitors} caption={false} />
 
                 <div class="grid gap-x-10 gap-y-8 sm:grid-cols-2">
                     <StatList title="Referrers" rows={site.referrers} level={3} />

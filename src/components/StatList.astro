@@ -1,6 +1,7 @@
 ---
 // A ranked list for /admin/analytics: label, optional detail, count, with a faint bar showing share of the top row.
 import type { Row } from "@/lib/analytics/stats";
+import ShowMore from "@/components/ShowMore.astro";
 
 interface Props {
     title: string;
@@ -16,24 +17,26 @@ const Heading = `h${level}` as const;
 const max = Math.max(...rows.map((r) => r.count), 1);
 ---
 
-<section class="min-w-0 space-y-2">
+<section class="min-w-0 space-y-2 [--bar:var(--site-accent,var(--color-foreground))] dark:[--bar:color-mix(in_oklab,var(--site-accent,var(--color-foreground))_75%,white)]">
     <Heading class="text-xs uppercase tracking-wide text-muted-foreground">{title}</Heading>
     {rows.length === 0 ? (
         <p class="text-sm text-faint-foreground">{empty}</p>
     ) : (
-        <ul class="space-y-0.5">
-            {rows.map((r) => (
-                <li class="relative flex items-baseline justify-between gap-4 rounded-md px-2 py-1.5 text-sm">
-                    <span class="absolute inset-y-0 left-0 rounded-md bg-foreground/20" style={`width: ${(r.count / max) * 100}%`} aria-hidden="true" />
-                    {/* A long label truncates on its own, so the detail after it stays visible. */}
-                    <span class="relative flex min-w-0 items-baseline gap-1" title={r.detail ? `${r.label} · ${r.detail}` : r.label}>
-                        <span class="min-w-0 truncate text-foreground">{r.label}</span>
-                        {r.detail && <span class="shrink-0 text-faint-foreground">· {r.detail}</span>}
-                    </span>
-                    <span class="relative shrink-0 tabular-nums text-muted-foreground">{r.count.toLocaleString("en-US")}</span>
-                </li>
-            ))}
-        </ul>
+        <ShowMore total={rows.length} shown={5} inset>
+            <ul class="space-y-0.5">
+                {rows.map((r, i) => (
+                    <li class:list={["relative flex items-baseline justify-between gap-4 rounded-md px-2 py-1.5 text-sm", i >= 5 && "group-data-[state=closed]/more:hidden"]}>
+                        <span class="absolute inset-y-0 left-0 rounded-md bg-(--bar)/25 dark:bg-(--bar)/35" style={`width: ${(r.count / max) * 100}%`} aria-hidden="true" />
+                        {/* A long label truncates on its own, so the detail after it stays visible. */}
+                        <span class="relative flex min-w-0 items-baseline gap-1" title={r.detail ? `${r.label} · ${r.detail}` : r.label}>
+                            <span class="min-w-0 truncate text-foreground">{r.label}</span>
+                            {r.detail && <span class="shrink-0 text-faint-foreground">· {r.detail}</span>}
+                        </span>
+                        <span class="relative shrink-0 tabular-nums text-muted-foreground">{r.count.toLocaleString("en-US")}</span>
+                    </li>
+                ))}
+            </ul>
+        </ShowMore>
     )}
     {note && <p class="px-2 text-sm text-faint-foreground">{note}</p>}
 </section>

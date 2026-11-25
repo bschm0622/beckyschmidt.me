@@ -1,17 +1,41 @@
 ---
-// The date range for an admin analytics page, right-aligned above its data. Picking a range loads ?range=.
-import { Select, SelectContent, SelectItem, SelectTrigger } from "@/components/starwind/select";
+// The date range for an admin analytics page, right-aligned above its data, with an optional site picker
+// on the left. Picking either loads the page with that ?range= or ?site=, keeping the other.
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/starwind/select";
+
+type Option = { key: string; label: string };
 
 interface Props {
-    ranges: readonly { key: string; label: string }[];
+    ranges: readonly Option[];
     current: string;
+    sites?: { options: readonly (Option & { icon: string })[]; current: string };
 }
 
-const { ranges, current } = Astro.props;
+const { ranges, current, sites } = Astro.props;
 ---
 
-<div class="flex justify-end">
-    <Select defaultValue={current} data-range-select>
+<div class:list={["flex flex-wrap items-center gap-3", sites ? "justify-between" : "justify-end"]}>
+    {sites && (
+        <Select defaultValue={sites.current} data-query-param="site">
+            {/*
+              Wide enough for the longest name, since the menu matches the button's width. The button shows the
+              picked name as text, so the current site's icon goes in before it (picking reloads the page).
+            */}
+            <SelectTrigger size="sm" aria-label="Site" class="w-56">
+                <img src={sites.options.find((s) => s.key === sites.current)?.icon} alt="" class="size-4 shrink-0 rounded-sm" />
+                <SelectValue />
+            </SelectTrigger>
+            <SelectContent size="sm">
+                {sites.options.map((s) => (
+                    <SelectItem value={s.key}>
+                        <img src={s.icon} alt="" class="size-4 shrink-0 rounded-sm" />
+                        {s.label}
+                    </SelectItem>
+                ))}
+            </SelectContent>
+        </Select>
+    )}
+    <Select defaultValue={current} data-query-param="range">
         <SelectTrigger size="sm" aria-label="Date range" />
         <SelectContent size="sm">
             {ranges.map((r) => <SelectItem value={r.key}>{r.label}</SelectItem>)}
@@ -22,11 +46,12 @@ const { ranges, current } = Astro.props;
 <script>
     // Bundled scripts run once per session; delegate so new pages need no rebinding.
     document.addEventListener("starwind:value-change", (event) => {
-        if (!(event.target as Element).closest("[data-range-select]")) return;
+        const select = (event.target as Element).closest<HTMLElement>("[data-query-param]");
+        if (!select) return;
         const { value } = (event as CustomEvent<{ value: string | null }>).detail;
         if (!value) return;
         const url = new URL(window.location.href);
-        url.searchParams.set("range", value);
+        url.searchParams.set(select.dataset.queryParam!, value);
         window.location.href = url.toString();
     });
 </script>

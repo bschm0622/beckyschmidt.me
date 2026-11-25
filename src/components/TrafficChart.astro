@@ -1,5 +1,6 @@
 ---
-// Daily page views as bars; hover or focus a bar for that day's numbers. Used on the colophon and the admin analytics pages.
+// Page views as bars, one per day (or per hour of today, when the data carries hours); hover or focus a bar
+// for its numbers. Used on the colophon and the admin analytics pages.
 import type { DayTraffic } from "@/lib/analytics/stats";
 
 interface Props {
@@ -13,39 +14,43 @@ interface Props {
 const { data, visitors: totalVisitors, caption = true } = Astro.props;
 const max = Math.max(...data.map((d) => d.views), 1);
 const totalViews = data.reduce((sum, d) => sum + d.views, 0);
-const label = (day: string) =>
-    new Date(`${day}T12:00:00Z`).toLocaleDateString("en-US", { month: "short", day: "numeric", timeZone: "UTC" });
+const hourly = data[0]?.hour !== undefined;
+const label = ({ day, hour }: DayTraffic) =>
+    hour !== undefined
+        ? `${hour % 12 || 12} ${hour < 12 ? "AM" : "PM"}`
+        : new Date(`${day}T12:00:00Z`).toLocaleDateString("en-US", { month: "short", day: "numeric", timeZone: "UTC" });
 const plural = (n: number, word: string) => `${n.toLocaleString("en-US")} ${word}${n === 1 ? "" : "s"}`;
 ---
 
-<figure class="m-0">
+{/* Bars use the site's color when the page sets --site-accent (lifted toward white in dark mode), otherwise the text color. */}
+<figure class="m-0 [--bar:var(--site-accent,var(--color-foreground))] dark:[--bar:color-mix(in_oklab,var(--site-accent,var(--color-foreground))_75%,white)]">
     <figcaption class:list={[caption ? "mb-3 text-sm text-muted-foreground tabular-nums" : "sr-only"]}>
         {plural(totalViews, "view")} · {plural(totalVisitors, "visitor")}
     </figcaption>
-    <div class:list={["flex h-32 items-end", data.length <= 90 && "gap-0.5"]} role="list" aria-label="Page views per day">
+    <div class:list={["flex h-32 items-end", data.length <= 90 && "gap-0.5"]} role="list" aria-label={hourly ? "Page views per hour" : "Page views per day"}>
         {data.map((d) => (
             <div
                 class="group relative flex h-full flex-1 items-end outline-none"
                 role="listitem"
                 tabindex="0"
-                aria-label={`${label(d.day)}: ${plural(d.views, "view")}, ${plural(d.visitors, "visitor")}`}
+                aria-label={`${label(d)}: ${plural(d.views, "view")}, ${plural(d.visitors, "visitor")}`}
             >
                 <div
                     class:list={[
                         "w-full rounded-t-sm transition-colors",
-                        d.views ? "bg-foreground/25 group-hover:bg-foreground/60 group-focus-visible:bg-foreground/60" : "bg-foreground/8",
+                        d.views ? "bg-(--bar)/40 group-hover:bg-(--bar)/75 group-focus-visible:bg-(--bar)/75 dark:bg-(--bar)/55" : "bg-foreground/8",
                     ]}
                     style={`height: ${d.views ? Math.max((d.views / max) * 100, 3) : 1.5}%`}
                 />
                 <div class="traffic-tip pointer-events-none absolute bottom-full z-10 mb-2 hidden whitespace-nowrap rounded-md bg-foreground px-2 py-1 text-xs text-background group-hover:block group-focus-visible:block">
-                    {label(d.day)} · {plural(d.views, "view")} · {plural(d.visitors, "visitor")}
+                    {label(d)} · {plural(d.views, "view")} · {plural(d.visitors, "visitor")}
                 </div>
             </div>
         ))}
     </div>
     <div class="mt-2 flex justify-between text-xs text-faint-foreground tabular-nums">
-        <span>{label(data[0].day)}</span>
-        <span>{label(data[data.length - 1].day)}</span>
+        <span>{label(data[0])}</span>
+        <span>{label(data[data.length - 1])}</span>
     </div>
 </figure>
 

@@ -4,8 +4,11 @@ import AdminLayout from "@/layouts/AdminLayout.astro";
 import RangeBar from "@/components/RangeBar.astro";
 import TrafficChart from "@/components/TrafficChart.astro";
 import StatList from "@/components/StatList.astro";
+import ShowMore from "@/components/ShowMore.astro";
 import { isAuthenticated } from "@/lib/session";
 import { report, type Visit, type VisitStep } from "@/lib/analytics/stats";
+import { DASHBOARDS, dashboardFor } from "@/lib/analytics/dashboards";
+import { searchSummary } from "@/lib/analytics/search-console";
 import { SITE } from "@/siteConfig";
 
 if (!isAuthenticated(Astro.request)) return Astro.redirect("/admin");
@@ -18,7 +21,21 @@ const RANGES = [
     { key: "all", label: "All time", days: null },
 ] as const;
 const range = RANGES.find((r) => r.key === Astro.url.searchParams.get("range")) ?? RANGES[0];
-const data = await report(range.days);
+const site = dashboardFor(Astro.url.searchParams.get("site"));
+// Google keeps about 16 months of search data, so "all time" asks for that much.
+const [data, search] = await Promise.all([report(site, range.days), searchSummary(site.host, range.days ?? 480)]);
+const shortDay = (day: string) =>
+    new Date(`${day}T12:00:00Z`).toLocaleDateString("en-US", { month: "short", day: "numeric", timeZone: "UTC" });
+const plural = (n: number, one: string, many: string) => `${n.toLocaleString("en-US")} ${n === 1 ? one : many}`;
+const searchNote =
+    search && !search.error
+        ? [
+              plural(search.clicks, "click", "clicks"),
+              plural(search.impressions, "impression", "impressions"),
+              search.position !== null && `avg position ${search.position.toFixed(1)}`,
+              search.through && `through ${shortDay(search.through)}`,
+          ].filter(Boolean).join(" · ")
+        : undefined;
 
 const duration = (seconds: number | null) => {
     if (!seconds) return "–";
@@ -39,16 +56,11 @@ const offset = (ms: number) => {
 const engagement = (s: { scroll?: number; engaged?: number }) =>
     [`${s.scroll ?? 0}% scrolled`, s.engaged ? duration(s.engaged) : null].filter(Boolean).join(" · ");
 
-const CLICK_NAMES: Record<string, string> = {
-    "theme-toggle": "Toggled the theme",
-    "search-open": "Opened search",
-};
-
 /** A step in plain words, plus a quieter detail. */
 function describe(step: VisitStep): { text: string; meta?: string } {
     switch (step.kind) {
         case "view":
-            return { text: step.path, meta: engagement(step) };
+            return { text: step.path, meta: [step.referrer && `from ${step.referrer}`, engagement(step)].filter(Boolean).join(" · ") };
         case "missing":
             return { text: `${step.path} (not found)` };
         case "outbound":
@@ -64,18 +76,27 @@ function describe(step: VisitStep): { text: string; meta?: string } {
             const text = step.name ?? "";
             return { text: `Copied "${text.length > 80 ? `${text.slice(0, 80)}…` : text}"` };
         }
-        default:
-            return { text: CLICK_NAMES[step.name ?? ""] ?? `Clicked ${step.name}` };
+        default: {
+            const name = step.name ?? "";
+            const kind = site.clicks.find((c) => name.startsWith(c.prefix));
+            if (kind) return kind.step(name.slice(kind.prefix.length), step.target ?? null);
+            return { text: site.clickNames[name] ?? `Clicked ${name}` };
+        }
     }
 }
 
-const summary = (v: Visit) =>
+/** A click on a site's "visit" link is followed by its outbound click; show it once. */
+const stepsOf = (v: Visit) =>
+    v.steps.filter((s, i) => !(s.kind === "outbound" && v.steps[i - 1]?.kind === "click" && v.steps[i - 1]?.name === `visit:${s.name}`));
+
+const summary = (v: Visit, steps: VisitStep[]) =>
     [
         v.place,
         v.referrer && `from ${v.referrer}`,
+        !v.referrer && steps.find((s) => s.referrer) && `then from ${steps.find((s) => s.referrer)!.referrer}`,
         v.campaign && `via ${v.campaign}`,
         v.device,
-        v.steps.length === 1 && engagement(v.steps[0]),
+        steps.length === 1 && engagement(steps[0]),
     ]
         .filter(Boolean)
         .join(" · ");
@@ -92,143 +113,155 @@ const headline = [
 ];
 ---
 
-<AdminLayout title="Personal site" current="analytics">
-    {/* The filled tab already names the page; the heading is for screen readers. */}
-    <h1 class="sr-only">Personal site</h1>
-    <RangeBar ranges={RANGES} current={range.key} />
-
-    <div class="grid grid-cols-2 gap-x-6 gap-y-5 sm:grid-cols-5">
-        {headline.map((h) => (
-            <div>
-                <div class="text-sm text-muted-foreground">{h.label}</div>
-                <div class="text-2xl tabular-nums text-foreground">{h.value}</div>
-            </div>
-        ))}
-    </div>
-
-    {range.days !== 1 && <TrafficChart data={data.daily} visitors={data.totals.visitors} />}
-
-    <section class="space-y-2">
-        <h2 class="text-xs uppercase tracking-wide text-muted-foreground">Pages</h2>
-        {data.pages.length === 0 ? (
-            <p class="text-sm text-faint-foreground">No views in this range.</p>
-        ) : (
-            <div class="overflow-x-auto">
-                <table class="w-full text-sm">
-                    <thead class="text-left text-faint-foreground">
-                        <tr>
-                            <th class="py-1.5 pr-4 font-normal">Path</th>
-                            <th class="py-1.5 pl-4 text-right font-normal">Views</th>
-                            <th class="py-1.5 pl-4 text-right font-normal">Visitors</th>
-                            <th class="py-1.5 pl-4 text-right font-normal">Scroll</th>
-                            <th class="py-1.5 pl-4 text-right font-normal">Time</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-muted tabular-nums">
-                        {data.pages.map((p) => (
-                            <tr>
-                                <td class="max-w-0 w-full truncate py-1.5 pr-4 text-foreground" title={p.path}>{p.path}</td>
-                                <td class="py-1.5 pl-4 text-right text-muted-foreground">{p.views}</td>
-                                <td class="py-1.5 pl-4 text-right text-muted-foreground">{p.visitors}</td>
-                                <td class="py-1.5 pl-4 text-right text-muted-foreground">{p.scroll}%</td>
-                                <td class="whitespace-nowrap py-1.5 pl-4 text-right text-muted-foreground">{duration(p.engaged)}</td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
-            </div>
-        )}
-    </section>
-
-    <div class="grid gap-x-10 gap-y-10 sm:grid-cols-2">
-        <StatList title="Referrers" rows={data.referrers} />
-        <StatList
-            title="Days visited"
-            rows={data.frequency}
-            note="Visitors are recognized within a calendar month, so someone who comes back next month counts as new."
+<AdminLayout title={site.name} current="analytics">
+    {/* The chart and list bars take the site's own color; contents keeps the layout's spacing. */}
+    <div class="contents" style={site.accent ? `--site-accent: ${site.accent}` : undefined}>
+        {/* The site picker already names the page; the heading is for screen readers. */}
+        <h1 class="sr-only">{site.name}</h1>
+        <RangeBar
+            ranges={RANGES}
+            current={range.key}
+            sites={{ options: DASHBOARDS.map((d) => ({ key: d.id, label: d.name, icon: d.icon })), current: site.id }}
         />
-        <StatList title="Cities" rows={data.cities} />
-        <StatList title="Countries" rows={data.countries} />
-        <StatList title="Campaigns" rows={data.campaigns} empty="No UTM-tagged visits." />
-        <StatList title="Outbound clicks" rows={data.outbound} />
-        <StatList title="Searches" rows={data.searches} />
-        <StatList title="Clicks" rows={data.clicks} />
-        <StatList title="Copied text" rows={data.copies} />
-        <StatList title="Devices" rows={data.devices} />
-        <StatList title="Browsers" rows={data.browsers} />
-        <StatList title="Operating systems" rows={data.systems} />
-        <StatList title="Languages" rows={data.languages} />
-        <StatList title="Not found" rows={data.notFound} empty="No broken links hit." />
-    </div>
 
-    <section class="space-y-2">
-        <h2 class="text-xs uppercase tracking-wide text-muted-foreground">Latest visits</h2>
-        {data.visits.length === 0 ? (
-            <p class="text-sm text-faint-foreground">No visits yet.</p>
-        ) : (
-            <ul class="divide-y divide-muted">
-                {data.visits.map((v) => {
-                    const expandable = v.steps.length > 1;
-                    const row = (
-                        <div class="flex items-start justify-between gap-4 py-2.5">
-                            <div class="min-w-0">
-                                <div class="flex min-w-0 items-center gap-2 text-sm">
-                                    <span class="truncate text-foreground">{v.steps[0].path}</span>
-                                    {v.number > 1 && (
-                                        <span class="shrink-0 rounded-full bg-foreground/8 px-2 text-xs leading-5 text-muted-foreground" title={`Visit ${v.number} this month`}>
-                                            Visit {v.number}
-                                        </span>
-                                    )}
-                                </div>
-                                <div class="text-sm text-faint-foreground">{summary(v)}</div>
-                            </div>
-                            <div class="shrink-0 text-right text-sm tabular-nums">
-                                <time class="block text-muted-foreground">{when(v.start)}</time>
-                                {expandable && (
-                                    <span class="inline-flex items-center gap-1 text-faint-foreground">
-                                        {v.steps.length} steps
-                                        <svg class="size-4 transition-transform group-open:rotate-180" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                                            <path d="M6 9l6 6 6-6" />
-                                        </svg>
-                                    </span>
-                                )}
-                            </div>
-                        </div>
-                    );
-                    return !expandable ? (
-                        <li>{row}</li>
+        <div class="grid grid-cols-2 gap-x-6 gap-y-5 sm:grid-cols-5">
+            {headline.map((h) => (
+                <div>
+                    <div class="text-sm text-muted-foreground">{h.label}</div>
+                    <div class="text-2xl tabular-nums text-foreground">{h.value}</div>
+                </div>
+            ))}
+        </div>
+
+        <TrafficChart data={data.daily} visitors={data.totals.visitors} />
+
+        <section class="space-y-2">
+            <h2 class="text-xs uppercase tracking-wide text-muted-foreground">Pages</h2>
+            {data.pages.length === 0 ? (
+                <p class="text-sm text-faint-foreground">No views in this range.</p>
+            ) : (
+                <ShowMore total={data.pages.length} shown={10}>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-sm">
+                            <thead class="text-left text-faint-foreground">
+                                <tr>
+                                    <th class="py-1.5 pr-4 font-normal">Path</th>
+                                    <th class="py-1.5 pl-4 text-right font-normal">Views</th>
+                                    <th class="py-1.5 pl-4 text-right font-normal">Visitors</th>
+                                    <th class="py-1.5 pl-4 text-right font-normal">Scroll</th>
+                                    <th class="py-1.5 pl-4 text-right font-normal">Time</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-muted tabular-nums">
+                                {data.pages.map((p, i) => (
+                                    <tr class:list={[i >= 10 && "group-data-[state=closed]/more:hidden"]}>
+                                        <td class="max-w-0 w-full truncate py-1.5 pr-4 text-foreground" title={p.path}>{p.path}</td>
+                                        <td class="py-1.5 pl-4 text-right text-muted-foreground">{p.views}</td>
+                                        <td class="py-1.5 pl-4 text-right text-muted-foreground">{p.visitors}</td>
+                                        <td class="py-1.5 pl-4 text-right text-muted-foreground">{p.scroll}%</td>
+                                        <td class="whitespace-nowrap py-1.5 pl-4 text-right text-muted-foreground">{duration(p.engaged)}</td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                </ShowMore>
+            )}
+        </section>
+
+        <div class="grid gap-x-10 gap-y-10 sm:grid-cols-2">
+            {data.lists.map((l, i) => (
+                <>
+                    <StatList title={l.title} rows={l.rows} empty={l.empty} note={l.note} />
+                    {/* Google searches sit right after referrers: the other way people find the site. */}
+                    {i === 0 && search && (search.error ? (
+                        <section class="space-y-2">
+                            <h2 class="text-xs uppercase tracking-wide text-muted-foreground">Google searches</h2>
+                            <p class="text-sm text-faint-foreground">{search.error}</p>
+                        </section>
                     ) : (
-                        <li>
-                            {/* Opened visits sit on a tint so the journey reads as one block. */}
-                            <details class="group -mx-3 rounded-lg px-3 open:my-1.5 open:bg-foreground/4">
-                                <summary class="cursor-pointer list-none [&::-webkit-details-marker]:hidden">{row}</summary>
-                                <ol class="space-y-1.5 border-t border-foreground/8 pt-3 pb-3">
-                                    {v.steps.map((step) => {
-                                        const { text, meta } = describe(step);
-                                        const isPage = step.kind === "view" || step.kind === "missing";
-                                        return (
-                                            <li class="flex gap-3 text-sm">
-                                                <span class="w-10 shrink-0 tabular-nums text-faint-foreground">{offset(step.ts - v.start)}</span>
-                                                <span class:list={["min-w-0 break-words", isPage ? "text-foreground" : "pl-3 text-muted-foreground"]}>
-                                                    {text}
-                                                    {meta && <span class="text-faint-foreground"> · {meta}</span>}
-                                                </span>
-                                            </li>
-                                        );
-                                    })}
-                                </ol>
-                            </details>
-                        </li>
-                    );
-                })}
-            </ul>
-        )}
-    </section>
+                        <StatList title="Google searches (impressions)" rows={search.queries} empty="No searches in this range." note={searchNote} />
+                    ))}
+                </>
+            ))}
+        </div>
 
-    <p class="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-muted-foreground">
-        <span data-tracking-status>This browser isn't counted.</span>
-        <button type="button" class="btn-ghost underline decoration-1 underline-offset-2 decoration-foreground/30" data-tracking-toggle>Count it</button>
-    </p>
+        <section class="space-y-2">
+            <h2 class="text-xs uppercase tracking-wide text-muted-foreground">Latest visits</h2>
+            {data.visits.length === 0 ? (
+                <p class="text-sm text-faint-foreground">No visits in this range.</p>
+            ) : (
+                <ShowMore total={data.visits.length} shown={10}>
+                    <ul class="divide-y divide-muted">
+                        {data.visits.map((v, i) => {
+                            const more = i >= 10 && "group-data-[state=closed]/more:hidden";
+                            const steps = stepsOf(v);
+                            const expandable = steps.length > 1;
+                            const row = (
+                                <div class="flex items-start justify-between gap-4 py-2.5">
+                                    <div class="min-w-0">
+                                        <div class="flex min-w-0 items-center gap-2 text-sm">
+                                            <span class="truncate text-foreground">{steps[0].path}</span>
+                                            {v.number > 1 && (
+                                                <span class="shrink-0 rounded-full bg-foreground/8 px-2 text-xs leading-5 text-muted-foreground" title={`Visit ${v.number} this month`}>
+                                                    Visit {v.number}
+                                                </span>
+                                            )}
+                                        </div>
+                                        <div class="text-sm text-faint-foreground">{summary(v, steps)}</div>
+                                    </div>
+                                    <div class="shrink-0 text-right text-sm tabular-nums">
+                                        <time class="block text-muted-foreground">{when(v.start)}</time>
+                                        {expandable && (
+                                            <span class="inline-flex items-center gap-1 text-faint-foreground">
+                                                {steps.length} steps
+                                                <svg class="size-4 transition-transform group-open:rotate-180" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                                    <path d="M6 9l6 6 6-6" />
+                                                </svg>
+                                            </span>
+                                        )}
+                                    </div>
+                                </div>
+                            );
+                            return !expandable ? (
+                                <li class:list={[more]}>{row}</li>
+                            ) : (
+                                <li class:list={[more]}>
+                                    {/* Opened visits sit on a tint so the journey reads as one block. */}
+                                    <details class="group -mx-3 rounded-lg px-3 open:my-1.5 open:bg-foreground/4">
+                                        <summary class="cursor-pointer list-none [&::-webkit-details-marker]:hidden">{row}</summary>
+                                        <ol class="space-y-1.5 border-t border-foreground/8 pt-3 pb-3">
+                                            {steps.map((step) => {
+                                                const { text, meta } = describe(step);
+                                                const isPage = step.kind === "view" || step.kind === "missing";
+                                                return (
+                                                    <li class="flex gap-3 text-sm">
+                                                        <span class="w-10 shrink-0 tabular-nums text-faint-foreground">{offset(step.ts - v.start)}</span>
+                                                        <span class:list={["min-w-0 break-words", isPage ? "text-foreground" : "pl-3 text-muted-foreground"]}>
+                                                            {text}
+                                                            {meta && <span class="text-faint-foreground"> · {meta}</span>}
+                                                        </span>
+                                                    </li>
+                                                );
+                                            })}
+                                        </ol>
+                                    </details>
+                                </li>
+                            );
+                        })}
+                    </ul>
+                </ShowMore>
+            )}
+        </section>
+
+        {/* Counting is per site; this only reaches this site's own tracker. */}
+        {site.id === "beckyschmidt" && (
+            <p class="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-muted-foreground">
+                <span data-tracking-status>This browser isn't counted.</span>
+                <button type="button" class="btn-ghost underline decoration-1 underline-offset-2 decoration-foreground/30" data-tracking-toggle>Count it</button>
+            </p>
+        )}
+    </div>
 </AdminLayout>
 
 <script>
