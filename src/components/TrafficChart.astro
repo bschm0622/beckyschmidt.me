@@ -1,6 +1,7 @@
 ---
 // Page views as bars, one per day (or per hour of today, when the data carries hours); hover or focus a bar
-// for its numbers. Used on the colophon and the admin analytics pages.
+// for its numbers (a tap focuses the bar, which shows them on a phone). Used on the colophon and the
+// admin analytics pages.
 import type { DayTraffic } from "@/lib/analytics/stats";
 
 interface Props {
@@ -38,11 +39,11 @@ const plural = (n: number, word: string) => `${n.toLocaleString("en-US")} ${word
                 <div
                     class:list={[
                         "w-full rounded-t-sm transition-colors",
-                        d.views ? "bg-(--bar)/40 group-hover:bg-(--bar)/75 group-focus-visible:bg-(--bar)/75 dark:bg-(--bar)/55" : "bg-foreground/8",
+                        d.views ? "bg-(--bar)/40 group-hover:bg-(--bar)/75 group-focus:bg-(--bar)/75 dark:bg-(--bar)/55" : "bg-foreground/8",
                     ]}
                     style={`height: ${d.views ? Math.max((d.views / max) * 100, 3) : 1.5}%`}
                 />
-                <div class="traffic-tip pointer-events-none absolute bottom-full z-10 mb-2 hidden whitespace-nowrap rounded-md bg-foreground px-2 py-1 text-xs text-background group-hover:block group-focus-visible:block">
+                <div class="traffic-tip pointer-events-none absolute bottom-full z-10 mb-2 hidden whitespace-nowrap rounded-md bg-foreground px-2 py-1 text-xs text-background group-hover:block group-focus:block">
                     {label(d)} · {plural(d.views, "view")} · {plural(d.visitors, "visitor")}
                 </div>
             </div>

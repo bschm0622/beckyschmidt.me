@@ -356,7 +356,8 @@ async function remotepmjobs(days: number): Promise<Omit<SiteSummary, "search">> 
 
 /**
  * BiblePlan keeps its analytics in its own Supabase (Postgres) project: `events` has one row per page
- * view or tagged action, with `anon_id` as the visitor (a browser id). Its migrations in the bible-app
+ * view or tagged action, with `anon_id` as the visitor (a browser id). A 'page_time' row is a page view's
+ * running visible seconds, not an action, so counts of people and visits leave it out. Its migrations in the bible-app
  * repo define the table. Read with a read-only Supabase access token through the Management API, which
  * runs one SQL statement and refuses writes.
  */
@@ -411,7 +412,13 @@ async function bibleplan(days: number): Promise<Omit<SiteSummary, "search">> {
         'checked', (select count(*)::int from public.plan_entries e join public.plans p on p.id = e.plan_id
           where e.is_checked and e.checked_at >= ${at(since)} and ${notStaff("p.user_id")}),
         'readers', (select count(distinct user_id)::int from counted
-          where created_at >= ${at(since)} and user_id is not null)
+          where created_at >= ${at(since)} and user_id is not null and name <> 'page_time'),
+        -- 'page_time' rows carry a page view's running visible seconds; its time is the largest per pv.
+        'engaged', (select round(avg(seconds))::int from (
+          select max((props->>'seconds')::numeric) as seconds from counted
+          where name = 'page_time' and created_at >= ${at(since)}
+            and jsonb_typeof(props->'seconds') = 'number' and props ? 'pv'
+          group by props->>'pv') t)
       ) as summary`;
 
     const token = getSecret("BIBLEPLAN_SUPABASE_TOKEN");
@@ -425,13 +432,12 @@ async function bibleplan(days: number): Promise<Omit<SiteSummary, "search">> {
     const [{ summary: s }] = (await response.json()) as [{ summary: {
         views: number; visitors: number; returning: number; previousVisitors: number;
         daily: DayTraffic[]; referrers: Row[]; countries: Row[];
-        signups: number; plans: number; checked: number; readers: number;
+        signups: number; plans: number; checked: number; readers: number; engaged: number | null;
     } }];
 
     return {
         ...site,
-        // No time on page: BiblePlan doesn't measure it.
-        totals: { views: s.views, visitors: s.visitors, returning: s.returning, engaged: null },
+        totals: { views: s.views, visitors: s.visitors, returning: s.returning, engaged: s.engaged },
         previousVisitors: s.previousVisitors,
         daily: chartBars(days, s.daily),
         referrers: s.referrers.map((r) => (r.label === "Unknown" ? { ...r, label: "Direct" } : r)),
