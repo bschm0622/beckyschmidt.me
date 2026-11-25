@@ -42,12 +42,6 @@
       "version": "2.2.0",
       "framework": "astro",
       "registry": "default"
-    },
-    {
-      "name": "badge",
-      "version": "1.5.0",
-      "framework": "astro",
-      "registry": "default"
     }
   ],
   "tailwind": {

@@ -7,7 +7,6 @@ import AdminLogin from "@/components/AdminLogin.tsx";
 import TrafficChart from "@/components/TrafficChart.astro";
 import StatList from "@/components/StatList.astro";
 import { Button } from "@/components/starwind/button";
-import { Badge } from "@/components/starwind/badge";
 import ArrowUpRight from "@tabler/icons/outline/arrow-up-right.svg";
 import { isAuthenticated } from "@/lib/session";
 import { siteSummaries } from "@/lib/analytics/sites";
@@ -82,58 +81,58 @@ const rows = sites.map((site) => {
             <RangeBar ranges={RANGES} current={range.key} />
 
             {/*
-              The quick scan: one row per site, each row opening that site's full dashboard (the only kind of link
-              on this page). The rows share columns through subgrid; a phone keeps visitors and the main conversion.
-              "+N new" is filled in by the script below: what came in since this browser last opened the page.
+              The quick scan: one line per site, each row opening that site's full dashboard (the only kind of link
+              on this page). The rows share columns through subgrid; the site column fits the longest name and the
+              number columns share the rest of the width. The change from the previous period hugs the visitors
+              number, and the conversion is left-aligned so its numbers line up and its label reads after them.
+              A phone keeps visitors and the conversion, a tablet adds views, and a laptop shows them all. The line
+              under a site's name ("+3 visitors · +1 conversion") is filled in by the script below: what came in
+              since this browser last opened the page.
             */}
-            <div class="grid grid-cols-[minmax(0,1fr)_auto_auto_auto] text-sm tabular-nums sm:grid-cols-[minmax(0,1fr)_repeat(5,auto)_auto]" data-sites data-day={today} data-range={range.key}>
+            <div class="grid grid-cols-[auto_1fr_auto_1fr] text-sm tabular-nums sm:grid-cols-[auto_1fr_auto_1fr_1fr] sm:whitespace-nowrap lg:grid-cols-[auto_1fr_auto_repeat(4,1fr)]" data-sites data-day={today} data-range={range.key}>
                 <div class="col-span-full grid grid-cols-subgrid pb-2 text-xs uppercase tracking-wide text-muted-foreground" aria-hidden="true">
                     <span>Site</span>
-                    <span class="pl-3 text-right">Visitors</span>
-                    <span class="hidden pl-3 text-right sm:block">Views</span>
-                    <span class="hidden pl-3 text-right sm:block">Time on page</span>
-                    <span class="pl-3 text-right">Main conversion</span>
-                    <span class="hidden pl-3 text-right sm:block">Google clicks</span>
-                    <span class="w-7" />
+                    <span class="pl-4 text-right">Visitors</span>
+                    <span />
+                    <span class="pl-4 sm:pl-8">Conversion</span>
+                    <span class="hidden pl-4 text-right sm:block">Views</span>
+                    <span class="hidden pl-4 text-right lg:block">Time on page</span>
+                    <span class="hidden pl-4 text-right lg:block">Google clicks</span>
                 </div>
                 {rows.map(({ site, trend, goal }) => (
                     <a
                         href={site.dashboard ?? site.url}
                         {...((site.dashboard ?? site.url).startsWith("http") && { target: "_blank", rel: "noopener" })}
-                        class="group col-span-full grid grid-cols-subgrid items-center border-t border-foreground/8 py-3 no-underline! last:border-b"
+                        class="group col-span-full grid grid-cols-subgrid items-center border-t border-foreground/8 py-2.5 no-underline! last:border-b"
                         data-site={site.id}
                         data-visitors={site.totals.visitors}
                         data-goal={goal?.count ?? 0}
                     >
-                        <span class="flex min-w-0 items-center gap-2 text-primary group-hover:text-foreground group-hover:underline">
-                            <img src={site.icon} alt="" class="size-4 shrink-0 rounded-sm" />
-                            {site.name}
-                        </span>
-                        <span class="pl-3 text-right">
-                            <span class="flex items-center justify-end gap-1.5">
-                                <Badge tone="info" appearance="soft" size="sm" data-new="visitors" hidden />
-                                <span class="text-base text-foreground">{number(site.totals.visitors)}</span>
+                        <span>
+                            <span class="flex items-center gap-2 text-primary group-hover:text-foreground group-hover:underline">
+                                <img src={site.icon} alt="" class="size-4 shrink-0 rounded-sm" />
+                                {site.name}
                             </span>
-                            {trend && <span class:list={["block text-xs", trend.class]} title={trend.title}>{trend.text}</span>}
+                            <span class="block pl-6 text-xs text-info" data-new hidden />
                         </span>
-                        <span class="hidden pl-3 text-right text-muted-foreground sm:block">{number(site.totals.views)}</span>
-                        <span class="hidden pl-3 text-right text-muted-foreground sm:block">{duration(site.totals.engaged) ?? "–"}</span>
-                        <span class="pl-3 text-right">
+                        <span class="pl-4 text-right whitespace-nowrap">
+                            <span class="text-foreground">{number(site.totals.visitors)}</span>
+                        </span>
+                        <span class="pl-1.5 text-xs">
+                            {trend && <span class={trend.class} title={trend.title}>{trend.text}</span>}
+                        </span>
+                        <span class="pl-4 sm:pl-8">
                             {goal ? (
                                 <>
-                                    <span class="flex items-center justify-end gap-1.5">
-                                        <Badge tone="info" appearance="soft" size="sm" data-new="goal" hidden />
-                                        <span class="text-foreground">{number(goal.count)}</span>
-                                    </span>
-                                    <span class="block text-xs text-faint-foreground">{goal.label.toLowerCase()}</span>
+                                    <span class="text-foreground">{number(goal.count)}</span>
+                                    <span class="text-muted-foreground"> {goal.label.toLowerCase()}</span>
                                 </>
-                            ) : "–"}
+                            ) : <span class="text-muted-foreground">–</span>}
                         </span>
-                        <span class="hidden pl-3 text-right text-muted-foreground sm:block">
+                        <span class="hidden pl-4 text-right text-muted-foreground sm:block">{number(site.totals.views)}</span>
+                        <span class="hidden pl-4 text-right text-muted-foreground lg:block">{duration(site.totals.engaged) ?? "–"}</span>
+                        <span class="hidden pl-4 text-right text-muted-foreground lg:block">
                             {site.search && !site.search.error ? number(site.search.clicks) : "–"}
-                        </span>
-                        <span class="flex w-7 justify-end text-faint-foreground group-hover:text-foreground">
-                            <ArrowUpRight aria-hidden="true" class="size-4" />
                         </span>
                     </a>
                 ))}
@@ -156,7 +155,7 @@ const rows = sites.map((site) => {
                         <Button
                             href={site.dashboard}
                             size="sm"
-                            variant="outline"
+                            variant="ghost"
                             {...(site.dashboard.startsWith("http") && { target: "_blank", rel: "noopener" })}
                         >Open dashboard <ArrowUpRight aria-hidden="true" /></Button>
                     )}
@@ -189,11 +188,13 @@ const rows = sites.map((site) => {
 )}
 
 <script>
-    // "+N new" beside visitors and the main conversion: how much each went up since this browser last opened
-    // the page with the same range on the same day. Remembered per browser only; a phone and a laptop each
+    // Under each site's name, what came in since this browser last opened the page with the same range on the
+    // same day, e.g. "+3 visitors · +1 conversion". Remembered per browser only; a phone and a laptop each
     // count from their own last look.
     const KEY = "all-sites-last-look";
     type Look = { day: string; sites: Record<string, { visitors: number; goal: number }> };
+    // A no-break space keeps "+1 conversion" together, so a narrow screen breaks the line only at the dot.
+    const plural = (n: number, one: string, many: string) => `+${n.toLocaleString("en-US")}\u00a0${n === 1 ? one : many}`;
 
     function showNew() {
         const table = document.querySelector<HTMLElement>("[data-sites]");
@@ -211,14 +212,17 @@ const rows = sites.map((site) => {
             const current = { visitors: Number(row.dataset.visitors), goal: Number(row.dataset.goal) };
             now.sites[id] = current;
             const before = last?.sites[id];
-            if (!before) return;
-            for (const key of ["visitors", "goal"] as const) {
-                const added = current[key] - before[key];
-                const badge = row.querySelector<HTMLElement>(`[data-new="${key}"]`);
-                if (badge && added > 0) {
-                    badge.textContent = `+${added.toLocaleString("en-US")} new`;
-                    badge.hidden = false;
-                }
+            const line = row.querySelector<HTMLElement>("[data-new]");
+            if (!before || !line) return;
+            const visitors = current.visitors - before.visitors;
+            const goal = current.goal - before.goal;
+            const parts = [
+                visitors > 0 && plural(visitors, "visitor", "visitors"),
+                goal > 0 && plural(goal, "conversion", "conversions"),
+            ].filter(Boolean);
+            if (parts.length) {
+                line.textContent = parts.join(" · ");
+                line.hidden = false;
             }
         });
 
