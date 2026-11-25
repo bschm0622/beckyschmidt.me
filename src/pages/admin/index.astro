@@ -6,8 +6,12 @@ import RangeBar from "@/components/RangeBar.astro";
 import AdminLogin from "@/components/AdminLogin.tsx";
 import TrafficChart from "@/components/TrafficChart.astro";
 import StatList from "@/components/StatList.astro";
+import { Button } from "@/components/starwind/button";
+import { Badge } from "@/components/starwind/badge";
+import ArrowUpRight from "@tabler/icons/outline/arrow-up-right.svg";
 import { isAuthenticated } from "@/lib/session";
 import { siteSummaries } from "@/lib/analytics/sites";
+import { lastDays } from "@/lib/analytics/day";
 import type { SearchSummary } from "@/lib/analytics/search-console";
 
 const signedIn = isAuthenticated(Astro.request);
@@ -20,10 +24,13 @@ const RANGES = [
 ] as const;
 const range = RANGES.find((r) => r.key === Astro.url.searchParams.get("range")) ?? RANGES[0];
 const sites = signedIn ? await siteSummaries(range.days) : [];
+/** The site's day, so "+N new" counts start over each morning. */
+const today = lastDays(1)[0];
 
 const number = (n: number) => n.toLocaleString("en-US");
+const plural = (n: number, one: string, many: string) => `${number(n)} ${n === 1 ? one : many}`;
 const duration = (seconds: number | null) => {
-    if (!seconds) return "–";
+    if (!seconds) return null;
     const s = Math.round(seconds);
     return s < 60 ? `${s}s` : `${Math.floor(s / 60)}m ${String(s % 60).padStart(2, "0")}s`;
 };
@@ -35,13 +42,30 @@ const shortDay = (day: string) =>
     new Date(`${day}T12:00:00Z`).toLocaleDateString("en-US", { month: "short", day: "numeric", timeZone: "UTC" });
 const searchNote = (s: SearchSummary) =>
     [
-        `${number(s.clicks)} ${s.clicks === 1 ? "click" : "clicks"}`,
-        `${number(s.impressions)} ${s.impressions === 1 ? "impression" : "impressions"}`,
+        plural(s.clicks, "click", "clicks"),
+        plural(s.impressions, "impression", "impressions"),
         s.position !== null && `avg position ${s.position.toFixed(1)}`,
         s.through && `through ${shortDay(s.through)}`,
     ].filter(Boolean).join(" · ");
 
-const th = "pb-2 text-xs font-normal uppercase tracking-wide text-muted-foreground";
+/** Each site's headline numbers, with its visitor change from the previous span as an arrow and percent. */
+const rows = sites.map((site) => {
+    const pct = change(site.totals.visitors, site.previousVisitors);
+    const trend = pct === null ? null : {
+        text: `${pct > 0 ? "↑" : pct < 0 ? "↓" : ""}${Math.abs(pct)}%`,
+        class: pct > 0 ? "text-success" : pct < 0 ? "text-danger" : "text-muted-foreground",
+        title: `${number(site.previousVisitors)} in the ${range.days === 1 ? "same part of yesterday" : `${range.days} days before`}`,
+    };
+    const [goal] = site.conversions;
+    // The columns a phone hides from the table, repeated in its snapshot there.
+    const time = duration(site.totals.engaged);
+    const more = [
+        plural(site.totals.views, "view", "views"),
+        time && `${time} on a page`,
+        site.search && !site.search.error && plural(site.search.clicks, "Google click", "Google clicks"),
+    ].filter(Boolean).join(" · ");
+    return { site, trend, goal, more };
+});
 ---
 
 {!signedIn ? (
@@ -57,73 +81,84 @@ const th = "pb-2 text-xs font-normal uppercase tracking-wide text-muted-foregrou
             <h1 class="sr-only">All sites</h1>
             <RangeBar ranges={RANGES} current={range.key} />
 
-            {/* One row per site: the numbers to compare at a glance. Each name jumps to that site's section. */}
-            <table class="w-full text-sm tabular-nums">
-                <thead class="text-left">
-                    <tr>
-                        <th class={th}>Site</th>
-                        <th class:list={[th, "text-right"]}>Visitors</th>
-                        <th class:list={[th, "hidden text-right sm:table-cell"]}>Views</th>
-                        <th class:list={[th, "hidden text-right sm:table-cell"]}>Time on page</th>
-                        <th class:list={[th, "text-right"]}>Main conversion</th>
-                        <th class:list={[th, "hidden text-right sm:table-cell"]}>Google clicks</th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-foreground/8 border-t border-foreground/8">
-                    {sites.map((site) => {
-                        const pct = change(site.totals.visitors, site.previousVisitors);
-                        const [goal] = site.conversions;
-                        return (
-                            <tr>
-                                <td class="py-3 pr-3">
-                                    <a href={`#${site.id}`} class="flex items-center gap-2 text-foreground! no-underline! hover:underline!">
-                                        <img src={site.icon} alt="" class="size-4 shrink-0 rounded-sm" />
-                                        {site.name}
-                                    </a>
-                                </td>
-                                <td class="py-3 pl-3 text-right">
-                                    <span class="text-base text-foreground">{number(site.totals.visitors)}</span>
-                                    {pct !== null && (
-                                        <span
-                                            class:list={["ml-1.5 text-xs", pct > 0 ? "text-success" : pct < 0 ? "text-danger" : "text-muted-foreground"]}
-                                            title={`${number(site.previousVisitors)} in the ${range.days === 1 ? "same part of yesterday" : `${range.days} days before`}`}
-                                        >{pct > 0 ? "↑" : pct < 0 ? "↓" : ""}{Math.abs(pct)}%</span>
-                                    )}
-                                </td>
-                                <td class="hidden py-3 pl-3 text-right text-muted-foreground sm:table-cell">{number(site.totals.views)}</td>
-                                <td class="hidden py-3 pl-3 text-right text-muted-foreground sm:table-cell">{duration(site.totals.engaged)}</td>
-                                <td class="py-3 pl-3 text-right">
-                                    {goal ? (
-                                        <>
-                                            <span class="text-foreground">{number(goal.count)}</span>
-                                            <span class="block text-xs text-faint-foreground">{goal.label.toLowerCase()}</span>
-                                        </>
-                                    ) : "–"}
-                                </td>
-                                <td class="hidden py-3 pl-3 text-right text-muted-foreground sm:table-cell">
-                                    {site.search && !site.search.error ? number(site.search.clicks) : "–"}
-                                </td>
-                            </tr>
-                        );
-                    })}
-                </tbody>
-            </table>
+            {/*
+              The quick scan: one row per site, each row opening that site's full dashboard (the only kind of link
+              on this page). The rows share columns through subgrid; a phone keeps visitors and the main conversion.
+              "+N new" is filled in by the script below: what came in since this browser last opened the page.
+            */}
+            <div class="grid grid-cols-[minmax(0,1fr)_auto_auto_auto] text-sm tabular-nums sm:grid-cols-[minmax(0,1fr)_repeat(5,auto)_auto]" data-sites data-day={today} data-range={range.key}>
+                <div class="col-span-full grid grid-cols-subgrid pb-2 text-xs uppercase tracking-wide text-muted-foreground" aria-hidden="true">
+                    <span>Site</span>
+                    <span class="pl-3 text-right">Visitors</span>
+                    <span class="hidden pl-3 text-right sm:block">Views</span>
+                    <span class="hidden pl-3 text-right sm:block">Time on page</span>
+                    <span class="pl-3 text-right">Main conversion</span>
+                    <span class="hidden pl-3 text-right sm:block">Google clicks</span>
+                    <span class="w-7" />
+                </div>
+                {rows.map(({ site, trend, goal }) => (
+                    <a
+                        href={site.dashboard ?? site.url}
+                        {...((site.dashboard ?? site.url).startsWith("http") && { target: "_blank", rel: "noopener" })}
+                        class="group col-span-full grid grid-cols-subgrid items-center border-t border-foreground/8 py-3 no-underline! last:border-b"
+                        data-site={site.id}
+                        data-visitors={site.totals.visitors}
+                        data-goal={goal?.count ?? 0}
+                    >
+                        <span class="flex min-w-0 items-center gap-2 text-primary group-hover:text-foreground group-hover:underline">
+                            <img src={site.icon} alt="" class="size-4 shrink-0 rounded-sm" />
+                            {site.name}
+                        </span>
+                        <span class="pl-3 text-right">
+                            <span class="flex items-center justify-end gap-1.5">
+                                <Badge tone="info" appearance="soft" size="sm" data-new="visitors" hidden />
+                                <span class="text-base text-foreground">{number(site.totals.visitors)}</span>
+                            </span>
+                            {trend && <span class:list={["block text-xs", trend.class]} title={trend.title}>{trend.text}</span>}
+                        </span>
+                        <span class="hidden pl-3 text-right text-muted-foreground sm:block">{number(site.totals.views)}</span>
+                        <span class="hidden pl-3 text-right text-muted-foreground sm:block">{duration(site.totals.engaged) ?? "–"}</span>
+                        <span class="pl-3 text-right">
+                            {goal ? (
+                                <>
+                                    <span class="flex items-center justify-end gap-1.5">
+                                        <Badge tone="info" appearance="soft" size="sm" data-new="goal" hidden />
+                                        <span class="text-foreground">{number(goal.count)}</span>
+                                    </span>
+                                    <span class="block text-xs text-faint-foreground">{goal.label.toLowerCase()}</span>
+                                </>
+                            ) : "–"}
+                        </span>
+                        <span class="hidden pl-3 text-right text-muted-foreground sm:block">
+                            {site.search && !site.search.error ? number(site.search.clicks) : "–"}
+                        </span>
+                        <span class="flex w-7 justify-end text-faint-foreground group-hover:text-foreground">
+                            <ArrowUpRight aria-hidden="true" class="size-4" />
+                        </span>
+                    </a>
+                ))}
+            </div>
         </div>
 
-        {sites.map((site) => (
-            <section id={site.id} class="mt-6 flex scroll-mt-6 flex-col gap-8 border-t border-foreground/15 pt-10">
-                <div class="flex items-center justify-between gap-6">
-                    <h2 class="flex items-center gap-2.5 text-xl text-foreground">
-                        <img src={site.icon} alt="" class="size-5 shrink-0 rounded-md" />
-                        <a href={site.url} class="no-underline! hover:underline!">{site.name}</a>
-                    </h2>
+        {/* Each site's snapshot, always open, for scrolling through. */}
+        {rows.map(({ site, more }) => (
+            <section class="mt-6 flex flex-col gap-8 border-t border-foreground/15 pt-10" aria-labelledby={`${site.id}-name`}>
+                <div class="flex flex-wrap items-center justify-between gap-3">
+                    <div class="space-y-1">
+                        <h2 id={`${site.id}-name`} class="flex items-center gap-2.5 text-xl text-foreground">
+                            <img src={site.icon} alt="" class="size-5 shrink-0 rounded-md" />
+                            {site.name}
+                        </h2>
+                        {/* The columns a phone leaves out of the table. */}
+                        <p class="text-sm text-muted-foreground sm:hidden">{more}</p>
+                    </div>
                     {site.dashboard && (
-                        <a
+                        <Button
                             href={site.dashboard}
+                            size="sm"
+                            variant="outline"
                             {...(site.dashboard.startsWith("http") && { target: "_blank", rel: "noopener" })}
-                            class="shrink-0 text-sm text-muted-foreground! no-underline! hover:text-foreground!">
-                            Full dashboard →
-                        </a>
+                        >Open dashboard <ArrowUpRight aria-hidden="true" /></Button>
                     )}
                 </div>
 
@@ -152,3 +187,45 @@ const th = "pb-2 text-xs font-normal uppercase tracking-wide text-muted-foregrou
         ))}
     </AdminLayout>
 )}
+
+<script>
+    // "+N new" beside visitors and the main conversion: how much each went up since this browser last opened
+    // the page with the same range on the same day. Remembered per browser only; a phone and a laptop each
+    // count from their own last look.
+    const KEY = "all-sites-last-look";
+    type Look = { day: string; sites: Record<string, { visitors: number; goal: number }> };
+
+    function showNew() {
+        const table = document.querySelector<HTMLElement>("[data-sites]");
+        if (!table) return;
+        const { day = "", range = "" } = table.dataset;
+        let looks: Record<string, Look> = {};
+        try {
+            looks = JSON.parse(localStorage.getItem(KEY) ?? "{}");
+        } catch {}
+        const last = looks[range]?.day === day ? looks[range] : null;
+
+        const now: Look = { day, sites: {} };
+        table.querySelectorAll<HTMLElement>("[data-site]").forEach((row) => {
+            const id = row.dataset.site!;
+            const current = { visitors: Number(row.dataset.visitors), goal: Number(row.dataset.goal) };
+            now.sites[id] = current;
+            const before = last?.sites[id];
+            if (!before) return;
+            for (const key of ["visitors", "goal"] as const) {
+                const added = current[key] - before[key];
+                const badge = row.querySelector<HTMLElement>(`[data-new="${key}"]`);
+                if (badge && added > 0) {
+                    badge.textContent = `+${added.toLocaleString("en-US")} new`;
+                    badge.hidden = false;
+                }
+            }
+        });
+
+        try {
+            localStorage.setItem(KEY, JSON.stringify({ ...looks, [range]: now }));
+        } catch {}
+    }
+
+    document.addEventListener("astro:page-load", showNew);
+</script>

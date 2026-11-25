@@ -31,6 +31,14 @@
       "database_name": "welldesignedsites",
       "database_id": "484bc39a-1403-4584-be4b-cdfd083a083d",
       "remote": true
+    },
+    // CEO Paycheck's analytics (the salaries-directory repo), on the same schema
+    // as welldesignedsites and read the same way.
+    {
+      "binding": "CP_DB",
+      "database_name": "ceopaycheck",
+      "database_id": "c0dccd53-0032-4569-b2f3-42380b92d008",
+      "remote": true
     }
   ],
   "observability": {

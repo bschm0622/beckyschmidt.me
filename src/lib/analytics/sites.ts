@@ -133,6 +133,36 @@ async function welldesignedsites(days: number): Promise<Omit<SiteSummary, "searc
     };
 }
 
+/** CEO Paycheck runs welldesignedsites' tracker; its key action is the organization search. */
+async function ceopaycheck(days: number): Promise<Omit<SiteSummary, "search">> {
+    const site: Site = {
+        id: "ceopaycheck",
+        name: "CEO Paycheck",
+        icon: "/project-icons/ceopaycheck.svg",
+        url: "https://ceopaycheck.com",
+        dashboard: "https://ceopaycheck.com/admin/",
+    };
+    const { all, since, ...summary } = await d1Summary(env.CP_DB, "people", days);
+    // The search records `search:<org>` when a result is opened and `search-miss:<query>` when nothing matches.
+    const [e] = await all<{ opened: number; missed: number; outbound: number }>(
+        `SELECT COALESCE(SUM(type = 'click' AND name LIKE 'search:%'), 0) AS opened,
+                COALESCE(SUM(type = 'click' AND name LIKE 'search-miss:%'), 0) AS missed,
+                COALESCE(SUM(type = 'outbound'), 0) AS outbound
+         FROM events WHERE day >= ? AND pageview IN (SELECT id FROM people)`,
+        since,
+    );
+    return {
+        ...site,
+        ...summary,
+        conversions: [
+            // A search that opened an organization's page; short so it fits the table's conversion column.
+            { label: "Lookups", count: e.opened },
+            { label: "Searches with no match", count: e.missed },
+            { label: "Outbound clicks", count: e.outbound },
+        ],
+    };
+}
+
 async function beckyschmidt(days: number): Promise<Omit<SiteSummary, "search">> {
     const site: Site = {
         id: "beckyschmidt",
@@ -394,10 +424,11 @@ async function bibleplan(days: number): Promise<Omit<SiteSummary, "search">> {
 /** Every site's summary for the last `days` days, in the order the page shows them. */
 export async function siteSummaries(days: number): Promise<SiteSummary[]> {
     const all = [
-        { summary: remotepmjobs, host: "remotepmjobs.com" },
         // Shown once its read-only token is set, so a missing token can't break the page.
         ...(getSecret("BIBLEPLAN_SUPABASE_TOKEN") ? [{ summary: bibleplan, host: "bibleplan.app" }] : []),
+        { summary: remotepmjobs, host: "remotepmjobs.com" },
         { summary: welldesignedsites, host: "welldesignedsites.com" },
+        { summary: ceopaycheck, host: "ceopaycheck.com" },
         { summary: beckyschmidt, host: "beckyschmidt.me" },
     ];
     const sites = all.map(({ summary }) => summary(days));
