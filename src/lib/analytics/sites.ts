@@ -451,8 +451,11 @@ async function bibleplan(days: number): Promise<Omit<SiteSummary, "search">> {
     };
 }
 
-/** Every site's summary for the last `days` days, in the order the page shows them. */
-export async function siteSummaries(days: number): Promise<SiteSummary[]> {
+/**
+ * Every site's summary for the last `days` days, in the order the page shows them. The phone widget
+ * passes `search: false`, since it doesn't show Google numbers and that call is the slowest.
+ */
+export async function siteSummaries(days: number, { search: withSearch = true } = {}): Promise<SiteSummary[]> {
     const all = [
         // Shown once its read-only token is set, so a missing token can't break the page.
         ...(getSecret("BIBLEPLAN_SUPABASE_TOKEN") ? [{ summary: bibleplan, host: "bibleplan.app" }] : []),
@@ -465,7 +468,7 @@ export async function siteSummaries(days: number): Promise<SiteSummary[]> {
     const hosts = all.map(({ host }) => host);
     const [traffic, search] = await Promise.all([
         Promise.all(sites),
-        Promise.all(hosts.map((host) => searchSummary(host, days))),
+        Promise.all(hosts.map((host) => (withSearch ? searchSummary(host, days) : null))),
     ]);
     return traffic.map((site, i) => ({ ...site, search: search[i] }));
 }

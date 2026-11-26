@@ -1,0 +1,43 @@
+---
+export const prerender = false;
+import AdminLayout from "@/layouts/AdminLayout.astro";
+import { Button } from "@/components/starwind/button";
+import { isAuthenticated, widgetKey } from "@/lib/session";
+import source from "@/lib/analytics/widget.scriptable.js?raw";
+
+if (!isAuthenticated(Astro.request)) return Astro.redirect("/admin");
+
+// The script with this site's address and the widget's key filled in, so pasting it is the whole setup.
+const script = source.replace("__SITE__", Astro.url.origin).replace("__KEY__", widgetKey() ?? "");
+---
+
+<AdminLayout title="Phone widget" current="sites">
+    <section class="flex flex-col gap-4 text-sm" aria-labelledby="widget">
+        <h1 id="widget">Phone widget</h1>
+        <ol class="list-decimal space-y-2 pl-5 text-muted-foreground">
+            <li>Install <a href="https://apps.apple.com/app/scriptable/id1405459188">Scriptable</a> from the App Store.</li>
+            <li>Copy the script, open Scriptable, tap +, paste it in and name it Sites.</li>
+            <li>Add a Scriptable widget to your home screen, then long-press it, tap Edit Widget and pick Sites as the Script. For the last 7 days instead of today, type 7d as the Parameter.</li>
+        </ol>
+        <div>
+            <Button type="button" data-copy-script>Copy script</Button>
+        </div>
+        <textarea hidden data-script>{script}</textarea>
+    </section>
+</AdminLayout>
+
+<script>
+    // Delegated, like the other admin scripts, so it works after client-side page changes.
+    document.addEventListener("click", async (event) => {
+        const button = (event.target as Element).closest<HTMLElement>("[data-copy-script]");
+        const script = document.querySelector<HTMLTextAreaElement>("[data-script]");
+        if (!button || !script) return;
+        try {
+            await navigator.clipboard.writeText(script.value);
+            button.textContent = "Copied";
+        } catch {
+            button.textContent = "Couldn't copy";
+        }
+        setTimeout(() => (button.textContent = "Copy script"), 2000);
+    });
+</script>

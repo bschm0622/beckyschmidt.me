@@ -41,6 +41,21 @@ export function isAuthenticated(request: Request): boolean {
   return Number(exp) > Date.now();
 }
 
+/**
+ * The key the phone widget (Scriptable) sends as a bearer token to /api/widget. It's derived from the
+ * admin password, so changing the password changes the key; /admin/widget hands it out baked into the script.
+ */
+export function widgetKey(): string | null {
+  const secret = getSecret('ADMIN_PASSWORD');
+  return secret ? sign('widget', secret) : null;
+}
+
+export function hasWidgetKey(request: Request): boolean {
+  const key = widgetKey();
+  const sent = request.headers.get('authorization')?.replace(/^Bearer\s+/i, '') ?? '';
+  return Boolean(key && sent && timingSafeEqual(sent, key));
+}
+
 export function timingSafeEqual(a: string, b: string): boolean {
   const ab = Buffer.from(a);
   const bb = Buffer.from(b);
